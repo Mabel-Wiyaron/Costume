@@ -22,6 +22,7 @@ struct SidebarRow: View {
                 .font(.title3)
                 .foregroundStyle(isSelected ? Color("PrimaryColor") : Color.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
                 .padding(.vertical, VERTICAL_PADDING)
                 .padding(.horizontal, HORIZONTAL_PADDING)
                 .background(isSelected ? Color("BackgroundColor") : Color.clear)
