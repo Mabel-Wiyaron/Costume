@@ -11,6 +11,8 @@ struct LabeledTextEditor: View {
     let label: String
     var isRequired: Bool = false
     @Binding var text: String
+    
+    @FocusState var isFocused: Bool
 
     private let EDITOR_HEIGHT: CGFloat = 160
     private let CORNER_RADIUS: CGFloat = 6
@@ -29,14 +31,24 @@ struct LabeledTextEditor: View {
                 }
             }
             TextEditor(text: $text)
+                .focused($isFocused)
                 .font(.body)
                 .frame(height: EDITOR_HEIGHT)
                 .textEditorStyle(.plain)
                 .padding(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.black)
-            )
+                        .stroke(currentBorderColor, lineWidth: isFocused ? 2 : 1)
+                )
+                .animation(.easeInOut(duration: 0.2), value: isFocused)
+        }
+    }
+    
+    private var currentBorderColor: Color {
+        if isFocused {
+            return .orange
+        } else {
+            return .black
         }
     }
 }

@@ -14,6 +14,9 @@ final class EditProfileViewModel {
     var profile: Profile
     var selectedSection: ProfileSection? = .personalInfo
 
+    var isEducationModalPresented: Bool = false
+    var educationBeingEdited: Education? = nil
+
     private let modelContext: ModelContext?
 
     init(profile: Profile, modelContext: ModelContext? = nil) {
@@ -27,5 +30,58 @@ final class EditProfileViewModel {
 
     func Save() {
         try? modelContext?.save()
+    }
+
+    // MARK: - Education
+
+    func startAddingEducation() {
+        educationBeingEdited = nil
+        isEducationModalPresented = true
+    }
+
+    func startEditingEducation(_ education: Education) {
+        educationBeingEdited = education
+        isEducationModalPresented = true
+    }
+
+    func cancelEducationEdit() {
+        isEducationModalPresented = false
+        educationBeingEdited = nil
+    }
+
+    func saveEducation(
+        school: String,
+        degree: String,
+        fieldOfStudy: String,
+        grade: String?,
+        startDate: Date,
+        endDate: Date?
+    ) {
+        if let education = educationBeingEdited {
+            education.school = school
+            education.degree = degree
+            education.fieldOfStudy = fieldOfStudy
+            education.grade = grade
+            education.startDate = startDate
+            education.endDate = endDate
+        } else {
+            let newEducation = Education(
+                school: school,
+                degree: degree,
+                fieldOfStudy: fieldOfStudy,
+                startDate: startDate,
+                endDate: endDate,
+                grade: grade
+            )
+            profile.educations.append(newEducation)
+        }
+        Save()
+        isEducationModalPresented = false
+        educationBeingEdited = nil
+    }
+
+    func deleteEducation(_ education: Education) {
+        profile.educations.removeAll { $0 === education }
+        Save()
     }
 }

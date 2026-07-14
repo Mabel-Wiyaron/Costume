@@ -31,7 +31,7 @@ struct EditProfileView: View {
                     case .personalInfo, .none:
                         PersonalInfoFormView(viewModel: viewModel)
                     case .education:
-                        Text("Education")
+                        EducationSectionView(viewModel: viewModel)
                     case .skills:
                         Text("Skills")
                     case .experience:
