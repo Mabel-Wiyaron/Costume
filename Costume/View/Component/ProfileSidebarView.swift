@@ -1,4 +1,9 @@
-// MARK: - ProfileSidebarView.swift
+//
+//  ProfileSidebarView.swift
+//  Costume
+//
+//  Created by Matthew Regan Hadiwidjaja on 14/07/26.
+//
 
 import SwiftUI
 
@@ -7,26 +12,40 @@ struct ProfileSidebarView: View {
     var onBack: (() -> Void)? = nil
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Button(action: { onBack?() }) {
-                    Image(systemName: "chevron.left")
+        ZStack {
+            Color("PrimaryColor")
+                .ignoresSafeArea()
+
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Button(action: { onBack?() }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundStyle(Color.white)
+                    }
+                    .buttonStyle(.plain)
+                    Spacer()
                 }
-                .buttonStyle(.plain)
+
+                Text("Edit Profile")
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.white)
+                    .padding(.horizontal, 4)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(ProfileSection.allCases) { section in
+                        SidebarRow(
+                            section: section,
+                            isSelected: section == selectedSection,
+                            action: { selectedSection = section }
+                        )
+                    }
+                }
+
                 Spacer()
             }
-
-            Text("Edit Profile")
-                .font(.title2.bold())
-                .padding(.horizontal, 4)
-
-            List(ProfileSection.allCases, selection: $selectedSection) { section in
-                SidebarRow(section: section)
-            }
-            .listStyle(.sidebar)
-            .scrollContentBackground(.hidden)
+            .padding(.top, 16)
+            .padding(.horizontal, 16)
         }
-        .padding(.top, 16)
-        .padding(.horizontal, 16)
     }
 }

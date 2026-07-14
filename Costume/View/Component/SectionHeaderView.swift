@@ -1,4 +1,9 @@
-// MARK: - SectionHeaderView.swift
+//
+//  SectionHeaderView.swift
+//  Costume
+//
+//  Created by Matthew Regan Hadiwidjaja on 14/07/26.
+//
 
 import SwiftUI
 
@@ -10,9 +15,10 @@ struct SectionHeaderView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
-                .font(.title2.bold())
+                .font(.title2)
+                .fontWeight(.bold)
             Rectangle()
-                .fill(Color.accentColor)
+                .fill(Color("AccentColor"))
                 .frame(height: RULE_HEIGHT)
         }
     }

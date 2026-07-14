@@ -1,21 +1,31 @@
-// MARK: - EditProfileViewModel.swift
+//
+//  EditProfileViewModel.swift
+//  Costume
+//
+//  Created by Matthew Regan Hadiwidjaja on 14/07/26.
+//
 
 import Foundation
-import Combine
+import SwiftData
+import Observation
 
-final class EditProfileViewModel: ObservableObject {
-    @Published var personalInfo: PersonalInfo
-    @Published var selectedSection: ProfileSection? = .personalInfo
+@Observable
+final class EditProfileViewModel {
+    var profile: Profile
+    var selectedSection: ProfileSection? = .personalInfo
 
-    init(personalInfo: PersonalInfo = PersonalInfo()) {
-        self.personalInfo = personalInfo
+    private let modelContext: ModelContext?
+
+    init(profile: Profile, modelContext: ModelContext? = nil) {
+        self.profile = profile
+        self.modelContext = modelContext
     }
 
     var isSaveEnabled: Bool {
-        !personalInfo.name.isEmpty && !personalInfo.contact.isEmpty && !personalInfo.email.isEmpty
+        !profile.name.isEmpty && !profile.phone.isEmpty && !profile.email.isEmpty
     }
 
     func Save() {
-        // TODO: persist personalInfo through the model/data layer once provided
+        try? modelContext?.save()
     }
 }

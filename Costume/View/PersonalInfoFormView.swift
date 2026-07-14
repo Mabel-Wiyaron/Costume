@@ -1,10 +1,16 @@
-// MARK: - PersonalInfoFormView.swift
+//
+//  PersonalInfoFormView.swift
+//  Costume
+//
+//  Created by Matthew Regan Hadiwidjaja on 14/07/26.
+//
 
 import SwiftUI
 
 struct PersonalInfoFormView: View {
-    @ObservedObject var viewModel: EditProfileViewModel
+    @Bindable var viewModel: EditProfileViewModel
 
+    private let CARD_PADDING: CGFloat = 32
     private let COLUMN_SPACING: CGFloat = 32
     private let SECTION_SPACING: CGFloat = 32
 
@@ -21,7 +27,7 @@ struct PersonalInfoFormView: View {
                     LabeledTextField(
                         label: "Name",
                         isRequired: true,
-                        text: $viewModel.personalInfo.name
+                        text: $viewModel.profile.name
                     )
 
                     HStack(alignment: .top, spacing: COLUMN_SPACING) {
@@ -29,11 +35,11 @@ struct PersonalInfoFormView: View {
                             label: "Contact",
                             isRequired: true,
                             placeholder: "+62 1234567890",
-                            text: $viewModel.personalInfo.contact
+                            text: $viewModel.profile.phone
                         )
                         LabeledTextField(
                             label: "LinkedIn",
-                            text: $viewModel.personalInfo.linkedIn
+                            text: $viewModel.profile.linkedin.stringValue
                         )
                     }
 
@@ -41,22 +47,22 @@ struct PersonalInfoFormView: View {
                         LabeledTextField(
                             label: "Email",
                             isRequired: true,
-                            text: $viewModel.personalInfo.email
+                            text: $viewModel.profile.email
                         )
                         LabeledTextField(
                             label: "Personal Website",
-                            text: $viewModel.personalInfo.personalWebsite
+                            text: $viewModel.profile.website.stringValue
                         )
                     }
 
                     HStack(alignment: .top, spacing: COLUMN_SPACING) {
                         LabeledTextField(
                             label: "Location",
-                            text: $viewModel.personalInfo.location
+                            text: $viewModel.profile.location
                         )
                         LabeledTextField(
                             label: "Github",
-                            text: $viewModel.personalInfo.github
+                            text: $viewModel.profile.links.urlString(forPlatform: .github)
                         )
                     }
                 }
@@ -65,7 +71,7 @@ struct PersonalInfoFormView: View {
                     SectionHeaderView(title: "Summary")
                     LabeledTextEditor(
                         label: "About Me",
-                        text: $viewModel.personalInfo.aboutMe
+                        text: $viewModel.profile.summary.stringValue
                     )
                 }
 
@@ -74,11 +80,15 @@ struct PersonalInfoFormView: View {
                     Button("Save") {
                         viewModel.Save()
                     }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Color("PrimaryColor"))
+                    .controlSize(.large)
                     .keyboardShortcut(.defaultAction)
                     .disabled(!viewModel.isSaveEnabled)
                 }
             }
-            .padding(32)
+            .padding(CARD_PADDING)
         }
+        .cardBackground()
     }
 }

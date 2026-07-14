@@ -1,4 +1,9 @@
-// MARK: - LabeledTextEditor.swift
+//
+//  LabeledTextEditor.swift
+//  Costume
+//
+//  Created by Matthew Regan Hadiwidjaja on 14/07/26.
+//
 
 import SwiftUI
 
@@ -14,21 +19,24 @@ struct LabeledTextEditor: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 2) {
                 Text(label)
-                    .font(.headline)
+                    .font(.title3)
+                    .fontWeight(.semibold)
                 if isRequired {
                     Text("*")
-                        .font(.headline)
+                        .font(.title3)
+                        .fontWeight(.semibold)
                         .foregroundStyle(.red)
                 }
             }
             TextEditor(text: $text)
                 .font(.body)
                 .frame(height: EDITOR_HEIGHT)
-                .padding(4)
+                .textEditorStyle(.plain)
+                .padding(12)
                 .overlay(
-                    RoundedRectangle(cornerRadius: CORNER_RADIUS)
-                        .stroke(Color.secondary.opacity(0.3), lineWidth: 1)
-                )
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.black)
+            )
         }
     }
 }

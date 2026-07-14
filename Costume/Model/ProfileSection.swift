@@ -1,4 +1,9 @@
-// MARK: - ProfileSection.swift
+//
+//  ProfileSection.swift
+//  Costume
+//
+//  Created by Matthew Regan Hadiwidjaja on 14/07/26.
+//
 
 import Foundation
 
