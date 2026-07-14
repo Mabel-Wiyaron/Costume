@@ -9,13 +9,13 @@ import Foundation
 
 struct ProfileGenerable: Codable {
     let name: String
-    let role: String
-    let email: String
-    let location: String
-    let phone: String
-    let link1: String
-    let link2: String
-    let link3: String
+    let role: String?
+    let email: String?
+    let location: String?
+    let phone: String?
+    let link1: String?
+    let link2: String?
+    let link3: String?
 }
 
 struct ProfileAgentService: AgentProtocol {
