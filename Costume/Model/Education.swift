@@ -15,6 +15,7 @@ final class Education {
     var fieldOfStudy: String
     var startDate: Date
     var endDate: Date?
+    var grade: String?
 
     @Relationship
     var skills: [Skill]
@@ -25,6 +26,7 @@ final class Education {
         fieldOfStudy: String,
         startDate: Date,
         endDate: Date? = nil,
+        grade: String? = nil,
         skills: [Skill] = []
     ) {
         self.school = school
@@ -32,6 +34,7 @@ final class Education {
         self.fieldOfStudy = fieldOfStudy
         self.startDate = startDate
         self.endDate = endDate
+        self.grade = grade
         self.skills = skills
     }
 }
