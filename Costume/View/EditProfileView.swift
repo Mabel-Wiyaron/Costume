@@ -39,7 +39,7 @@ struct EditProfileView: View {
                         case .education:
                             EducationSectionView(viewModel: viewModel)
                         case .skills:
-                            Text("Skills")
+                            SkillsSectionView(viewModel: viewModel)
                         case .experience:
                             Text("Experience")
                         case .project:
