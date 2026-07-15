@@ -17,6 +17,11 @@ struct CardBackground: ViewModifier {
             .background(.white)
             .clipShape(RoundedRectangle(cornerRadius: CORNER_RADIUS))
             .shadow(color: .black.opacity(SHADOW_OPACITY), radius: SHADOW_RADIUS, y: 2)
+            .background(
+                RoundedRectangle(cornerRadius: CORNER_RADIUS)
+                    .fill(Color.accentColor)
+                    .offset(y: 8)
+            )
     }
 }
 
