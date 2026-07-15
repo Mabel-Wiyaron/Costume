@@ -88,7 +88,7 @@ struct PersonalInfoFormView: View {
                 }
             }
             .padding(CARD_PADDING)
+            .cardBackground()
         }
-        .cardBackground()
     }
 }

@@ -5,8 +5,8 @@
 //  Created by Matthew Regan Hadiwidjaja on 14/07/26.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 struct EditProfileView: View {
     @State private var viewModel: EditProfileViewModel
@@ -15,7 +15,12 @@ struct EditProfileView: View {
     private let CARD_MAX_WIDTH: CGFloat = 800
 
     init(profile: Profile, modelContext: ModelContext? = nil) {
-        _viewModel = State(initialValue: EditProfileViewModel(profile: profile, modelContext: modelContext))
+        _viewModel = State(
+            initialValue: EditProfileViewModel(
+                profile: profile,
+                modelContext: modelContext
+            )
+        )
     }
 
     var body: some View {
@@ -26,27 +31,29 @@ struct EditProfileView: View {
                 Color("BackgroundColor")
                     .ignoresSafeArea()
 
-                Group {
-                    switch viewModel.selectedSection {
-                    case .personalInfo, .none:
-                        PersonalInfoFormView(viewModel: viewModel)
-                    case .education:
-                        EducationSectionView(viewModel: viewModel)
-                    case .skills:
-                        Text("Skills")
-                    case .experience:
-                        Text("Experience")
-                    case .project:
-                        Text("Project")
-                    case .certificationAndAwards:
-                        Text("Certification & Awards")
-                    case .volunteers:
-                        Text("Volunteers")
+                ScrollView {
+                    Group {
+                        switch viewModel.selectedSection {
+                        case .personalInfo, .none:
+                            PersonalInfoFormView(viewModel: viewModel)
+                        case .education:
+                            EducationSectionView(viewModel: viewModel)
+                        case .skills:
+                            Text("Skills")
+                        case .experience:
+                            Text("Experience")
+                        case .project:
+                            Text("Project")
+                        case .certificationAndAwards:
+                            Text("Certification & Awards")
+                        case .volunteers:
+                            Text("Volunteers")
+                        }
                     }
+                    .frame(maxWidth: CARD_MAX_WIDTH, alignment: .top)
+                    .padding(OUTER_PADDING)
+                    .frame(maxWidth: .infinity, alignment: .top)
                 }
-                .frame(maxWidth: CARD_MAX_WIDTH, alignment: .top)
-                .padding(OUTER_PADDING)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
         }
         .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 300)
@@ -58,7 +65,16 @@ struct EditProfileView: View {
         for: Profile.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
-    let sampleProfile = Profile(name: "", role: "", email: "", location: "", phone: "")
-    return EditProfileView(profile: sampleProfile, modelContext: container.mainContext)
-        .modelContainer(container)
+    let sampleProfile = Profile(
+        name: "",
+        role: "",
+        email: "",
+        location: "",
+        phone: ""
+    )
+    return EditProfileView(
+        profile: sampleProfile,
+        modelContext: container.mainContext
+    )
+    .modelContainer(container)
 }

@@ -22,6 +22,7 @@ struct CardBackground: ViewModifier {
                     .fill(Color.accentColor)
                     .offset(y: 8)
             )
+            .padding(.bottom, 8)
     }
 }
 
