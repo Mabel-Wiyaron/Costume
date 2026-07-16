@@ -16,10 +16,24 @@ final class EditProfileViewModel {
 
     var isEducationModalPresented: Bool = false
     var educationBeingEdited: Education? = nil
+    
+    var isExperienceModalPresented: Bool = false
+    var experienceBeingEdited: Experience? = nil
+    
+    var isProjectModalPresented: Bool = false
+    var projectBeingEdited: Project? = nil
+    
+    var isCertificationModalPresented: Bool = false
+    var certificationBeingEdited: Certification? = nil
+    
+    var isAwardModalPresented: Bool = false
+    var awardBeingEdited: Award? = nil
 
-    private let modelContext: ModelContext?
+    // Made internal to the module since SwiftData actions require a solid model context instance
+    private let modelContext: ModelContext
 
-    init(profile: Profile, modelContext: ModelContext? = nil) {
+    // Pass the View's modelContext here using (.modelContext environment wrapper)
+    init(profile: Profile, modelContext: ModelContext) {
         self.profile = profile
         self.modelContext = modelContext
     }
@@ -28,8 +42,8 @@ final class EditProfileViewModel {
         !profile.name.isEmpty && !profile.phone.isEmpty && !profile.email.isEmpty
     }
 
-    func Save() {
-        try? modelContext?.save()
+    func save() {
+        try? modelContext.save()
     }
 
     // MARK: - Education
@@ -73,22 +87,23 @@ final class EditProfileViewModel {
                 endDate: endDate,
                 grade: grade
             )
+            // SwiftData automatically establishes context tracking when inserted or appended to an existing model
             profile.educations.append(newEducation)
         }
-        Save()
+        save()
         isEducationModalPresented = false
         educationBeingEdited = nil
     }
 
     func deleteEducation(_ education: Education) {
-        profile.educations.removeAll { $0 === education }
-        Save()
+        // 1. Remove relationship reference link from array
+        profile.educations.removeAll { $0.id == education.id }
+        // 2. Explicitly wipe object row from SQLite store
+        modelContext.delete(education)
+        save()
     }
     
     // MARK: - Experience
-
-    var isExperienceModalPresented: Bool = false
-    var experienceBeingEdited: Experience? = nil
 
     func startAddingExperience() {
         experienceBeingEdited = nil
@@ -107,7 +122,7 @@ final class EditProfileViewModel {
 
     func saveExperience(
         role: String,
-        employmentType: EmploymentType,
+        employmentType: EmploymentType, // Updated type mapping matching your enum location
         company: String,
         location: String,
         startDate: Date,
@@ -134,20 +149,18 @@ final class EditProfileViewModel {
             )
             profile.experiences.append(newExperience)
         }
-        Save()
+        save()
         isExperienceModalPresented = false
         experienceBeingEdited = nil
     }
 
     func deleteExperience(_ experience: Experience) {
-        profile.experiences.removeAll { $0 === experience }
-        Save()
+        profile.experiences.removeAll { $0.id == experience.id }
+        modelContext.delete(experience)
+        save()
     }
 
     // MARK: - Project
-
-    var isProjectModalPresented: Bool = false
-    var projectBeingEdited: Project? = nil
 
     func startAddingProject() {
         projectBeingEdited = nil
@@ -191,20 +204,18 @@ final class EditProfileViewModel {
             )
             profile.projects.append(newProject)
         }
-        Save()
+        save()
         isProjectModalPresented = false
         projectBeingEdited = nil
     }
 
     func deleteProject(_ project: Project) {
-        profile.projects.removeAll { $0 === project }
-        Save()
+        profile.projects.removeAll { $0.id == project.id }
+        modelContext.delete(project)
+        save()
     }
 
     // MARK: - Certification
-
-    var isCertificationModalPresented: Bool = false
-    var certificationBeingEdited: Certification? = nil
 
     func startAddingCertification() {
         certificationBeingEdited = nil
@@ -248,20 +259,18 @@ final class EditProfileViewModel {
             )
             profile.certifications.append(newCertification)
         }
-        Save()
+        save()
         isCertificationModalPresented = false
         certificationBeingEdited = nil
     }
 
     func deleteCertification(_ certification: Certification) {
-        profile.certifications.removeAll { $0 === certification }
-        Save()
+        profile.certifications.removeAll { $0.id == certification.id }
+        modelContext.delete(certification)
+        save()
     }
 
     // MARK: - Award
-
-    var isAwardModalPresented: Bool = false
-    var awardBeingEdited: Award? = nil
 
     func startAddingAward() {
         awardBeingEdited = nil
@@ -293,15 +302,17 @@ final class EditProfileViewModel {
                 issuer: issuer,
                 issueDate: issueDate
             )
+            modelContext.insert(newAward)
             profile.awards.append(newAward)
         }
-        Save()
+        save()
         isAwardModalPresented = false
         awardBeingEdited = nil
     }
 
     func deleteAward(_ award: Award) {
-        profile.awards.removeAll { $0 === award }
-        Save()
+        profile.awards.removeAll { $0.id == award.id }
+        modelContext.delete(award)
+        save()
     }
 }

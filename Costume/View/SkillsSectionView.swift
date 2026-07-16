@@ -25,7 +25,7 @@ struct SkillsSectionView: View {
             HStack {
                 Spacer()
                 Button("Save") {
-                    viewModel.Save()
+                    viewModel.save()
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Color("PrimaryColor"))

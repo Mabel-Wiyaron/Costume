@@ -78,7 +78,7 @@ struct PersonalInfoFormView: View {
                 HStack {
                     Spacer()
                     Button("Save") {
-                        viewModel.Save()
+                        viewModel.save()
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(Color("PrimaryColor"))
@@ -89,6 +89,7 @@ struct PersonalInfoFormView: View {
             }
             .padding(CARD_PADDING)
             .cardBackground()
+            .id(viewModel.profile.id)
         }
     }
 }
