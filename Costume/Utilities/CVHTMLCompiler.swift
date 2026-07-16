@@ -223,7 +223,7 @@ struct CVHTMLCompiler {
         }
         
         for link in profile.links {
-            elements.append("<a href=\"\(link.url.absoluteString)\">\(sanitize(link.platform))</a>")
+            elements.append("<a href=\"\(link.url.absoluteString)\">\(sanitize(link.platform.rawValue))</a>")
         }
         
         // Plain separator text instead of distinct structural styling span tags
