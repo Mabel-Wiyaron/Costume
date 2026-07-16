@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct JobDescriptionInputView: View {
+struct JobDescInputFormView: View {
     @State private var jobDescription: String = ""
     @FocusState private var isFocused: Bool
     
@@ -163,5 +163,5 @@ struct JobDescriptionInputView: View {
 }
 
 #Preview {
-    JobDescriptionInputView()
+    JobDescInputFormView()
 }
