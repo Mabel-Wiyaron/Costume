@@ -8,7 +8,11 @@
 import SwiftUI
 
 struct JobDescInputFormView: View {
+    // MARK: - View Model
+    let jobDescExtVM: JobDescriptionExtractionViewModel
+
     @State private var jobDescription: String = ""
+    @State private var isLoading: Bool = false
     @FocusState private var isFocused: Bool
     
     // MARK: - Constants
@@ -27,7 +31,29 @@ struct JobDescInputFormView: View {
     // Responsive Bounds
     private let MAX_CARD_WIDTH: CGFloat = 800
     private let MIN_HORIZONTAL_MARGIN: CGFloat = 24
-    
+
+    init() {
+        self.jobDescExtVM = .init()
+        self.isFocused = true
+    }
+
+    func onSubmit() {
+        Task {
+            do {
+                isLoading = true
+                let result = try await jobDescExtVM.extract(
+                    from: jobDescription
+                )
+
+                print(result)
+            } catch {
+                print("error")
+            }
+
+            isLoading = false
+        }
+    }
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -119,6 +145,7 @@ struct JobDescInputFormView: View {
                         // Main action button wrapper layout setup
                         Button(action: {
                             // Action to trigger backend layout analysis
+                            onSubmit()
                         }) {
                             Text("Start Analyzing")
                                 .font(.body)
@@ -129,7 +156,12 @@ struct JobDescInputFormView: View {
                                 .background(jobDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color("PrimaryColor").opacity(0.5) : Color("PrimaryColor"))
                                 .clipShape(RoundedRectangle(cornerRadius: BUTTON_CORNER_RADIUS))
                         }
-                        .disabled(jobDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .disabled(
+                            isLoading
+                                || jobDescription.trimmingCharacters(
+                                    in: .whitespacesAndNewlines
+                                ).isEmpty
+                        )
                         .buttonStyle(.plain)
                     }
                     .padding(CARD_INNER_PADDING)
