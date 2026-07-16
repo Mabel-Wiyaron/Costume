@@ -31,24 +31,25 @@ struct JobDescriptionInputView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Background color fill matches the light blue style layout context
-                Color(red: 0.92, green: 0.95, blue: 1.0)
-                    .ignoresSafeArea()
+                Color.background
                 
                 VStack(spacing: 0) {
                     // Top header navigation row (Fixed at top)
                     HStack {
-                        Button(action: {
-                            // Action for handling back navigation
-                        }) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 16, weight: .semibold))
-                                .foregroundStyle(.black)
-                                .frame(width: BACK_BUTTON_SIZE, height: BACK_BUTTON_SIZE)
-                                .background(.white)
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
-                        }
+//                        Button(action: {
+//                            // Action for handling back navigation
+//                        })
+//                        {
+//                            Image(systemName: "chevron.left")
+//                                .font(.system(size: 16, weight: .semibold))
+//                                .foregroundStyle(.text)
+//                                .frame(width: BACK_BUTTON_SIZE, height: BACK_BUTTON_SIZE)
+//                                .background(.card)
+//                                .clipShape(Circle())
+//                                .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+//                        }
+//                        .buttonStyle(.plain)
+                        
                         Spacer()
                     }
                     .padding(.horizontal, HEADER_HORIZONTAL_PADDING)
@@ -64,7 +65,7 @@ struct JobDescriptionInputView: View {
                             Text("Paste Job Description Below")
                                 .font(.title)
                                 .fontWeight(.bold)
-                                .foregroundStyle(.black)
+                                .foregroundStyle(.text)
                         }
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.top, 8)
@@ -86,7 +87,7 @@ struct JobDescriptionInputView: View {
                                     .overlay(
                                         RoundedRectangle(cornerRadius: TEXT_EDITOR_CORNER_RADIUS)
                                             .stroke(
-                                                isFocused ? Color.orange : Color.black.opacity(0.2),
+                                                isFocused ? Color.accentColor : Color.black.opacity(0.2),
                                                 lineWidth: isFocused ? BORDER_WIDTH_FOCUSED : BORDER_WIDTH_UNFOCUSED
                                             )
                                     )
@@ -125,10 +126,11 @@ struct JobDescriptionInputView: View {
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: BUTTON_HEIGHT)
-                                .background(jobDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color.blue.opacity(0.5) : Color.blue)
+                                .background(jobDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color("PrimaryColor").opacity(0.5) : Color("PrimaryColor"))
                                 .clipShape(RoundedRectangle(cornerRadius: BUTTON_CORNER_RADIUS))
                         }
                         .disabled(jobDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        .buttonStyle(.plain)
                     }
                     .padding(CARD_INNER_PADDING)
                     .cardBackground() // Utilizes your precise Custom Card Background ViewModifier
