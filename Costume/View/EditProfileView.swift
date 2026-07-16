@@ -39,15 +39,15 @@ struct EditProfileView: View {
                         case .education:
                             EducationSectionView(viewModel: viewModel)
                         case .skills:
-                            Text("Skills")
+                            SkillsSectionView(viewModel: viewModel)
                         case .experience:
-                            Text("Experience")
+                            ExperienceSectionView(viewModel: viewModel)
                         case .project:
-                            Text("Project")
-                        case .certificationAndAwards:
-                            Text("Certification & Awards")
-                        case .volunteers:
-                            Text("Volunteers")
+                            ProjectSectionView(viewModel: viewModel)
+                        case .certification:
+                            CertificationSectionView(viewModel: viewModel)
+                        case .awards:
+                            AwardSectionView(viewModel: viewModel)
                         }
                     }
                     .frame(maxWidth: CARD_MAX_WIDTH, alignment: .top)

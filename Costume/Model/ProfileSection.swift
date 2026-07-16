@@ -13,8 +13,8 @@ enum ProfileSection: String, CaseIterable, Identifiable {
     case skills
     case experience
     case project
-    case certificationAndAwards
-    case volunteers
+    case certification
+    case awards
 
     var id: String { rawValue }
 
@@ -25,8 +25,8 @@ enum ProfileSection: String, CaseIterable, Identifiable {
         case .skills: return "Skills"
         case .experience: return "Experience"
         case .project: return "Project"
-        case .certificationAndAwards: return "Certification & Awards"
-        case .volunteers: return "Volunteers"
+        case .certification: return "Certification"
+        case .awards: return "Awards"
         }
     }
 
@@ -37,8 +37,8 @@ enum ProfileSection: String, CaseIterable, Identifiable {
         case .skills: return "clock"
         case .experience: return "briefcase"
         case .project: return "folder"
-        case .certificationAndAwards: return "medal"
-        case .volunteers: return "person.2"
+        case .certification: return "medal"
+        case .awards: return "trophy"
         }
     }
 }

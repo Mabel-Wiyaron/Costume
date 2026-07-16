@@ -13,6 +13,7 @@ final class Project {
     var role: String
     var name: String
     var startDate: Date
+    var endDate: Date?
     var website: URL?
     var descriptionText: [String]
 
@@ -23,6 +24,7 @@ final class Project {
         role: String,
         name: String,
         startDate: Date,
+        endDate: Date? = nil,
         website: URL? = nil,
         descriptionText: [String] = [],
         skills: [Skill] = []
@@ -30,6 +32,7 @@ final class Project {
         self.role = role
         self.name = name
         self.startDate = startDate
+        self.endDate = endDate
         self.website = website
         self.descriptionText = descriptionText
         self.skills = skills
