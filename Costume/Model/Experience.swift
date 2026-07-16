@@ -8,9 +8,32 @@
 import Foundation
 import SwiftData
 
+enum EmploymentType: String, Codable, CaseIterable, Identifiable {
+    case fullTime
+    case partTime
+    case freelance
+    case selfEmployed
+    case internship
+    case contracted
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .fullTime: return "Full-time"
+        case .partTime: return "Part-time"
+        case .freelance: return "Freelance"
+        case .selfEmployed: return "Self-employed"
+        case .internship: return "Internship"
+        case .contracted: return "Contracted"
+        }
+    }
+}
+
 @Model
 final class Experience {
     var role: String
+    var employmentType: EmploymentType
     var company: String
     var location: String
     var startDate: Date
@@ -23,6 +46,7 @@ final class Experience {
 
     init(
         role: String,
+        employmentType: EmploymentType,
         company: String,
         location: String,
         startDate: Date,
@@ -31,6 +55,7 @@ final class Experience {
         skills: [Skill] = []
     ) {
         self.role = role
+        self.employmentType = employmentType
         self.company = company
         self.location = location
         self.startDate = startDate
