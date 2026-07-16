@@ -12,7 +12,7 @@ struct JobDescriptionInputView: View {
     @FocusState private var isFocused: Bool
     
     // MARK: - Constants
-    private let MAX_CHARACTER_LIMIT: Int = 2000
+    private let MAX_CHARACTER_LIMIT: Int = 4000
     private let TEXT_EDITOR_PADDING: CGFloat = 12
     private let TEXT_EDITOR_CORNER_RADIUS: CGFloat = 8
     private let BORDER_WIDTH_UNFOCUSED: CGFloat = 1
