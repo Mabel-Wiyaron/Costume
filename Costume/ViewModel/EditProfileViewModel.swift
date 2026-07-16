@@ -39,7 +39,26 @@ final class EditProfileViewModel {
     }
 
     var isSaveEnabled: Bool {
-        !profile.name.isEmpty && !profile.phone.isEmpty && !profile.email.isEmpty
+            isNameValid && isEmailValid && isPhoneValid
+    }
+    
+    // Logika Validasi Murni
+    var isNameValid: Bool {
+        !profile.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
+    var isEmailValid: Bool {
+        let email = profile.email.trimmingCharacters(in: .whitespacesAndNewlines)
+        if email.isEmpty { return false }
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        return NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: email)
+    }
+    
+    var isPhoneValid: Bool {
+        let phone = profile.phone.trimmingCharacters(in: .whitespacesAndNewlines)
+        if phone.isEmpty { return false }
+        let phoneRegex = "^[+]*[0-9]{9,15}$"
+        return NSPredicate(format: "SELF MATCHES %@", phoneRegex).evaluate(with: phone)
     }
 
     func save() {
