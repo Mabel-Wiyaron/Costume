@@ -15,6 +15,7 @@ enum EmploymentType: String, Codable, CaseIterable, Identifiable {
     case selfEmployed
     case internship
     case contracted
+    case volunteer
 
     var id: String { rawValue }
 
@@ -26,6 +27,7 @@ enum EmploymentType: String, Codable, CaseIterable, Identifiable {
         case .selfEmployed: return "Self-employed"
         case .internship: return "Internship"
         case .contracted: return "Contracted"
+        case .volunteer: return "Volunteer"
         }
     }
 }
