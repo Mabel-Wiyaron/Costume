@@ -12,7 +12,7 @@ struct ResumeCard: View {
     let resume: Resume
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 2) {
             HStack {
                 Spacer()
                 Text(resume.date)
@@ -34,6 +34,12 @@ struct ResumeCard: View {
         .frame(maxWidth: .infinity, minHeight: 154, maxHeight: 154, alignment: .leading)
         .background(Color(NSColor.controlBackgroundColor))
         .cornerRadius(12)
+        .cornerRadius(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.accent)
+                .offset(y:8)
+            )
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
         .onHover { isHovered in
             if isHovered { NSCursor.pointingHand.push() }
