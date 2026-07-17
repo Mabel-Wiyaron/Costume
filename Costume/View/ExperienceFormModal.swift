@@ -20,28 +20,82 @@ struct ExperienceFormModal: View {
     @State private var endDate: Date? = nil
     @State private var descriptionText: String = ""
 
+    // --- TRACK INTERAKSI UI ---
+    private enum Field: Hashable {
+        case role, company, location
+    }
+    @FocusState private var focusedField: Field?
+    @State private var roleTouched = false
+    @State private var companyTouched = false
+    @State private var locationTouched = false
+
     private let MODAL_PADDING: CGFloat = 32
     private let MODAL_WIDTH: CGFloat = 700
     private let COLUMN_SPACING: CGFloat = 32
 
-    private var isSaveEnabled: Bool {
-        !role.isEmpty && !company.isEmpty && !location.isEmpty
+    // --- LOGIKA VALIDASI DASAR ---
+    private var isRoleValid: Bool {
+        !role.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
+    
+    private var isCompanyValid: Bool {
+        !company.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
+    private var isLocationValid: Bool {
+        !location.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var isSaveEnabled: Bool {
+        isRoleValid && isCompanyValid && isLocationValid
+    }
+
+    // --- KONDISI TAMPILAN ERROR ---
+    private var shouldShowRoleError: Bool { roleTouched && !isRoleValid }
+    private var shouldShowCompanyError: Bool { companyTouched && !isCompanyValid }
+    private var shouldShowLocationError: Bool { locationTouched && !isLocationValid }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            LabeledTextField(label: "Job Title", isRequired: true, text: $role)
+            LabeledTextField(
+                label: "Job Title",
+                isRequired: true,
+                text: $role,
+                isError: shouldShowRoleError,
+                errorMessage: "Job title is required"
+            )
+            .focused($focusedField, equals: .role)
+
             LabeledPicker(
                 label: "Employment Type",
                 isRequired: true,
                 selection: $employmentType,
                 optionTitle: { $0.title }
             )
-            LabeledTextField(label: "Company", isRequired: true, text: $company)
+
+            LabeledTextField(
+                label: "Company",
+                isRequired: true,
+                text: $company,
+                isError: shouldShowCompanyError,
+                errorMessage: "Company name is required"
+            )
+            .focused($focusedField, equals: .company)
 
             HStack(alignment: .top, spacing: COLUMN_SPACING) {
-                LabeledTextField(label: "Location", isRequired: true, placeholder: "City, Country", text: $location)
+                LabeledTextField(
+                    label: "Location",
+                    isRequired: true,
+                    placeholder: "City, Country",
+                    text: $location,
+                    isError: shouldShowLocationError,
+                    errorMessage: "Location is required"
+                )
+                .focused($focusedField, equals: .location)
+                .frame(maxWidth: .infinity)
+                
                 LabeledDateRangeField(label: "Years", isRequired: true, startDate: $startDate, endDate: $endDate)
+                    .frame(maxWidth: .infinity)
             }
 
             LabeledTextEditor(label: "Description", text: $descriptionText)
@@ -69,6 +123,15 @@ struct ExperienceFormModal: View {
         .padding(MODAL_PADDING)
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
+        // --- DETEKSI PERPINDAHAN FOKUS ---
+        .onChange(of: focusedField) { oldFocus, newFocus in
+            if oldFocus == .role && newFocus != .role { roleTouched = true }
+            if oldFocus == .company && newFocus != .company { companyTouched = true }
+            if oldFocus == .location && newFocus != .location { locationTouched = true }
+        }
+        .animation(.default, value: roleTouched)
+        .animation(.default, value: companyTouched)
+        .animation(.default, value: locationTouched)
     }
 
     private func populateFieldsIfEditing() {

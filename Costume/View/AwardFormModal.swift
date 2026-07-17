@@ -16,17 +16,59 @@ struct AwardFormModal: View {
     @State private var issuer: String = ""
     @State private var issueDate: Date = Date()
 
+    // --- TRACK INTERAKSI UI ---
+    private enum Field: Hashable {
+        case title, issuer
+    }
+    @FocusState private var focusedField: Field?
+    @State private var titleTouched = false
+    @State private var issuerTouched = false
+
     private let MODAL_PADDING: CGFloat = 32
     private let MODAL_WIDTH: CGFloat = 700
 
+    // Validasi dasar (untuk tombol Save)
+    private var isTitleValid: Bool {
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
+    private var isIssuerValid: Bool {
+        !issuer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     private var isSaveEnabled: Bool {
-        !title.isEmpty && !issuer.isEmpty
+        isTitleValid && isIssuerValid
+    }
+
+    // Properti Tampilan Error (hanya jika sudah disentuh & tidak valid)
+    private var shouldShowTitleError: Bool {
+        titleTouched && !isTitleValid
+    }
+
+    private var shouldShowIssuerError: Bool {
+        issuerTouched && !isIssuerValid
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            LabeledTextField(label: "Award Title", isRequired: true, text: $title)
-            LabeledTextField(label: "Provider", isRequired: true, text: $issuer)
+            LabeledTextField(
+                label: "Award Title",
+                isRequired: true,
+                text: $title,
+                isError: shouldShowTitleError,
+                errorMessage: "Award title is required"
+            )
+            .focused($focusedField, equals: .title)
+
+            LabeledTextField(
+                label: "Provider",
+                isRequired: true,
+                text: $issuer,
+                isError: shouldShowIssuerError,
+                errorMessage: "Provider is required"
+            )
+            .focused($focusedField, equals: .issuer)
+
             LabeledDateField(label: "Year", isRequired: true, date: $issueDate)
 
             HStack {
@@ -48,6 +90,13 @@ struct AwardFormModal: View {
         .padding(MODAL_PADDING)
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
+        // --- DETEKSI KAPAN USER PINDAH FOKUS ---
+        .onChange(of: focusedField) { oldFocus, newFocus in
+            if oldFocus == .title && newFocus != .title { titleTouched = true }
+            if oldFocus == .issuer && newFocus != .issuer { issuerTouched = true }
+        }
+        .animation(.default, value: titleTouched)
+        .animation(.default, value: issuerTouched)
     }
 
     private func populateFieldsIfEditing() {

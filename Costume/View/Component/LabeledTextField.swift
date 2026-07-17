@@ -16,6 +16,8 @@ struct LabeledTextField: View {
     var isError: Bool = false
     @FocusState var isFocused: Bool
     
+    var errorMessage: String? = nil
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 2) {
@@ -39,6 +41,20 @@ struct LabeledTextField: View {
                 )
                 .animation(.easeInOut(duration: 0.2), value: isFocused)
                 .animation(.easeInOut(duration: 0.2), value: isError)
+            
+            // Menampilkan inline error text tepat di bawah kotak input
+            if isError, let errorMessage = errorMessage {
+                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                    // Ikon tanda seru dalam lingkaran dari SF Symbols
+                    Image(systemName: "exclamationmark.circle.fill")
+                        .font(.caption)
+                        .foregroundColor(.red)
+                    
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }.transition(.opacity)
+            }
             
         }
         .frame(maxWidth: .infinity, alignment: .leading)

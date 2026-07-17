@@ -9,23 +9,23 @@ import SwiftData
 import SwiftUI
 
 struct EditProfileView: View {
-    @State private var viewModel: EditProfileViewModel
+    // Gunakan @Environment untuk mendapatkan ModelContext bawaan sistem
+    @Environment(\.modelContext) private var modelContext
+    
+    // Inisialisasi ViewModel secara kosong dulu menggunakan @State
+    @State private var viewModel: EditProfileViewModel? = nil
 
     private let OUTER_PADDING: CGFloat = 40
     private let CARD_MAX_WIDTH: CGFloat = 800
 
-    init(profile: Profile, modelContext: ModelContext? = nil) {
-        _viewModel = State(
-            initialValue: EditProfileViewModel(
-                profile: profile,
-                modelContext: modelContext
-            )
-        )
-    }
-
     var body: some View {
         NavigationSplitView {
-            ProfileSidebarView(selectedSection: $viewModel.selectedSection)
+            // Kita butuh viewModel siap dulu sebelum menampilkan sidebar
+            if let viewModel = Binding($viewModel) {
+                ProfileSidebarView(selectedSection: viewModel.selectedSection)
+            } else {
+                ProgressView() // Tampilan loading sementara data disiapkan
+            }
         } detail: {
             ZStack {
                 Color("BackgroundColor")
@@ -49,32 +49,54 @@ struct EditProfileView: View {
                         case .awards:
                             AwardSectionView(viewModel: viewModel)
                         }
+                        .frame(maxWidth: CARD_MAX_WIDTH, alignment: .top)
+                        .padding(OUTER_PADDING)
+                        .frame(maxWidth: .infinity, alignment: .top)
                     }
-                    .frame(maxWidth: CARD_MAX_WIDTH, alignment: .top)
-                    .padding(OUTER_PADDING)
-                    .frame(maxWidth: .infinity, alignment: .top)
                 }
             }
         }
         .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 300)
+        // Pindahkan logika database ke .onAppear di bawah ini!
+        .onAppear {
+            setupViewModel()
+        }
     }
-}
 
-#Preview {
-    let container = try! ModelContainer(
-        for: Profile.self,
-        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-    )
-    let sampleProfile = Profile(
-        name: "",
-        role: "",
-        email: "",
-        location: "",
-        phone: ""
-    )
-    return EditProfileView(
-        profile: sampleProfile,
-        modelContext: container.mainContext
-    )
-    .modelContainer(container)
+    private func setupViewModel() {
+        guard viewModel == nil else { return }
+        
+        let descriptor = FetchDescriptor<Profile>()
+        let fetchedProfiles = (try? modelContext.fetch(descriptor)) ?? []
+        
+        // DEBUG: Cetak jumlah profil yang sukses dibaca dari SQLite
+        print("DEBUG: Total profile ditemukan di DB = \(fetchedProfiles.count)")
+        for (index, p) in fetchedProfiles.enumerated() {
+            print("[\(index)] Nama: '\(p.name)', JobDesc: '\(String(describing: p.jobDescription))'")
+        }
+        
+        // Perbaikan logika: Cari profile utama.
+        // Jika jobDescription nil ATAU kosong, kita anggap itu profil utama pengguna.
+        let matchedProfile = fetchedProfiles.first(where: {
+            $0.jobDescription == nil
+        })
+        
+        let finalProfile: Profile
+        if let existing = matchedProfile {
+            print("DEBUG: Berhasil memakai data lama -> \(existing.name)")
+            finalProfile = existing
+        } else if let fallbackFirst = fetchedProfiles.first {
+            // Fallback darurat: jika filter di atas meleset tapi DB punya data, pakai data pertama yang ada
+            print("DEBUG: Fallback memakai profile pertama yang ada -> \(fallbackFirst.name)")
+            finalProfile = fallbackFirst
+        } else {
+            // Jika database benar-benar kosong melompong, baru buat baru
+            print("DEBUG: Database kosong. Membuat profile baru.")
+            let newProfile = Profile(name: "", email: "", location: "", phone: "")
+            modelContext.insert(newProfile)
+            finalProfile = newProfile
+        }
+        
+        self.viewModel = EditProfileViewModel(profile: finalProfile, modelContext: modelContext)
+    }
 }

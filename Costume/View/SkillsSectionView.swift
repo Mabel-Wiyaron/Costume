@@ -22,7 +22,7 @@ struct SkillsSectionView: View {
                 helperText: "Press enter for each new skill",
                 skills: $skills
             )
-
+            
             if let onSave {
                 HStack {
                     Spacer()

@@ -16,20 +16,84 @@ final class EditProfileViewModel {
 
     var isEducationModalPresented: Bool = false
     var educationBeingEdited: Education? = nil
+    
+    var isExperienceModalPresented: Bool = false
+    var experienceBeingEdited: Experience? = nil
+    
+    var isProjectModalPresented: Bool = false
+    var projectBeingEdited: Project? = nil
+    
+    var isCertificationModalPresented: Bool = false
+    var certificationBeingEdited: Certification? = nil
+    
+    var isAwardModalPresented: Bool = false
+    var awardBeingEdited: Award? = nil
 
-    private let modelContext: ModelContext?
+    // --- SNAPSHOT UNTUK STRATEGI PENGUNCIAN TOMBOL SIMPAN ---
+    private var lastSavedSnapshot: ProfileSnapshot
 
-    init(profile: Profile, modelContext: ModelContext? = nil) {
+    // Made internal to the module since SwiftData actions require a solid model context instance
+    private let modelContext: ModelContext
+
+    // Pass the View's modelContext here using (.modelContext environment wrapper)
+    init(profile: Profile, modelContext: ModelContext) {
         self.profile = profile
         self.modelContext = modelContext
+        // Ambil data awal sebagai acuan dasar perubahan
+        self.lastSavedSnapshot = ProfileSnapshot(from: profile)
     }
 
-    var isSaveEnabled: Bool {
-        !profile.name.isEmpty && !profile.phone.isEmpty && !profile.email.isEmpty
+    var isPersonalInfoSaveEnabled: Bool {
+        // Validasi format terpenuhi DAN ada perubahan khusus di data personal info
+        isNameValid && isEmailValid && isPhoneValid && hasUnsavedPersonalInfoChanges
     }
 
-    func Save() {
-        try? modelContext?.save()
+    var isSkillsSaveEnabled: Bool {
+        hasUnsavedSkillsChanges
+    }
+
+    // --- Logika Pengecekan Parsial ---
+
+    private var hasUnsavedPersonalInfoChanges: Bool {
+        let current = ProfileSnapshot(from: profile)
+        return current.name != lastSavedSnapshot.name ||
+               current.phone != lastSavedSnapshot.phone ||
+               current.email != lastSavedSnapshot.email ||
+               current.linkedin != lastSavedSnapshot.linkedin ||
+               current.website != lastSavedSnapshot.website ||
+               current.location != lastSavedSnapshot.location ||
+               current.github != lastSavedSnapshot.github ||
+               current.summary != lastSavedSnapshot.summary
+    }
+
+    private var hasUnsavedSkillsChanges: Bool {
+        let current = ProfileSnapshot(from: profile)
+        return current.skills != lastSavedSnapshot.skills
+    }
+    
+    // Logika Validasi Murni
+    var isNameValid: Bool {
+        !profile.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
+    var isEmailValid: Bool {
+        let email = profile.email.trimmingCharacters(in: .whitespacesAndNewlines)
+        if email.isEmpty { return false }
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}"
+        return NSPredicate(format: "SELF MATCHES %@", emailRegex).evaluate(with: email)
+    }
+    
+    var isPhoneValid: Bool {
+        let phone = profile.phone.trimmingCharacters(in: .whitespacesAndNewlines)
+        if phone.isEmpty { return false }
+        let phoneRegex = "^[+]*[0-9]{9,15}$"
+        return NSPredicate(format: "SELF MATCHES %@", phoneRegex).evaluate(with: phone)
+    }
+
+    func save() {
+        try? modelContext.save()
+        // Perbarui acuan snapshot setelah penyimpanan berhasil dilakukan
+        lastSavedSnapshot = ProfileSnapshot(from: profile)
     }
 
     // MARK: - Education
@@ -75,20 +139,18 @@ final class EditProfileViewModel {
             )
             profile.educations.append(newEducation)
         }
-        Save()
+        save()
         isEducationModalPresented = false
         educationBeingEdited = nil
     }
 
     func deleteEducation(_ education: Education) {
-        profile.educations.removeAll { $0 === education }
-        Save()
+        profile.educations.removeAll { $0.id == education.id }
+        modelContext.delete(education)
+        save()
     }
     
     // MARK: - Experience
-
-    var isExperienceModalPresented: Bool = false
-    var experienceBeingEdited: Experience? = nil
 
     func startAddingExperience() {
         experienceBeingEdited = nil
@@ -134,20 +196,18 @@ final class EditProfileViewModel {
             )
             profile.experiences.append(newExperience)
         }
-        Save()
+        save()
         isExperienceModalPresented = false
         experienceBeingEdited = nil
     }
 
     func deleteExperience(_ experience: Experience) {
-        profile.experiences.removeAll { $0 === experience }
-        Save()
+        profile.experiences.removeAll { $0.id == experience.id }
+        modelContext.delete(experience)
+        save()
     }
 
     // MARK: - Project
-
-    var isProjectModalPresented: Bool = false
-    var projectBeingEdited: Project? = nil
 
     func startAddingProject() {
         projectBeingEdited = nil
@@ -191,20 +251,18 @@ final class EditProfileViewModel {
             )
             profile.projects.append(newProject)
         }
-        Save()
+        save()
         isProjectModalPresented = false
         projectBeingEdited = nil
     }
 
     func deleteProject(_ project: Project) {
-        profile.projects.removeAll { $0 === project }
-        Save()
+        profile.projects.removeAll { $0.id == project.id }
+        modelContext.delete(project)
+        save()
     }
 
     // MARK: - Certification
-
-    var isCertificationModalPresented: Bool = false
-    var certificationBeingEdited: Certification? = nil
 
     func startAddingCertification() {
         certificationBeingEdited = nil
@@ -248,20 +306,18 @@ final class EditProfileViewModel {
             )
             profile.certifications.append(newCertification)
         }
-        Save()
+        save()
         isCertificationModalPresented = false
         certificationBeingEdited = nil
     }
 
     func deleteCertification(_ certification: Certification) {
-        profile.certifications.removeAll { $0 === certification }
-        Save()
+        profile.certifications.removeAll { $0.id == certification.id }
+        modelContext.delete(certification)
+        save()
     }
 
     // MARK: - Award
-
-    var isAwardModalPresented: Bool = false
-    var awardBeingEdited: Award? = nil
 
     func startAddingAward() {
         awardBeingEdited = nil
@@ -293,15 +349,52 @@ final class EditProfileViewModel {
                 issuer: issuer,
                 issueDate: issueDate
             )
+            modelContext.insert(newAward)
             profile.awards.append(newAward)
         }
-        Save()
+        save()
         isAwardModalPresented = false
         awardBeingEdited = nil
     }
 
     func deleteAward(_ award: Award) {
-        profile.awards.removeAll { $0 === award }
-        Save()
+        profile.awards.removeAll { $0.id == award.id }
+        modelContext.delete(award)
+        save()
+    }
+}
+
+// --- PEMBANTU SNAPSHOT DATA ---
+// Struktur ringan bertipe Value (Struct) untuk melacak perbedaan konten string mentah
+fileprivate struct ProfileSnapshot: Equatable {
+    let name: String
+    let phone: String
+    let linkedin: String
+    let email: String
+    let website: String
+    let location: String
+    let github: String
+    let summary: String
+    
+    let skills: [Skill] // <-- 1. Tambahkan array skills di sini
+        
+    init(from profile: Profile) {
+        self.name = profile.name
+        self.phone = profile.phone
+        self.email = profile.email
+        self.location = profile.location
+        self.linkedin = profile.linkedin?.absoluteString ?? ""
+        self.website = profile.website?.absoluteString ?? ""
+        self.summary = profile.summary ?? ""
+        
+        // 2. Masukkan array skills dari profile ke snapshot
+        // Jika bertipe data String biasa, langsung masukkan. Jika objek, map ke string id/nama-nya.
+        self.skills = profile.skills
+        
+        if let githubURL = profile.links.first(where: { $0.platform == .github })?.url {
+            self.github = githubURL.absoluteString
+        } else {
+            self.github = ""
+        }
     }
 }
