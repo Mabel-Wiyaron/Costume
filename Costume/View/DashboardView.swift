@@ -10,7 +10,9 @@ import SwiftData
 
 struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
+    
     @Query private var profiles: [Profile]
+    
     
     @State private var searchText = ""
     @State private var isSearchExpanded = false
@@ -27,11 +29,13 @@ struct DashboardView: View {
     // Mengurutkan data profil secara in-memory berdasarkan tanggal pembuatan job description (terbaru dahulu).
     // Hal ini diperlukan karena @Query SwiftData tidak mendukung pengurutan langsung (sort keypath) menggunakan properti relasi objek.
     var sortedProfiles: [Profile] {
-        profiles.sorted { p1, p2 in
-            let d1 = p1.jobDescription?.createdAt ?? Date.distantPast
-            let d2 = p2.jobDescription?.createdAt ?? Date.distantPast
-            return d1 > d2
-        }
+        profiles
+            .filter { $0.jobDescription != nil }
+            .sorted { p1, p2 in
+                let d1 = p1.jobDescription?.createdAt ?? Date.distantPast
+                let d2 = p2.jobDescription?.createdAt ?? Date.distantPast
+                return d1 > d2
+            }
     }
     
     // Menyaring daftar profil berdasarkan teks pencarian yang dimasukkan pengguna (mencari kecocokan pada role, company, atau format tanggal).
