@@ -49,7 +49,6 @@ final class Profile {
 
     init(
         name: String,
-        role: String,
         email: String,
         location: String,
         phone: String,

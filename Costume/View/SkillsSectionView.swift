@@ -25,12 +25,13 @@ struct SkillsSectionView: View {
             HStack {
                 Spacer()
                 Button("Save") {
-                    viewModel.Save()
+                    viewModel.save()
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Color("PrimaryColor"))
                 .controlSize(.large)
                 .keyboardShortcut(.defaultAction)
+                .disabled(!viewModel.isSkillsSaveEnabled)
             }
         }
         .padding(CARD_PADDING)

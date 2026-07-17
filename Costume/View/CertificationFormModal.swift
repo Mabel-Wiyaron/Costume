@@ -20,22 +20,84 @@ struct CertificationFormModal: View {
     @State private var credentialID: String = ""
     @State private var credentialURL: String = ""
 
+    // --- TRACK INTERAKSI UI ---
+    private enum Field: Hashable {
+        case name, issuer, credentialID, credentialURL
+    }
+    @FocusState private var focusedField: Field?
+    @State private var nameTouched = false
+    @State private var issuerTouched = false
+    @State private var credentialIDTouched = false
+    @State private var credentialURLTouched = false
+
     private let MODAL_PADDING: CGFloat = 32
     private let MODAL_WIDTH: CGFloat = 700
     private let COLUMN_SPACING: CGFloat = 32
 
-    private var isSaveEnabled: Bool {
-        !name.isEmpty && !issuer.isEmpty && !credentialID.isEmpty
+    // --- LOGIKA VALIDASI DASAR ---
+    private var isNameValid: Bool {
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
+    
+    private var isIssuerValid: Bool {
+        !issuer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
+    private var isCredentialIDValid: Bool {
+        !credentialID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var isCredentialURLValid: Bool {
+        let trimmedURL = credentialURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmedURL.isEmpty { return true } // Opsional, kosong berarti sah
+        
+        let urlRegex = #"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})(\/[\w \.-]*)*\/?$"#
+        let urlPredicate = NSPredicate(format: "SELF MATCHES %@", urlRegex)
+        return urlPredicate.evaluate(with: trimmedURL)
+    }
+
+    private var isSaveEnabled: Bool {
+        isNameValid && isIssuerValid && isCredentialIDValid && isCredentialURLValid
+    }
+
+    // --- KONDISI KAPAN ERROR DITAMPILKAN ---
+    private var shouldShowNameError: Bool { nameTouched && !isNameValid }
+    private var shouldShowIssuerError: Bool { issuerTouched && !isIssuerValid }
+    private var shouldShowCredentialIDError: Bool { credentialIDTouched && !isCredentialIDValid }
+    private var shouldShowCredentialURLError: Bool { credentialURLTouched && !isCredentialURLValid }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            LabeledTextField(label: "Certification Name", isRequired: true, text: $name)
-            LabeledTextField(label: "Provider", isRequired: true, text: $issuer)
+            LabeledTextField(
+                label: "Certification Name",
+                isRequired: true,
+                text: $name,
+                isError: shouldShowNameError,
+                errorMessage: "Certification name is required"
+            )
+            .focused($focusedField, equals: .name)
+
+            LabeledTextField(
+                label: "Provider",
+                isRequired: true,
+                text: $issuer,
+                isError: shouldShowIssuerError,
+                errorMessage: "Provider is required"
+            )
+            .focused($focusedField, equals: .issuer)
 
             HStack(alignment: .top, spacing: COLUMN_SPACING) {
                 LabeledDateField(label: "Issue Date", isRequired: true, date: $issueDate)
-                LabeledTextField(label: "Credential ID", isRequired: true, text: $credentialID)
+                
+                LabeledTextField(
+                    label: "Credential ID",
+                    isRequired: true,
+                    text: $credentialID,
+                    isError: shouldShowCredentialIDError,
+                    errorMessage: "Credential ID is required"
+                )
+                .focused($focusedField, equals: .credentialID)
+                .frame(maxWidth: .infinity)
             }
 
             Toggle("Has expiration date", isOn: $hasExpirationDate)
@@ -43,7 +105,13 @@ struct CertificationFormModal: View {
                 LabeledDateField(label: "Expiration Date", date: $expirationDate)
             }
 
-            LabeledTextField(label: "Credential URL", text: $credentialURL)
+            LabeledTextField(
+                label: "Credential URL",
+                text: $credentialURL,
+                isError: shouldShowCredentialURLError,
+                errorMessage: "Enter a valid website link (e.g., https://example.com)"
+            )
+            .focused($focusedField, equals: .credentialURL)
 
             HStack {
                 Spacer()
@@ -71,6 +139,17 @@ struct CertificationFormModal: View {
         .padding(MODAL_PADDING)
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
+        // --- DETEKSI PERPINDAHAN FOKUS ---
+        .onChange(of: focusedField) { oldFocus, newFocus in
+            if oldFocus == .name && newFocus != .name { nameTouched = true }
+            if oldFocus == .issuer && newFocus != .issuer { issuerTouched = true }
+            if oldFocus == .credentialID && newFocus != .credentialID { credentialIDTouched = true }
+            if oldFocus == .credentialURL && newFocus != .credentialURL { credentialURLTouched = true }
+        }
+        .animation(.default, value: nameTouched)
+        .animation(.default, value: issuerTouched)
+        .animation(.default, value: credentialIDTouched)
+        .animation(.default, value: credentialURLTouched)
     }
 
     private func populateFieldsIfEditing() {
