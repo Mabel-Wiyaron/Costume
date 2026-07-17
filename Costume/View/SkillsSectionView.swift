@@ -31,6 +31,7 @@ struct SkillsSectionView: View {
                 .tint(Color("PrimaryColor"))
                 .controlSize(.large)
                 .keyboardShortcut(.defaultAction)
+                .disabled(!viewModel.isSkillsSaveEnabled)
             }
         }
         .padding(CARD_PADDING)

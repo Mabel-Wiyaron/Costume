@@ -29,6 +29,9 @@ final class EditProfileViewModel {
     var isAwardModalPresented: Bool = false
     var awardBeingEdited: Award? = nil
 
+    // --- SNAPSHOT UNTUK STRATEGI PENGUNCIAN TOMBOL SIMPAN ---
+    private var lastSavedSnapshot: ProfileSnapshot
+
     // Made internal to the module since SwiftData actions require a solid model context instance
     private let modelContext: ModelContext
 
@@ -36,10 +39,36 @@ final class EditProfileViewModel {
     init(profile: Profile, modelContext: ModelContext) {
         self.profile = profile
         self.modelContext = modelContext
+        // Ambil data awal sebagai acuan dasar perubahan
+        self.lastSavedSnapshot = ProfileSnapshot(from: profile)
     }
 
-    var isSaveEnabled: Bool {
-            isNameValid && isEmailValid && isPhoneValid
+    var isPersonalInfoSaveEnabled: Bool {
+        // Validasi format terpenuhi DAN ada perubahan khusus di data personal info
+        isNameValid && isEmailValid && isPhoneValid && hasUnsavedPersonalInfoChanges
+    }
+
+    var isSkillsSaveEnabled: Bool {
+        hasUnsavedSkillsChanges
+    }
+
+    // --- Logika Pengecekan Parsial ---
+
+    private var hasUnsavedPersonalInfoChanges: Bool {
+        let current = ProfileSnapshot(from: profile)
+        return current.name != lastSavedSnapshot.name ||
+               current.phone != lastSavedSnapshot.phone ||
+               current.email != lastSavedSnapshot.email ||
+               current.linkedin != lastSavedSnapshot.linkedin ||
+               current.website != lastSavedSnapshot.website ||
+               current.location != lastSavedSnapshot.location ||
+               current.github != lastSavedSnapshot.github ||
+               current.summary != lastSavedSnapshot.summary
+    }
+
+    private var hasUnsavedSkillsChanges: Bool {
+        let current = ProfileSnapshot(from: profile)
+        return current.skills != lastSavedSnapshot.skills
     }
     
     // Logika Validasi Murni
@@ -63,6 +92,8 @@ final class EditProfileViewModel {
 
     func save() {
         try? modelContext.save()
+        // Perbarui acuan snapshot setelah penyimpanan berhasil dilakukan
+        lastSavedSnapshot = ProfileSnapshot(from: profile)
     }
 
     // MARK: - Education
@@ -106,7 +137,6 @@ final class EditProfileViewModel {
                 endDate: endDate,
                 grade: grade
             )
-            // SwiftData automatically establishes context tracking when inserted or appended to an existing model
             profile.educations.append(newEducation)
         }
         save()
@@ -115,9 +145,7 @@ final class EditProfileViewModel {
     }
 
     func deleteEducation(_ education: Education) {
-        // 1. Remove relationship reference link from array
         profile.educations.removeAll { $0.id == education.id }
-        // 2. Explicitly wipe object row from SQLite store
         modelContext.delete(education)
         save()
     }
@@ -141,7 +169,7 @@ final class EditProfileViewModel {
 
     func saveExperience(
         role: String,
-        employmentType: EmploymentType, // Updated type mapping matching your enum location
+        employmentType: EmploymentType,
         company: String,
         location: String,
         startDate: Date,
@@ -333,5 +361,40 @@ final class EditProfileViewModel {
         profile.awards.removeAll { $0.id == award.id }
         modelContext.delete(award)
         save()
+    }
+}
+
+// --- PEMBANTU SNAPSHOT DATA ---
+// Struktur ringan bertipe Value (Struct) untuk melacak perbedaan konten string mentah
+fileprivate struct ProfileSnapshot: Equatable {
+    let name: String
+    let phone: String
+    let linkedin: String
+    let email: String
+    let website: String
+    let location: String
+    let github: String
+    let summary: String
+    
+    let skills: [Skill] // <-- 1. Tambahkan array skills di sini
+        
+    init(from profile: Profile) {
+        self.name = profile.name
+        self.phone = profile.phone
+        self.email = profile.email
+        self.location = profile.location
+        self.linkedin = profile.linkedin?.absoluteString ?? ""
+        self.website = profile.website?.absoluteString ?? ""
+        self.summary = profile.summary ?? ""
+        
+        // 2. Masukkan array skills dari profile ke snapshot
+        // Jika bertipe data String biasa, langsung masukkan. Jika objek, map ke string id/nama-nya.
+        self.skills = profile.skills
+        
+        if let githubURL = profile.links.first(where: { $0.platform == .github })?.url {
+            self.github = githubURL.absoluteString
+        } else {
+            self.github = ""
+        }
     }
 }

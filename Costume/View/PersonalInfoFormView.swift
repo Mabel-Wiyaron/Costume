@@ -108,7 +108,7 @@ struct PersonalInfoFormView: View {
                     .tint(Color("PrimaryColor"))
                     .controlSize(.large)
                     .keyboardShortcut(.defaultAction)
-                    .disabled(!viewModel.isSaveEnabled)
+                    .disabled(!viewModel.isPersonalInfoSaveEnabled)
                 }
             }
             .padding(CARD_PADDING)
