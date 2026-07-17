@@ -33,9 +33,9 @@ struct EditCVView: View {
         for: Profile.self, JobDescription.self,
         configurations: ModelConfiguration(isStoredInMemoryOnly: true)
     )
-    let sampleProfile = Profile(name: "", role: "", email: "", location: "", phone: "")
+    let sampleProfile = Profile(name: "", email: "", location: "", phone: "")
     let sampleJobDescription = JobDescription(content: "Paste job description here...", jobTitle: "iOS Engineer", company: "Acme Corp")
-    return EditCVView(
+    EditCVView(
         document: CVDocument(profile: sampleProfile),
         jobDescription: sampleJobDescription,
         modelContext: container.mainContext

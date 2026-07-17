@@ -22,7 +22,6 @@ struct CVPreviewView: View {
     private var currentProfile: Profile {
         profiles.first ?? Profile(
             name: "MABEL WIYARON",
-            role: "Software Engineer",
             email: "hello@mabelwiyaron.com",
             location: "Surabaya, Indonesia",
             phone: "+6281234567890",
@@ -92,7 +91,6 @@ struct CVPreviewView: View {
         
         let sampleProfile = Profile(
             name: "MABEL WIYARON",
-            role: "Software Engineer",
             email: "hello@mabelwiyaron.com",
             location: "Surabaya, Indonesia",
             phone: "+6281234567890",
