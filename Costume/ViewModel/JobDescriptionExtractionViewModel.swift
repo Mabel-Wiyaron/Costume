@@ -32,7 +32,9 @@ final class JobDescriptionExtractionViewModel {
         // 1. Inisialisasi Model JobDescription awal dengan status 'processing'
         let newJobDesc = JobDescription(
             content: jobDescription,
-            extractionStatus: "processing"
+            role: "",
+            company: "",
+            extractionStatus: "processing",
         )
         context.insert(newJobDesc)
         
@@ -46,6 +48,9 @@ final class JobDescriptionExtractionViewModel {
                 // 3. Proses data SwiftData kembali di MainActor
                 await MainActor.run {
                     self.extractionResult = result
+                    
+                    newJobDesc.role = result.role
+                    newJobDesc.company = result.company
                     
                     // A. Cari Master Profile (Profile yang tidak memiliki JobDescription)
                     let masterProfile = fetchMasterProfile(using: context)
