@@ -29,7 +29,7 @@ let JOB_DESCRIPTION_INSTRUCTIONS_V1 = """
 
 // TODO: Partitions the descriptions into Prompt Template
 @Generable(description: "Structured breakdown of a job description, extracted for resume tailoring and ATS keyword matching.")
-struct JobDescriptionGenerable {
+struct JobDescriptionGenerable: Codable {
     @Guide(description: "Role name of the job")
     let role: String
     @Guide(description: "Company name of the job")

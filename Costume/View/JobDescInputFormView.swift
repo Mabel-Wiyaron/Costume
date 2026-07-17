@@ -8,8 +8,9 @@
 import SwiftUI
 
 struct JobDescInputFormView: View {
+    @Environment(\.modelContext) private var modelContext
     // MARK: - View Model
-    let jobDescExtVM: JobDescriptionExtractionViewModel
+    @State private var jobDescExtVM: JobDescriptionExtractionViewModel
 
     @State private var jobDescription: String = ""
     @State private var isLoading: Bool = false
@@ -35,23 +36,6 @@ struct JobDescInputFormView: View {
     init() {
         self.jobDescExtVM = .init()
         self.isFocused = true
-    }
-
-    func onSubmit() {
-        Task {
-            do {
-                isLoading = true
-                let result = try await jobDescExtVM.extract(
-                    from: jobDescription
-                )
-
-                print(result)
-            } catch {
-                print("error")
-            }
-
-            isLoading = false
-        }
     }
 
     var body: some View {
@@ -145,7 +129,7 @@ struct JobDescInputFormView: View {
                         // Main action button wrapper layout setup
                         Button(action: {
                             // Action to trigger backend layout analysis
-                            onSubmit()
+                            jobDescExtVM.onSubmit(jobDescription: jobDescription)
                         }) {
                             Text("Start Analyzing")
                                 .font(.body)
@@ -157,10 +141,7 @@ struct JobDescInputFormView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: BUTTON_CORNER_RADIUS))
                         }
                         .disabled(
-                            isLoading
-                                || jobDescription.trimmingCharacters(
-                                    in: .whitespacesAndNewlines
-                                ).isEmpty
+                            jobDescExtVM.isSubmitDisabled(for: jobDescription)
                         )
                         .buttonStyle(.plain)
                     }
@@ -171,6 +152,10 @@ struct JobDescInputFormView: View {
                     .padding(.horizontal, MIN_HORIZONTAL_MARGIN)
                     .frame(maxWidth: MAX_CARD_WIDTH + (MIN_HORIZONTAL_MARGIN * 2))
                     .frame(maxWidth: .infinity, alignment: .center)
+                    .onAppear {
+                        // Pasang context ke view model agar bisa dipakai saat submit
+                        jobDescExtVM.modelContext = modelContext
+                    }
                     
                     // Balances the top spacer, holding it dead center
                     Spacer()
