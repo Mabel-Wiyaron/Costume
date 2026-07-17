@@ -11,8 +11,8 @@ import SwiftData
 @Model
 final class JobDescription {
     var content: String
-    var jobTitle: String
-    var company: String
+    var role: String?
+    var company: String?
     var extractedData: Data // Keeps your original JSON/Binary backup
 
     @Relationship(deleteRule: .cascade, inverse: \Keyword.jobDescription)
@@ -30,8 +30,8 @@ final class JobDescription {
 
     init(
         content: String,
-        jobTitle: String = "",
-        company: String = "",
+        role: String? = nil,
+        company: String? = nil,
         extractedData: Data = Data(),
         extractionStatus: String = "idle",
         createdAt: Date = Date(),
@@ -39,7 +39,7 @@ final class JobDescription {
         keywords: [Keyword] = []
     ) {
         self.content = content
-        self.jobTitle = jobTitle
+        self.role = role
         self.company = company
         self.extractedData = extractedData
         self.extractionStatus = extractionStatus

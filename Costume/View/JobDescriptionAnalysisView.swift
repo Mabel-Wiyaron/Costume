@@ -35,15 +35,20 @@ struct JobDescriptionAnalysisView: View {
         .padding(CARD_PADDING)
         .cardBackground()
     }
-
+    
     private func header(for jobDescription: JobDescription) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(jobDescription.jobTitle.isEmpty ? "Job Title" : jobDescription.jobTitle)
+        let role = jobDescription.role ?? ""
+        let company = jobDescription.company ?? ""
+
+        return VStack(alignment: .leading, spacing: 10) {
+            Text(role)
                 .font(.largeTitle)
                 .fontWeight(.bold)
-            Text(jobDescription.company.isEmpty ? "Company" : jobDescription.company)
+            
+            Text(company.isEmpty ? "Company" : company)
                 .font(.title3)
                 .foregroundStyle(Color.orange)
+                
             Rectangle()
                 .fill(Color.orange)
                 .frame(height: 1)

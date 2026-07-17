@@ -31,7 +31,7 @@ struct JobDescInputFormView: View {
     // Responsive Bounds
     private let MAX_CARD_WIDTH: CGFloat = 800
     private let MIN_HORIZONTAL_MARGIN: CGFloat = 24
-    
+
     init() {
         self.jobDescExtVM = .init()
         self.isFocused = true

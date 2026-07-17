@@ -14,13 +14,20 @@ struct CVPreviewView: View {
     // Kueri reaktif untuk mengambil data Profile dari SwiftData secara otomatis saat ada perubahan
     @Query private var profiles: [Profile]
     
+    // Profil spesifik yang ingin di-preview (opsional)
+    var profile: Profile? = nil
+    
     // Nama dokumen default yang ditampilkan di bilah navigasi aplikasi
     var documentName: String = "Mabel_CV_Apple"
     
     // Menghitung profil aktif saat ini dari database.
     // Jika database kosong, mengembalikan profil default sementara untuk visualisasi awal
     private var currentProfile: Profile {
-        profiles.first ?? Profile(
+        profile ?? profiles.first ?? CVPreviewView.defaultProfile
+    }
+    
+    static var defaultProfile: Profile {
+        Profile(
             name: "MABEL WIYARON",
             email: "hello@mabelwiyaron.com",
             location: "Surabaya, Indonesia",
@@ -31,20 +38,26 @@ struct CVPreviewView: View {
         )
     }
     
+    private var pages: [PageContent] {
+        ATSCVTemplateView.distribute(profile: currentProfile)
+    }
+    
+    private func renderPage(_ page: PageContent) -> some View {
+        ATSCVTemplateView(profile: currentProfile, pageContent: page)
+            .background(Color.white)
+            .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 3)
+            .frame(width: 595, height: 842)
+    }
+    
     var body: some View {
         // Wadah Navigasi Stack untuk mendukung transisi layar secara native (push & pop)
         NavigationStack {
             // 1. Area Lembar Kerja (Canvas) yang dapat digulir secara vertikal
             ScrollView {
-                // Mendistribusikan data profil ke beberapa halaman A4 secara dinamis berdasarkan tinggi konten
-                let pages = ATSCVTemplateView.distribute(profile: currentProfile)
                 VStack(spacing: 20) { // Memberikan jarak antar kertas A4 sebesar 20pt
                     ForEach(pages) { page in
                         // Merender satu halaman A4 spesifik sesuai dengan data porsinya
-                        ATSCVTemplateView(profile: currentProfile, pageContent: page)
-                            .background(Color.white) // Kertas berwarna putih polos
-                            .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 3) // Efek bayangan kertas premium
-                            .frame(width: 595, height: 842) // Ukuran standar kertas A4 (point)
+                        renderPage(page)
                     }
                 }
                 .padding(40)
@@ -56,18 +69,11 @@ struct CVPreviewView: View {
             
             // 3. Bilah Alat (Toolbar) standard macOS HIG
             .toolbar {
-                // Sisi Kiri: Navigasi tombol kembali
-                ToolbarItem(placement: .navigation) {
-                    Button(action: { print("Go Back") }) {
-                        Image(systemName: "chevron.left")
-                    }
-                    .help("Go Back") // Tooltip bantuan saat kursor melayang di atas tombol
-                }
                 
                 // Sisi Kanan: Tombol aksi utama (Edit & Ekspor)
                 ToolbarItemGroup(placement: .primaryAction) {
                     // Tautan Navigasi untuk berpindah layar secara langsung ke menu Editor CV (EditProfileView)
-                    NavigationLink(destination: EditProfileView(profile: currentProfile, modelContext: modelContext)) {
+                    NavigationLink(destination: EditProfileView(profile: currentProfile)) {
                         Label("Edit", systemImage: "pencil")
                     }
                     .help("Edit Resumé")

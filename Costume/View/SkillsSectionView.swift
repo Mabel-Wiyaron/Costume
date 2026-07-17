@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct SkillsSectionView: View {
-    @Binding var skills: [Skill]
-    var onSave: (() -> Void)? = nil
+    @Bindable var viewModel: EditProfileViewModel
 
     private let CARD_PADDING: CGFloat = 32
 
@@ -20,18 +19,19 @@ struct SkillsSectionView: View {
             SkillTagField(
                 label: "Add skills",
                 helperText: "Press enter for each new skill",
-                skills: $skills
+                skills: $viewModel.profile.skills
             )
-            
-            if let onSave {
-                HStack {
-                    Spacer()
-                    Button("Save") { onSave() }
-                        .buttonStyle(.borderedProminent)
-                        .tint(Color("PrimaryColor"))
-                        .controlSize(.large)
-                        .keyboardShortcut(.defaultAction)
+
+            HStack {
+                Spacer()
+                Button("Save") {
+                    viewModel.save()
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(Color("PrimaryColor"))
+                .controlSize(.large)
+                .keyboardShortcut(.defaultAction)
+                .disabled(!viewModel.isSkillsSaveEnabled)
             }
         }
         .padding(CARD_PADDING)
