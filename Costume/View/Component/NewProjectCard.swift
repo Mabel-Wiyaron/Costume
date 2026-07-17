@@ -13,19 +13,27 @@ struct NewProjectCard: View {
             Image(systemName: "plus")
                 .font(.system(size: 50, weight: .medium))
                 .foregroundColor(.accentColor)
-            
+
             Text("New Project")
                 .font(.title)
                 .fontWeight(.bold)
                 .foregroundColor(.text)
         }
-                .frame(maxWidth: .infinity, minHeight: 154, maxHeight: 154)
+        .frame(maxWidth: .infinity, minHeight: 154, maxHeight: 154)
         .background(Color(NSColor.controlBackgroundColor))
         .cornerRadius(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.accent)
+                .offset(y:8)
+            )
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
         .onHover { isHovered in
-            if isHovered { NSCursor.pointingHand.push() }
-            else { NSCursor.pop() }
+            if isHovered {
+                NSCursor.pointingHand.push()
+            } else {
+                NSCursor.pop()
+            }
         }
     }
 }
