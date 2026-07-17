@@ -5,6 +5,13 @@
 //  Created by Matthew Regan Hadiwidjaja on 17/07/26.
 //
 
+//
+//  AnalysisPanelView.swift
+//  Costume
+//
+//  Created by Matthew Regan Hadiwidjaja on 17/07/26.
+//
+
 import SwiftUI
 
 struct AnalysisPanelView: View {
@@ -56,7 +63,7 @@ struct AnalysisPanelView: View {
                         case .jobDescriptionAnalysis:
                             JobDescriptionAnalysisView(jobDescription: viewModel.jobDescription)
                         case .resumePreview:
-                            resumePreviewPlaceholder
+                            resumePreview
                         }
                     }
                     .padding(.horizontal, CONTENT_PADDING)
@@ -66,15 +73,16 @@ struct AnalysisPanelView: View {
         }
     }
 
-    private var resumePreviewPlaceholder: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "doc.richtext")
-                .font(.system(size: 40))
-                .foregroundStyle(.secondary)
-            Text("Resumé Preview coming soon")
-                .font(.headline)
-                .foregroundStyle(.secondary)
+    private var resumePreview: some View {
+        let pages = ATSCVTemplateView.distribute(profile: viewModel.document.profile)
+        return VStack(spacing: 20) {
+            ForEach(pages) { page in
+                ATSCVTemplateView(profile: viewModel.document.profile, pageContent: page)
+                    .background(Color.white)
+                    .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 3)
+                    .frame(width: 595, height: 842)
+            }
         }
-        .frame(maxWidth: .infinity, minHeight: 300)
+        .frame(maxWidth: .infinity)
     }
 }
