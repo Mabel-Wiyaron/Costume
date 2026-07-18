@@ -202,4 +202,3 @@ struct CustomHeaderShape: Shape {
     DashboardView()
         .modelContainer(for: Profile.self, inMemory: true)
 }
-
