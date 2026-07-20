@@ -11,6 +11,7 @@ struct AwardFormModal: View {
     let award: Award?
     let onSave: (String, String, Date) -> Void
     let onCancel: () -> Void
+    var onDelete: (() -> Void)? = nil
 
     @State private var title: String = ""
     @State private var issuer: String = ""
@@ -72,6 +73,15 @@ struct AwardFormModal: View {
             LabeledDateField(label: "Year", isRequired: true, date: $issueDate)
 
             HStack {
+                if let onDelete {
+                    Button("Delete", role: .destructive) {
+                        onDelete()
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .tint(.red)
+                }
+
                 Spacer()
                 Button("Cancel") { onCancel() }
                     .buttonStyle(.bordered)
@@ -91,9 +101,13 @@ struct AwardFormModal: View {
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
         // --- DETEKSI KAPAN USER PINDAH FOKUS ---
-        .onChange(of: focusedField) { oldFocus, newFocus in
+        .onChange(of: focusedField) {
+ oldFocus,
+ newFocus in
             if oldFocus == .title && newFocus != .title { titleTouched = true }
-            if oldFocus == .issuer && newFocus != .issuer { issuerTouched = true }
+            if oldFocus == .issuer && newFocus != .issuer {
+                issuerTouched = true
+            }
         }
         .animation(.default, value: titleTouched)
         .animation(.default, value: issuerTouched)

@@ -11,6 +11,7 @@ struct ProjectFormModal: View {
     let project: Project?
     let onSave: (String, String, Date, Date?, String, [String]) -> Void
     let onCancel: () -> Void
+    var onDelete: (() -> Void)? = nil
 
     @State private var name: String = ""
     @State private var role: String = ""
@@ -57,7 +58,9 @@ struct ProjectFormModal: View {
     // --- KONDISI TAMPILAN ERROR ---
     private var shouldShowNameError: Bool { nameTouched && !isNameValid }
     private var shouldShowRoleError: Bool { roleTouched && !isRoleValid }
-    private var shouldShowWebsiteError: Bool { websiteTouched && !isWebsiteValid }
+    private var shouldShowWebsiteError: Bool {
+        websiteTouched && !isWebsiteValid
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -81,8 +84,13 @@ struct ProjectFormModal: View {
                 .focused($focusedField, equals: .role)
                 .frame(maxWidth: .infinity)
                 
-                LabeledDateRangeField(label: "Years", isRequired: true, startDate: $startDate, endDate: $endDate)
-                    .frame(maxWidth: .infinity)
+                LabeledDateRangeField(
+                    label: "Years",
+                    isRequired: true,
+                    startDate: $startDate,
+                    endDate: $endDate
+                )
+                .frame(maxWidth: .infinity)
             }
 
             LabeledTextField(
@@ -96,6 +104,15 @@ struct ProjectFormModal: View {
             LabeledTextEditor(label: "Description", text: $descriptionText)
 
             HStack {
+                if let onDelete {
+                    Button("Delete", role: .destructive) {
+                        onDelete()
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .tint(.red)
+                }
+
                 Spacer()
                 Button("Cancel") { onCancel() }
                     .buttonStyle(.bordered)
@@ -119,10 +136,14 @@ struct ProjectFormModal: View {
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
         // --- DETEKSI PERPINDAHAN FOKUS ---
-        .onChange(of: focusedField) { oldFocus, newFocus in
+        .onChange(of: focusedField) {
+ oldFocus,
+ newFocus in
             if oldFocus == .name && newFocus != .name { nameTouched = true }
             if oldFocus == .role && newFocus != .role { roleTouched = true }
-            if oldFocus == .website && newFocus != .website { websiteTouched = true }
+            if oldFocus == .website && newFocus != .website {
+                websiteTouched = true
+            }
         }
         .animation(.default, value: nameTouched)
         .animation(.default, value: roleTouched)

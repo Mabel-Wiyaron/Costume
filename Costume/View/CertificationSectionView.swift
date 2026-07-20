@@ -54,7 +54,14 @@ struct CertificationSectionView: View {
             CertificationFormModal(
                 certification: viewModel.certificationBeingEdited,
                 onSave: viewModel.saveCertification,
-                onCancel: viewModel.cancelCertificationEdit
+                onCancel: viewModel.cancelCertificationEdit,
+                onDelete: viewModel.certificationBeingEdited
+                    .map { certification in
+                        {
+                            viewModel.deleteCertification(certification)
+                            viewModel.cancelCertificationEdit()
+                        }
+                    }
             )
         }
     }

@@ -51,7 +51,13 @@ struct ProjectSectionView: View {
             ProjectFormModal(
                 project: viewModel.projectBeingEdited,
                 onSave: viewModel.saveProject,
-                onCancel: viewModel.cancelProjectEdit
+                onCancel: viewModel.cancelProjectEdit,
+                onDelete: viewModel.projectBeingEdited.map { project in
+                    {
+                        viewModel.deleteProject(project)
+                        viewModel.cancelProjectEdit()
+                    }
+                }
             )
         }
     }

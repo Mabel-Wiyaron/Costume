@@ -51,7 +51,13 @@ struct AwardSectionView: View {
             AwardFormModal(
                 award: viewModel.awardBeingEdited,
                 onSave: viewModel.saveAward,
-                onCancel: viewModel.cancelAwardEdit
+                onCancel: viewModel.cancelAwardEdit,
+                onDelete: viewModel.awardBeingEdited.map { award in
+                    {
+                        viewModel.deleteAward(award)
+                        viewModel.cancelAwardEdit()
+                    }
+                }
             )
         }
     }

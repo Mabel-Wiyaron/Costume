@@ -53,7 +53,13 @@ struct EducationSectionView: View {
             EducationFormModal(
                 education: viewModel.educationBeingEdited,
                 onSave: viewModel.saveEducation,
-                onCancel: viewModel.cancelEducationEdit
+                onCancel: viewModel.cancelEducationEdit,
+                onDelete: viewModel.educationBeingEdited.map { education in
+                    {
+                        viewModel.deleteEducation(education)
+                        viewModel.cancelEducationEdit()
+                    }
+                }
             )
         }
     }

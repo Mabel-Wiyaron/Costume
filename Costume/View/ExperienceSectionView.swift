@@ -53,7 +53,13 @@ struct ExperienceSectionView: View {
             ExperienceFormModal(
                 experience: viewModel.experienceBeingEdited,
                 onSave: viewModel.saveExperience,
-                onCancel: viewModel.cancelExperienceEdit
+                onCancel: viewModel.cancelExperienceEdit,
+                onDelete: viewModel.experienceBeingEdited.map { experience in
+                    {
+                        viewModel.deleteExperience(experience)
+                        viewModel.cancelExperienceEdit()
+                    }
+                }
             )
         }
     }

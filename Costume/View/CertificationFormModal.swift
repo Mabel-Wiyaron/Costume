@@ -11,6 +11,7 @@ struct CertificationFormModal: View {
     let certification: Certification?
     let onSave: (String, String, Date, Date?, String, String) -> Void
     let onCancel: () -> Void
+    var onDelete: (() -> Void)? = nil
 
     @State private var name: String = ""
     @State private var issuer: String = ""
@@ -48,7 +49,9 @@ struct CertificationFormModal: View {
     }
 
     private var isCredentialURLValid: Bool {
-        let trimmedURL = credentialURL.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedURL = credentialURL.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
         if trimmedURL.isEmpty { return true } // Opsional, kosong berarti sah
         
         let urlRegex = #"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})(\/[\w \.-]*)*\/?$"#
@@ -63,8 +66,12 @@ struct CertificationFormModal: View {
     // --- KONDISI KAPAN ERROR DITAMPILKAN ---
     private var shouldShowNameError: Bool { nameTouched && !isNameValid }
     private var shouldShowIssuerError: Bool { issuerTouched && !isIssuerValid }
-    private var shouldShowCredentialIDError: Bool { credentialIDTouched && !isCredentialIDValid }
-    private var shouldShowCredentialURLError: Bool { credentialURLTouched && !isCredentialURLValid }
+    private var shouldShowCredentialIDError: Bool {
+        credentialIDTouched && !isCredentialIDValid
+    }
+    private var shouldShowCredentialURLError: Bool {
+        credentialURLTouched && !isCredentialURLValid
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -87,7 +94,11 @@ struct CertificationFormModal: View {
             .focused($focusedField, equals: .issuer)
 
             HStack(alignment: .top, spacing: COLUMN_SPACING) {
-                LabeledDateField(label: "Issue Date", isRequired: true, date: $issueDate)
+                LabeledDateField(
+                    label: "Issue Date",
+                    isRequired: true,
+                    date: $issueDate
+                )
                 
                 LabeledTextField(
                     label: "Credential ID",
@@ -102,7 +113,10 @@ struct CertificationFormModal: View {
 
             Toggle("Has expiration date", isOn: $hasExpirationDate)
             if hasExpirationDate {
-                LabeledDateField(label: "Expiration Date", date: $expirationDate)
+                LabeledDateField(
+                    label: "Expiration Date",
+                    date: $expirationDate
+                )
             }
 
             LabeledTextField(
@@ -114,6 +128,15 @@ struct CertificationFormModal: View {
             .focused($focusedField, equals: .credentialURL)
 
             HStack {
+                if let onDelete {
+                    Button("Delete", role: .destructive) {
+                        onDelete()
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .tint(.red)
+                }
+
                 Spacer()
                 Button("Cancel") { onCancel() }
                     .buttonStyle(.bordered)
@@ -140,11 +163,19 @@ struct CertificationFormModal: View {
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
         // --- DETEKSI PERPINDAHAN FOKUS ---
-        .onChange(of: focusedField) { oldFocus, newFocus in
+        .onChange(of: focusedField) {
+ oldFocus,
+ newFocus in
             if oldFocus == .name && newFocus != .name { nameTouched = true }
-            if oldFocus == .issuer && newFocus != .issuer { issuerTouched = true }
-            if oldFocus == .credentialID && newFocus != .credentialID { credentialIDTouched = true }
-            if oldFocus == .credentialURL && newFocus != .credentialURL { credentialURLTouched = true }
+            if oldFocus == .issuer && newFocus != .issuer {
+                issuerTouched = true
+            }
+            if oldFocus == .credentialID && newFocus != .credentialID {
+                credentialIDTouched = true
+            }
+            if oldFocus == .credentialURL && newFocus != .credentialURL {
+                credentialURLTouched = true
+            }
         }
         .animation(.default, value: nameTouched)
         .animation(.default, value: issuerTouched)
