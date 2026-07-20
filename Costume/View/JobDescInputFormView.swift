@@ -6,14 +6,27 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct JobDescInputFormView: View {
+    // Context for inserting and saving tailored SwiftData records
+    @Environment(\.modelContext) private var modelContext
+    // Querying existing profiles to fetch the candidate's master profile
+    @Query private var profiles: [Profile]
+    
+    @Environment(\.dismiss) private var dismiss
+
     // MARK: - View Model
     let jobDescExtVM: JobDescriptionExtractionViewModel
 
     @State private var jobDescription: String = ""
     @State private var isLoading: Bool = false
     @FocusState private var isFocused: Bool
+
+    // Navigation states used to route user to CVPreviewView with their tailored CV details
+    @State private var navigationProfile: Profile? = nil
+    @State private var navigationJobDesc: JobDescription? = nil
+    @State private var isNavigatingToEditCV: Bool = false
     
     // MARK: - Constants
     private let MAX_CHARACTER_LIMIT: Int = 4000
@@ -41,13 +54,57 @@ struct JobDescInputFormView: View {
         Task {
             do {
                 isLoading = true
+                // 1. Extract role requirements and keywords from job description
                 let result = try await jobDescExtVM.extract(
                     from: jobDescription
                 )
 
-                print(result)
+                // 2. Fetch the user's master profile (where jobDescription is nil)
+                let master: Profile
+                if let existing = profiles.first(where: { $0.jobDescription == nil }) {
+                    master = existing
+                } else if let first = profiles.first {
+                    master = first
+                } else {
+                    let fallback = Profile(name: "Your Name", email: "", location: "", phone: "")
+                    modelContext.insert(fallback)
+                    master = fallback
+                }
+
+                // 3. Deep-copy the master profile to keep it clean and intact
+                let newProfile = master.duplicate()
+                
+                // 4. Wrap keywords and create the new JobDescription record
+                let keywords = result.keywords.map { Keyword(name: $0, status: .missing) }
+                let jobDesc = JobDescription(
+                    content: jobDescription,
+                    role: result.role,
+                    company: result.company,
+                    extractionStatus: "completed",
+                    keywords: keywords
+                )
+
+                // 5. Build bidirectional relationship between profile and job description
+                newProfile.jobDescription = jobDesc
+                jobDesc.profile = newProfile
+
+                // 6. Tailor profile sections (experience, projects, skills, etc.) using AI Agents
+                let orchestrationVM = AgentOrchestrationViewModel()
+                let tailoredProfile = try await orchestrationVM.tailor(for: result, from: newProfile)
+
+                // 7. Save the newly tailored profile into the database context
+                modelContext.insert(tailoredProfile)
+                modelContext.insert(jobDesc)
+                try? modelContext.save()
+
+                // 8. Update UI states to trigger navigation to CVPreviewView on the main thread
+                await MainActor.run {
+                    navigationProfile = tailoredProfile
+                    navigationJobDesc = jobDesc
+                    isNavigatingToEditCV = true
+                }
             } catch {
-                print("error")
+                print("Error tailoring CV: \(error)")
             }
 
             isLoading = false
@@ -174,6 +231,11 @@ struct JobDescInputFormView: View {
                     
                     // Balances the top spacer, holding it dead center
                     Spacer()
+                }
+            }
+            .navigationDestination(isPresented: $isNavigatingToEditCV) {
+                if let profile = navigationProfile, let jobDesc = navigationJobDesc {
+                    CVPreviewView(profile: profile, documentName: "\(profile.name)_CV_\(jobDesc.company ?? "Tailored")")
                 }
             }
         }
