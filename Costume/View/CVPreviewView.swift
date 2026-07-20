@@ -18,8 +18,18 @@ struct CVPreviewView: View {
     // Profil spesifik yang ingin di-preview (opsional)
     var profile: Profile? = nil
     
-    // Nama dokumen default yang ditampilkan di bilah navigasi aplikasi
-    var documentName: String = "Mabel_CV_Apple"
+    @State private var zoomScale: CGFloat = 1.0
+    @GestureState private var gestureZoomScale: CGFloat = 1.0
+    
+    // Nama dokumen yang ditampilkan di bilah navigasi aplikasi
+    private var documentName: String {
+        if let jobDesc = currentProfile.jobDescription,
+           let role = jobDesc.role, !role.isEmpty,
+           let company = jobDesc.company, !company.isEmpty {
+            return "\(role) - \(company)"
+        }
+        return "Mabel_CV_Apple"
+    }
     
     // Menghitung profil aktif saat ini dari database.
     // Jika database kosong, mengembalikan profil default sementara untuk visualisasi awal
@@ -44,10 +54,13 @@ struct CVPreviewView: View {
     }
     
     private func renderPage(_ page: PageContent) -> some View {
-        ATSCVTemplateView(profile: currentProfile, pageContent: page)
+        let currentScale = zoomScale * gestureZoomScale
+        return ATSCVTemplateView(profile: currentProfile, pageContent: page)
             .background(Color.white)
             .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 3)
             .frame(width: 595, height: 842)
+            .scaleEffect(currentScale)
+            .frame(width: 595 * currentScale, height: 842 * currentScale)
     }
     
     var body: some View {
@@ -63,6 +76,16 @@ struct CVPreviewView: View {
                 }
                 .padding(40)
                 .frame(maxWidth: .infinity)
+                .gesture(
+                    MagnificationGesture()
+                        .updating($gestureZoomScale) { value, state, _ in
+                            state = value
+                        }
+                        .onEnded { value in
+                            let nextScale = zoomScale * value
+                            zoomScale = max(0.5, min(2.0, nextScale))
+                        }
+                )
             }
             // 2. Latar belakang abu-abu terang standar dokumen viewer macOS
             .background(Color.background)
@@ -70,6 +93,7 @@ struct CVPreviewView: View {
             .navigationBarBackButtonHidden(true)
             // 3. Bilah Alat (Toolbar) standard macOS HIG
             .toolbar {
+                //back button
                 ToolbarItem(placement: .navigation) {
                     Button(action: {
                         dismiss()
@@ -78,6 +102,36 @@ struct CVPreviewView: View {
                     }
                 }
                 
+              //zoom
+               ToolbarItemGroup(placement: .automatic) {
+                    HStack(spacing: 8) {
+                        
+                        Text(" ")
+                        Button(action: {
+                            zoomScale = max(0.5, zoomScale - 0.1)
+                        }) {
+                            Image(systemName: "minus.magnifyingglass")
+                        }
+                        .disabled(zoomScale <= 0.5)
+                        .buttonStyle(.plain)
+                        
+                        Text("\(Int(zoomScale * 100))%")
+                            .font(.system(.body, design: .monospaced))
+                            .frame(width: 45)
+                        
+                        Button(action: {
+                            zoomScale = min(2.0, zoomScale + 0.1)
+                        }) {
+                            Image(systemName: "plus.magnifyingglass")
+                        }
+                        .disabled(zoomScale >= 2.0)
+                        .buttonStyle(.plain)
+                        
+                        Button("Actual Size") {
+                            zoomScale = 1.0
+                        }
+                        .disabled(zoomScale == 1.0)
+                      
                 // Sisi Kanan: Tombol aksi utama (Edit & Ekspor)
                 ToolbarItemGroup(placement: .primaryAction) {
                     NavigationLink(destination: EditCVView(document: CVDocument(profile: currentProfile), jobDescription: currentProfile.jobDescription, modelContext: modelContext, onBack: {
