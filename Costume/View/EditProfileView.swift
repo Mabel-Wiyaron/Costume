@@ -22,51 +22,54 @@ struct EditProfileView: View {
     private let CARD_MAX_WIDTH: CGFloat = 800
 
     var body: some View {
-        NavigationSplitView {
-            // Kita butuh viewModel siap dulu sebelum menampilkan sidebar
-            if let viewModel = Binding($viewModel) {
-                ProfileSidebarView(selectedSection: viewModel.selectedSection)
-            } else {
-                ProgressView() // Tampilan loading sementara data disiapkan
-            }
-        } detail: {
-            ZStack {
-                Color("BackgroundColor")
-                    .ignoresSafeArea()
+            NavigationSplitView {
+                if let vm = viewModel {
+                    @Bindable var bindableVM = vm
+                    ProfileSidebarView(selectedSection: $bindableVM.selectedSection)
+                } else {
+                    ProgressView()
+                }
+            } detail: {
+                ZStack {
+                    Color("BackgroundColor")
+                        .ignoresSafeArea()
 
-                ScrollView {
-                    if let viewModel = viewModel {
-                        Group {
-                            switch viewModel.selectedSection {
-                            case .personalInfo, .none:
-                                PersonalInfoFormView(viewModel: viewModel)
-                            case .education:
-                                EducationSectionView(viewModel: viewModel)
-                            case .skills:
-                                SkillsSectionView(viewModel: viewModel)
-                            case .experience:
-                                ExperienceSectionView(viewModel: viewModel)
-                            case .project:
-                                ProjectSectionView(viewModel: viewModel)
-                            case .certification:
-                                CertificationSectionView(viewModel: viewModel)
-                            case .awards:
-                                AwardSectionView(viewModel: viewModel)
+                    if let vm = viewModel {
+                        @Bindable var bindableVM = vm
+                        
+                        ScrollView {
+                            VStack(alignment: .leading) {
+                                switch bindableVM.selectedSection {
+                                case .personalInfo, .none:
+                                    PersonalInfoFormView(viewModel: vm)
+                                case .education:
+                                    EducationSectionView(viewModel: vm)
+                                case .skills:
+                                    SkillsSectionView(skills: $bindableVM.profile.skills, onSave: vm.save)
+                                case .experience:
+                                    ExperienceSectionView(viewModel: vm)
+                                case .project:
+                                    ProjectSectionView(viewModel: vm)
+                                case .certification:
+                                    CertificationSectionView(viewModel: vm)
+                                case .awards:
+                                    AwardSectionView(viewModel: vm)
+                                }
                             }
+                            .frame(maxWidth: CARD_MAX_WIDTH, alignment: .top)
+                            .padding(OUTER_PADDING)
+                            .frame(maxWidth: .infinity, alignment: .top)
                         }
-                        .frame(maxWidth: CARD_MAX_WIDTH, alignment: .top)
-                        .padding(OUTER_PADDING)
-                        .frame(maxWidth: .infinity, alignment: .top)
+                    } else {
+                        ProgressView()
                     }
                 }
             }
+            .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 300)
+            .onAppear {
+                setupViewModel()
+            }
         }
-        .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 300)
-        // Pindahkan logika database ke .onAppear di bawah ini!
-        .onAppear {
-            setupViewModel()
-        }
-    }
 
     private func setupViewModel() {
         guard viewModel == nil else { return }
