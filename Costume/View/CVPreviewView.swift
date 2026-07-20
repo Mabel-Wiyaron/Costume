@@ -17,8 +17,15 @@ struct CVPreviewView: View {
     // Profil spesifik yang ingin di-preview (opsional)
     var profile: Profile? = nil
     
-    // Nama dokumen default yang ditampilkan di bilah navigasi aplikasi
-    var documentName: String = "Mabel_CV_Apple"
+    // Nama dokumen yang ditampilkan di bilah navigasi aplikasi
+    private var documentName: String {
+        if let jobDesc = currentProfile.jobDescription,
+           let role = jobDesc.role, !role.isEmpty,
+           let company = jobDesc.company, !company.isEmpty {
+            return "\(role) - \(company)"
+        }
+        return "Mabel_CV_Apple"
+    }
     
     // Menghitung profil aktif saat ini dari database.
     // Jika database kosong, mengembalikan profil default sementara untuk visualisasi awal
