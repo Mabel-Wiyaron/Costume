@@ -21,14 +21,17 @@ struct CVPreviewView: View {
     @State private var zoomScale: CGFloat = 1.0
     @GestureState private var gestureZoomScale: CGFloat = 1.0
     
-    // Nama dokumen yang ditampilkan di bilah navigasi aplikasi
-    private var documentName: String {
+    // Nama dokumen default yang ditampilkan di bilah navigasi aplikasi
+    var documentName: String = "Mabel_CV_Apple"
+    
+    // Nama dokumen yang ditampilkan di bilah navigasi aplikasi (mengutamakan role - company format)
+    private var formattedDocumentName: String {
         if let jobDesc = currentProfile.jobDescription,
            let role = jobDesc.role, !role.isEmpty,
            let company = jobDesc.company, !company.isEmpty {
             return "\(role) - \(company)"
         }
-        return "Mabel_CV_Apple"
+        return documentName
     }
     
     // Menghitung profil aktif saat ini dari database.
@@ -89,7 +92,7 @@ struct CVPreviewView: View {
             }
             // 2. Latar belakang abu-abu terang standar dokumen viewer macOS
             .background(Color.background)
-            .navigationTitle(documentName)
+            .navigationTitle(formattedDocumentName)
             .navigationBarBackButtonHidden(true)
             // 3. Bilah Alat (Toolbar) standard macOS HIG
             .toolbar {
@@ -102,10 +105,9 @@ struct CVPreviewView: View {
                     }
                 }
                 
-              //zoom
-               ToolbarItemGroup(placement: .automatic) {
+                //zoom
+                ToolbarItemGroup(placement: .automatic) {
                     HStack(spacing: 8) {
-                        
                         Text(" ")
                         Button(action: {
                             zoomScale = max(0.5, zoomScale - 0.1)
@@ -131,7 +133,9 @@ struct CVPreviewView: View {
                             zoomScale = 1.0
                         }
                         .disabled(zoomScale == 1.0)
-                      
+                    }
+                }
+                
                 // Sisi Kanan: Tombol aksi utama (Edit & Ekspor)
                 ToolbarItemGroup(placement: .primaryAction) {
                     NavigationLink(destination: EditCVView(document: CVDocument(profile: currentProfile), jobDescription: currentProfile.jobDescription, modelContext: modelContext, onBack: {
