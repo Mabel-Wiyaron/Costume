@@ -23,16 +23,25 @@ struct ExperienceSectionView: View {
                 .tint(Color("PrimaryColor"))
             }
 
-            VStack(spacing: ROW_SPACING) {
-                ForEach(viewModel.profile.experiences) { experience in
-                    ListItemCard(
-                        title: experience.role,
-                        subtitle: "\(experience.company) • \(experience.employmentType.title)",
-                        action: { viewModel.startEditingExperience(experience) }
-                    )
-                    .contextMenu {
-                        Button("Delete", role: .destructive) {
-                            viewModel.deleteExperience(experience)
+            if viewModel.profile.experiences.isEmpty {
+                SectionEmptyStateView(
+                    imageName: "ExperienceEmptyState",
+                    message: "No experience yet."
+                )
+            } else {
+                VStack(spacing: ROW_SPACING) {
+                    ForEach(viewModel.profile.experiences) { experience in
+                        ListItemCard(
+                            title: experience.role,
+                            subtitle: "\(experience.company) • \(experience.employmentType.title)",
+                            action: {
+                                viewModel.startEditingExperience(experience)
+                            }
+                        )
+                        .contextMenu {
+                            Button("Delete", role: .destructive) {
+                                viewModel.deleteExperience(experience)
+                            }
                         }
                     }
                 }

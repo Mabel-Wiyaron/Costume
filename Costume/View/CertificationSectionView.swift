@@ -23,16 +23,26 @@ struct CertificationSectionView: View {
                 .tint(Color("PrimaryColor"))
             }
 
-            VStack(spacing: ROW_SPACING) {
-                ForEach(viewModel.profile.certifications) { certification in
-                    ListItemCard(
-                        title: certification.name,
-                        subtitle: certification.issuer,
-                        action: { viewModel.startEditingCertification(certification) }
-                    )
-                    .contextMenu {
-                        Button("Delete", role: .destructive) {
-                            viewModel.deleteCertification(certification)
+            if viewModel.profile.certifications.isEmpty {
+                SectionEmptyStateView(
+                    imageName: "CertificationEmptyState",
+                    message: "No certifications yet."
+                )
+            } else {
+                VStack(spacing: ROW_SPACING) {
+                    ForEach(viewModel.profile.certifications) { certification in
+                        ListItemCard(
+                            title: certification.name,
+                            subtitle: certification.issuer,
+                            action: {
+                                viewModel
+                                    .startEditingCertification(certification)
+                            }
+                        )
+                        .contextMenu {
+                            Button("Delete", role: .destructive) {
+                                viewModel.deleteCertification(certification)
+                            }
                         }
                     }
                 }

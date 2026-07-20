@@ -23,16 +23,23 @@ struct ProjectSectionView: View {
                 .tint(Color("PrimaryColor"))
             }
 
-            VStack(spacing: ROW_SPACING) {
-                ForEach(viewModel.profile.projects) { project in
-                    ListItemCard(
-                        title: project.name,
-                        subtitle: project.role,
-                        action: { viewModel.startEditingProject(project) }
-                    )
-                    .contextMenu {
-                        Button("Delete", role: .destructive) {
-                            viewModel.deleteProject(project)
+            if viewModel.profile.projects.isEmpty {
+                SectionEmptyStateView(
+                    imageName: "ProjectEmptyState",
+                    message: "No projects yet."
+                )
+            } else {
+                VStack(spacing: ROW_SPACING) {
+                    ForEach(viewModel.profile.projects) { project in
+                        ListItemCard(
+                            title: project.name,
+                            subtitle: project.role,
+                            action: { viewModel.startEditingProject(project) }
+                        )
+                        .contextMenu {
+                            Button("Delete", role: .destructive) {
+                                viewModel.deleteProject(project)
+                            }
                         }
                     }
                 }

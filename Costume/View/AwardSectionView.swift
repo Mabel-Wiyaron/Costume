@@ -23,16 +23,23 @@ struct AwardSectionView: View {
                 .tint(Color("PrimaryColor"))
             }
 
-            VStack(spacing: ROW_SPACING) {
-                ForEach(viewModel.profile.awards) { award in
-                    ListItemCard(
-                        title: award.title,
-                        subtitle: award.issuer,
-                        action: { viewModel.startEditingAward(award) }
-                    )
-                    .contextMenu {
-                        Button("Delete", role: .destructive) {
-                            viewModel.deleteAward(award)
+            if viewModel.profile.awards.isEmpty {
+                SectionEmptyStateView(
+                    imageName: "AwardsEmptyState",
+                    message: "No awards yet."
+                )
+            } else {
+                VStack(spacing: ROW_SPACING) {
+                    ForEach(viewModel.profile.awards) { award in
+                        ListItemCard(
+                            title: award.title,
+                            subtitle: award.issuer,
+                            action: { viewModel.startEditingAward(award) }
+                        )
+                        .contextMenu {
+                            Button("Delete", role: .destructive) {
+                                viewModel.deleteAward(award)
+                            }
                         }
                     }
                 }

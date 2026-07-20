@@ -23,16 +23,25 @@ struct EducationSectionView: View {
                 .tint(Color("PrimaryColor"))
             }
 
-            VStack(spacing: ROW_SPACING) {
-                ForEach(viewModel.profile.educations) { education in
-                    ListItemCard(
-                        title: education.school,
-                        subtitle: "\(education.degree), \(education.fieldOfStudy)",
-                        action: { viewModel.startEditingEducation(education) }
-                    )
-                    .contextMenu {
-                        Button("Delete", role: .destructive) {
-                            viewModel.deleteEducation(education)
+            if viewModel.profile.educations.isEmpty {
+                SectionEmptyStateView(
+                    imageName: "EducationEmptyState",
+                    message: "No education yet."
+                )
+            } else {
+                VStack(spacing: ROW_SPACING) {
+                    ForEach(viewModel.profile.educations) { education in
+                        ListItemCard(
+                            title: education.school,
+                            subtitle: "\(education.degree), \(education.fieldOfStudy)",
+                            action: {
+                                viewModel.startEditingEducation(education)
+                            }
+                        )
+                        .contextMenu {
+                            Button("Delete", role: .destructive) {
+                                viewModel.deleteEducation(education)
+                            }
                         }
                     }
                 }
