@@ -17,15 +17,6 @@ struct ProfileSidebarView: View {
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Button(action: { onBack?() }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(Color.white)
-                    }
-                    .buttonStyle(.plain)
-                    Spacer()
-                }
-
                 Text("Edit Profile")
                     .font(.title3)
                     .fontWeight(.bold)
