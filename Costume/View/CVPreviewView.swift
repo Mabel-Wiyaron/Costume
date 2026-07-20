@@ -73,9 +73,8 @@ struct CVPreviewView: View {
                 
                 // Sisi Kanan: Tombol aksi utama (Edit & Ekspor)
                 ToolbarItemGroup(placement: .primaryAction) {
-                    // Tautan Navigasi untuk berpindah layar secara langsung ke menu Editor CV (EditCVView)
                     NavigationLink(destination: EditCVView(document: CVDocument(profile: currentProfile), jobDescription: currentProfile.jobDescription, modelContext: modelContext, onBack: {
-                        dismiss()
+                        NotificationCenter.default.post(name: .popToDashboard, object: nil)
                     })) {
                         Label("Edit", systemImage: "pencil")
                     }

@@ -25,19 +25,6 @@ struct EditorPanelView: View {
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
-                HStack {
-                    Button(action: { onBack?() }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(Color.white)
-                            .frame(width: BACK_BUTTON_SIZE, height: BACK_BUTTON_SIZE)
-                            .background(Color.white.opacity(0.15))
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    Spacer()
-                }
-                .padding(.horizontal, HEADER_HORIZONTAL_PADDING)
-                .padding(.top, HEADER_TOP_PADDING)
 
                 Text("Editor Panel")
                     .font(.largeTitle)

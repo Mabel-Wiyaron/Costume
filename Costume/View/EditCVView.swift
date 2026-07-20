@@ -25,6 +25,17 @@ struct EditCVView: View {
                 .frame(minWidth: 460, idealWidth: 640)
         }
         .frame(minHeight: 640)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            // kalau back lansgung ke dashboard
+            ToolbarItem(placement: .navigation) {
+                Button(action: {
+                    onBack?()
+                }) {
+                    Image(systemName: "chevron.left")
+                }
+            }
+        }
     }
 }
 

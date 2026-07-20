@@ -18,6 +18,8 @@ struct DashboardView: View {
     @State private var isSearchExpanded = false
     @FocusState private var isSearchFocused: Bool
     
+    @State private var navigationId = UUID()
+    
     let columns = Array(repeating: GridItem(.flexible(), spacing: 20), count: 4)
     
     private func formatDate(_ date: Date) -> String {
@@ -153,6 +155,10 @@ struct DashboardView: View {
                         }
                     }
                 }
+            }
+            .id(navigationId)
+            .onReceive(NotificationCenter.default.publisher(for: .popToDashboard)) { _ in
+                navigationId = UUID()
             }
         }
     }
