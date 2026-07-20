@@ -85,8 +85,7 @@ struct EditorPanelView: View {
                             ProjectEntryFields(project: project)
                         }
 
-                        // REMOVED 'onSave' ARGUMENT HERE
-                        SkillsSectionView(skills: $viewModel.document.skills)
+                        skillsCard
 
                         InlineEntryListCard(
                             title: "Certifications",
@@ -145,6 +144,20 @@ struct EditorPanelView: View {
         VStack(alignment: .leading, spacing: 16) {
             SectionHeaderView(title: "Summary")
             LabeledTextEditor(label: "About Me", text: $viewModel.document.summary.stringValue)
+        }
+        .padding(CARD_PADDING)
+        .cardBackground()
+    }
+
+    private var skillsCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            SectionHeaderView(title: "Skills")
+
+            SkillTagField(
+                label: "Add skills",
+                helperText: "Press enter for each new skill",
+                skills: $viewModel.document.skills
+            )
         }
         .padding(CARD_PADDING)
         .cardBackground()

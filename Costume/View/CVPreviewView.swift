@@ -11,6 +11,7 @@ import SwiftData
 struct CVPreviewView: View {
     // Digunakan untuk menyimpan dan mengelola konteks database SwiftData
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     // Kueri reaktif untuk mengambil data Profile dari SwiftData secara otomatis saat ada perubahan
     @Query private var profiles: [Profile]
     
@@ -72,8 +73,10 @@ struct CVPreviewView: View {
                 
                 // Sisi Kanan: Tombol aksi utama (Edit & Ekspor)
                 ToolbarItemGroup(placement: .primaryAction) {
-                    // Tautan Navigasi untuk berpindah layar secara langsung ke menu Editor CV (EditProfileView)
-                    NavigationLink(destination: EditProfileView(profile: currentProfile)) {
+                    // Tautan Navigasi untuk berpindah layar secara langsung ke menu Editor CV (EditCVView)
+                    NavigationLink(destination: EditCVView(document: CVDocument(profile: currentProfile), jobDescription: currentProfile.jobDescription, modelContext: modelContext, onBack: {
+                        dismiss()
+                    })) {
                         Label("Edit", systemImage: "pencil")
                     }
                     .help("Edit Resumé")

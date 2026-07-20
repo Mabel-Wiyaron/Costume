@@ -82,4 +82,71 @@ final class Profile {
         self.skills = skills
         self.jobDescription = jobDescription
     }
+
+    func duplicate() -> Profile {
+        let copy = Profile(
+            name: self.name,
+            email: self.email,
+            location: self.location,
+            phone: self.phone,
+            linkedin: self.linkedin,
+            website: self.website,
+            summary: self.summary
+        )
+        
+        copy.links = self.links.map { ProfileLink(platform: $0.platform, url: $0.url) }
+        copy.experiences = self.experiences.map { exp in
+            Experience(
+                role: exp.role,
+                employmentType: exp.employmentType,
+                company: exp.company,
+                location: exp.location,
+                startDate: exp.startDate,
+                endDate: exp.endDate,
+                descriptionText: exp.descriptionText
+            )
+        }
+        copy.educations = self.educations.map { edu in
+            Education(
+                school: edu.school,
+                degree: edu.degree,
+                fieldOfStudy: edu.fieldOfStudy,
+                startDate: edu.startDate,
+                endDate: edu.endDate,
+                grade: edu.grade
+            )
+        }
+        copy.certifications = self.certifications.map { cert in
+            Certification(
+                name: cert.name,
+                issuer: cert.issuer,
+                issueDate: cert.issueDate,
+                expirationDate: cert.expirationDate,
+                credentialID: cert.credentialID,
+                credentialURL: cert.credentialURL
+            )
+        }
+        copy.projects = self.projects.map { proj in
+            Project(
+                role: proj.role,
+                name: proj.name,
+                startDate: proj.startDate,
+                endDate: proj.endDate,
+                website: proj.website,
+                descriptionText: proj.descriptionText
+            )
+        }
+        copy.awards = self.awards.map { aw in
+            Award(title: aw.title, issuer: aw.issuer, issueDate: aw.issueDate)
+        }
+        copy.languages = self.languages.map { lang in
+            Language(name: lang.name, proficiency: lang.proficiency)
+        }
+        copy.skills = self.skills.map { sk in
+            Skill(name: sk.name)
+        }
+        
+        return copy
+    }
 }
+

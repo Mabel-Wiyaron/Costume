@@ -6,14 +6,24 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct JobDescInputFormView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var profiles: [Profile]
+    
+    @Environment(\.dismiss) private var dismiss
+
     // MARK: - View Model
     let jobDescExtVM: JobDescriptionExtractionViewModel
 
     @State private var jobDescription: String = ""
     @State private var isLoading: Bool = false
     @FocusState private var isFocused: Bool
+
+    @State private var navigationProfile: Profile? = nil
+    @State private var navigationJobDesc: JobDescription? = nil
+    @State private var isNavigatingToEditCV: Bool = false
     
     // MARK: - Constants
     private let MAX_CHARACTER_LIMIT: Int = 4000
@@ -45,9 +55,44 @@ struct JobDescInputFormView: View {
                     from: jobDescription
                 )
 
-                print(result)
+                let master: Profile
+                if let existing = profiles.first(where: { $0.jobDescription == nil }) {
+                    master = existing
+                } else if let first = profiles.first {
+                    master = first
+                } else {
+                    let fallback = Profile(name: "Your Name", email: "", location: "", phone: "")
+                    modelContext.insert(fallback)
+                    master = fallback
+                }
+
+                let newProfile = master.duplicate()
+                let keywords = result.keywords.map { Keyword(name: $0, status: .missing) }
+                let jobDesc = JobDescription(
+                    content: jobDescription,
+                    role: result.role,
+                    company: result.company,
+                    extractionStatus: "completed",
+                    keywords: keywords
+                )
+
+                newProfile.jobDescription = jobDesc
+                jobDesc.profile = newProfile
+
+                let orchestrationVM = AgentOrchestrationViewModel()
+                let tailoredProfile = try await orchestrationVM.tailor(for: result, from: newProfile)
+
+                modelContext.insert(tailoredProfile)
+                modelContext.insert(jobDesc)
+                try? modelContext.save()
+
+                await MainActor.run {
+                    navigationProfile = tailoredProfile
+                    navigationJobDesc = jobDesc
+                    isNavigatingToEditCV = true
+                }
             } catch {
-                print("error")
+                print("Error tailoring CV: \(error)")
             }
 
             isLoading = false
@@ -174,6 +219,11 @@ struct JobDescInputFormView: View {
                     
                     // Balances the top spacer, holding it dead center
                     Spacer()
+                }
+            }
+            .navigationDestination(isPresented: $isNavigatingToEditCV) {
+                if let profile = navigationProfile, let jobDesc = navigationJobDesc {
+                    CVPreviewView(profile: profile, documentName: "\(profile.name)_CV_\(jobDesc.company ?? "Tailored")")
                 }
             }
         }
