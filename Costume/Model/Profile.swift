@@ -83,6 +83,8 @@ final class Profile {
         self.jobDescription = jobDescription
     }
 
+    /// Performs a deep copy of the profile and all its related SwiftData relationship models,
+    /// so the master profile remains unaffected during job description tailoring.
     func duplicate() -> Profile {
         let copy = Profile(
             name: self.name,
