@@ -37,6 +37,7 @@ struct AnalysisPanelView: View {
                     
                     if viewModel.selectedRightTab == .resumePreview {
                         HStack(spacing: 8) {
+                            Text("")
                             Button(action: {
                                 zoomScale = max(0.4, zoomScale - 0.1)
                             }) {
