@@ -11,6 +11,7 @@ import SwiftData
 struct CVPreviewView: View {
     // Digunakan untuk menyimpan dan mengelola konteks database SwiftData
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     // Kueri reaktif untuk mengambil data Profile dari SwiftData secara otomatis saat ada perubahan
     @Query private var profiles: [Profile]
     
@@ -66,14 +67,22 @@ struct CVPreviewView: View {
             // 2. Latar belakang abu-abu terang standar dokumen viewer macOS
             .background(Color.background)
             .navigationTitle(documentName)
-            
+            .navigationBarBackButtonHidden(true)
             // 3. Bilah Alat (Toolbar) standard macOS HIG
             .toolbar {
+                ToolbarItem(placement: .navigation) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                    }
+                }
                 
                 // Sisi Kanan: Tombol aksi utama (Edit & Ekspor)
                 ToolbarItemGroup(placement: .primaryAction) {
-                    // Tautan Navigasi untuk berpindah layar secara langsung ke menu Editor CV (EditProfileView)
-                    NavigationLink(destination: EditProfileView(profile: currentProfile)) {
+                    NavigationLink(destination: EditCVView(document: CVDocument(profile: currentProfile), jobDescription: currentProfile.jobDescription, modelContext: modelContext, onBack: {
+                        NotificationCenter.default.post(name: .popToDashboard, object: nil)
+                    })) {
                         Label("Edit", systemImage: "pencil")
                     }
                     .help("Edit Resumé")

@@ -25,19 +25,6 @@ struct EditorPanelView: View {
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
-                HStack {
-                    Button(action: { onBack?() }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(Color.white)
-                            .frame(width: BACK_BUTTON_SIZE, height: BACK_BUTTON_SIZE)
-                            .background(Color.white.opacity(0.15))
-                            .clipShape(Circle())
-                    }
-                    .buttonStyle(.plain)
-                    Spacer()
-                }
-                .padding(.horizontal, HEADER_HORIZONTAL_PADDING)
-                .padding(.top, HEADER_TOP_PADDING)
 
                 Text("Editor Panel")
                     .font(.largeTitle)
@@ -85,8 +72,7 @@ struct EditorPanelView: View {
                             ProjectEntryFields(project: project)
                         }
 
-                        // REMOVED 'onSave' ARGUMENT HERE
-                        SkillsSectionView(skills: $viewModel.document.skills)
+                        skillsCard
 
                         InlineEntryListCard(
                             title: "Certifications",
@@ -145,6 +131,20 @@ struct EditorPanelView: View {
         VStack(alignment: .leading, spacing: 16) {
             SectionHeaderView(title: "Summary")
             LabeledTextEditor(label: "About Me", text: $viewModel.document.summary.stringValue)
+        }
+        .padding(CARD_PADDING)
+        .cardBackground()
+    }
+
+    private var skillsCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            SectionHeaderView(title: "Skills")
+
+            SkillTagField(
+                label: "Add skills",
+                helperText: "Press enter for each new skill",
+                skills: $viewModel.document.skills
+            )
         }
         .padding(CARD_PADDING)
         .cardBackground()
