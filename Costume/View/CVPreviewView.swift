@@ -67,9 +67,16 @@ struct CVPreviewView: View {
             // 2. Latar belakang abu-abu terang standar dokumen viewer macOS
             .background(Color.background)
             .navigationTitle(documentName)
-            
+            .navigationBarBackButtonHidden(true)
             // 3. Bilah Alat (Toolbar) standard macOS HIG
             .toolbar {
+                ToolbarItem(placement: .navigation) {
+                    Button(action: {
+                        dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                    }
+                }
                 
                 // Sisi Kanan: Tombol aksi utama (Edit & Ekspor)
                 ToolbarItemGroup(placement: .primaryAction) {
