@@ -35,6 +35,7 @@ final class EditCVViewModel {
         self.document = document
         self.jobDescription = jobDescription
         self.modelContext = modelContext
+        startLiveMatching()
     }
 
     func save() {
@@ -92,5 +93,64 @@ final class EditCVViewModel {
     func updateKeywordStatus() {
         guard let keywords = jobDescription?.keywords, !keywords.isEmpty else { return }
         KeywordMatcher.updateStatus(for: keywords, using: document.profile)
+    }
+
+    func startLiveMatching() {
+        observeProfile(document.profile)
+    }
+
+    private func observeProfile(_ profile: Profile) {
+        withObservationTracking {
+            _ = profile.name
+            _ = profile.email
+            _ = profile.phone
+            _ = profile.location
+            _ = profile.linkedin
+            _ = profile.website
+            _ = profile.summary
+            for link in profile.links {
+                _ = link.platform
+                _ = link.url
+            }
+            for exp in profile.experiences {
+                _ = exp.role
+                _ = exp.company
+                _ = exp.location
+                _ = exp.employmentType
+                _ = exp.descriptionText
+            }
+            for edu in profile.educations {
+                _ = edu.school
+                _ = edu.degree
+                _ = edu.fieldOfStudy
+            }
+            for cert in profile.certifications {
+                _ = cert.name
+                _ = cert.issuer
+                _ = cert.credentialID
+            }
+            for project in profile.projects {
+                _ = project.role
+                _ = project.name
+                _ = project.descriptionText
+            }
+            for award in profile.awards {
+                _ = award.title
+                _ = award.issuer
+            }
+            for skill in profile.skills {
+                _ = skill.name
+            }
+            for lang in profile.languages {
+                _ = lang.name
+                _ = lang.proficiency
+            }
+        } onChange: { [weak self] in
+            guard let self else { return }
+            Task { @MainActor in
+                self.updateKeywordStatus()
+                self.observeProfile(profile)
+            }
+        }
     }
 }
