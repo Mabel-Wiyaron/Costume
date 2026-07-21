@@ -11,6 +11,7 @@ struct ProjectFormModal: View {
     let project: Project?
     let onSave: (String, String, Date, Date?, String, [String]) -> Void
     let onCancel: () -> Void
+    var onDelete: (() -> Void)? = nil
 
     @State private var name: String = ""
     @State private var role: String = ""
@@ -27,6 +28,7 @@ struct ProjectFormModal: View {
     @State private var nameTouched = false
     @State private var roleTouched = false
     @State private var websiteTouched = false
+    @State private var isDeleteConfirmationPresented = false
 
     private let MODAL_PADDING: CGFloat = 32
     private let MODAL_WIDTH: CGFloat = 700
@@ -57,7 +59,9 @@ struct ProjectFormModal: View {
     // --- KONDISI TAMPILAN ERROR ---
     private var shouldShowNameError: Bool { nameTouched && !isNameValid }
     private var shouldShowRoleError: Bool { roleTouched && !isRoleValid }
-    private var shouldShowWebsiteError: Bool { websiteTouched && !isWebsiteValid }
+    private var shouldShowWebsiteError: Bool {
+        websiteTouched && !isWebsiteValid
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -81,8 +85,13 @@ struct ProjectFormModal: View {
                 .focused($focusedField, equals: .role)
                 .frame(maxWidth: .infinity)
                 
-                LabeledDateRangeField(label: "Years", isRequired: true, startDate: $startDate, endDate: $endDate)
-                    .frame(maxWidth: .infinity)
+                LabeledDateRangeField(
+                    label: "Years",
+                    isRequired: true,
+                    startDate: $startDate,
+                    endDate: $endDate
+                )
+                .frame(maxWidth: .infinity)
             }
 
             LabeledTextField(
@@ -96,6 +105,15 @@ struct ProjectFormModal: View {
             LabeledTextEditor(label: "Description", text: $descriptionText)
 
             HStack {
+                if let onDelete {
+                    Button("Delete", role: .destructive) {
+                        isDeleteConfirmationPresented = true
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .tint(.red)
+                }
+
                 Spacer()
                 Button("Cancel") { onCancel() }
                     .buttonStyle(.bordered)
@@ -116,13 +134,25 @@ struct ProjectFormModal: View {
             }
         }
         .padding(MODAL_PADDING)
+        .alert("Delete this Project?", isPresented: $isDeleteConfirmationPresented) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                onDelete?()
+            }
+        } message: {
+            Text("This action can't be undone.")
+        }
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
         // --- DETEKSI PERPINDAHAN FOKUS ---
-        .onChange(of: focusedField) { oldFocus, newFocus in
+        .onChange(of: focusedField) {
+ oldFocus,
+ newFocus in
             if oldFocus == .name && newFocus != .name { nameTouched = true }
             if oldFocus == .role && newFocus != .role { roleTouched = true }
-            if oldFocus == .website && newFocus != .website { websiteTouched = true }
+            if oldFocus == .website && newFocus != .website {
+                websiteTouched = true
+            }
         }
         .animation(.default, value: nameTouched)
         .animation(.default, value: roleTouched)

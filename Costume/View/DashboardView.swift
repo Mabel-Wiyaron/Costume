@@ -13,6 +13,14 @@ struct DashboardView: View {
     
     @Query private var profiles: [Profile]
     
+    // State to trigger navigation when validation passes
+    @State private var navigateToInputForm = false
+    @State private var navigateToEditProfile = false
+    
+    // State to show an alert when validation fails
+    @State private var showAlert = false
+    @State private var alertMessage = ""
+    
     
     @State private var searchText = ""
     @State private var isSearchExpanded = false
@@ -127,7 +135,9 @@ struct DashboardView: View {
                             } else {
                                 LazyVGrid(columns: columns, spacing: 24) {
                                     if searchText.isEmpty {
-                                        NavigationLink(destination: JobDescInputFormView()) {
+                                        Button(action: {
+                                            handleNewProjectClick()
+                                        }) {
                                             NewProjectCard()
                                         }
                                         .buttonStyle(.plain)
@@ -153,6 +163,23 @@ struct DashboardView: View {
                                 .animation(.spring(response: 0.4, dampingFraction: 0.8), value: searchText)
                             }
                         }
+                        // Programmatic destination for the New Project button
+                        .navigationDestination(isPresented: $navigateToInputForm) {
+                            JobDescInputFormView()
+                        }
+                        // Navigation destination triggered from Alert button
+                        .navigationDestination(isPresented: $navigateToEditProfile) {
+                            EditProfileView()
+                        }
+                        // Alert shown if profile validation fails
+                        .alert("Complete Your Profile First!", isPresented: $showAlert) {
+                            Button("Cancel", role: .cancel) { }
+                            Button("Setup Profile") {
+                                navigateToEditProfile = true
+                            }
+                        } message: {
+                            Text(alertMessage)
+                        }
                     }
                 }
             }
@@ -160,6 +187,31 @@ struct DashboardView: View {
             .onReceive(NotificationCenter.default.publisher(for: .popToDashboard)) { _ in
                 navigationId = UUID()
             }
+        }
+        private func handleNewProjectClick() {
+            // 1. Check if a Master Profile exists (a Profile where jobDescription is nil)
+            guard let masterProfile = profiles.first(where: { $0.jobDescription == nil }) else {
+                alertMessage = "Before creating a new Resume, you'll need to complete your profile. New Resume are tailored from it, so this only needs to happen once."
+                showAlert = true
+                return
+            }
+            
+            // 3. Check if the Master Profile has at least one Education entry
+            guard !masterProfile.educations.isEmpty else {
+                alertMessage = "Your Profile Needs a Few More Details! Complete your profile by adding at least one experience."
+                showAlert = true
+                return
+            }
+            
+            // 2. Check if the Master Profile has at least one Work Experience entry
+            guard !masterProfile.experiences.isEmpty else {
+                alertMessage = "Your Profile Needs a Few More Details! Complete your profile by adding at least one experience."
+                showAlert = true
+                return
+            }
+            
+            // All checks passed -> Navigate to Job Description Input Form
+            navigateToInputForm = true
         }
     }
 

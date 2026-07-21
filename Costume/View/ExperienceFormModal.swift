@@ -9,8 +9,17 @@ import SwiftUI
 
 struct ExperienceFormModal: View {
     let experience: Experience?
-    let onSave: (String, EmploymentType, String, String, Date, Date?, [String]) -> Void
+    let onSave: (
+        String,
+        EmploymentType,
+        String,
+        String,
+        Date,
+        Date?,
+        [String]
+    ) -> Void
     let onCancel: () -> Void
+    var onDelete: (() -> Void)? = nil
 
     @State private var role: String = ""
     @State private var employmentType: EmploymentType = .fullTime
@@ -28,6 +37,7 @@ struct ExperienceFormModal: View {
     @State private var roleTouched = false
     @State private var companyTouched = false
     @State private var locationTouched = false
+    @State private var isDeleteConfirmationPresented: Bool = false
 
     private let MODAL_PADDING: CGFloat = 32
     private let MODAL_WIDTH: CGFloat = 700
@@ -52,8 +62,12 @@ struct ExperienceFormModal: View {
 
     // --- KONDISI TAMPILAN ERROR ---
     private var shouldShowRoleError: Bool { roleTouched && !isRoleValid }
-    private var shouldShowCompanyError: Bool { companyTouched && !isCompanyValid }
-    private var shouldShowLocationError: Bool { locationTouched && !isLocationValid }
+    private var shouldShowCompanyError: Bool {
+        companyTouched && !isCompanyValid
+    }
+    private var shouldShowLocationError: Bool {
+        locationTouched && !isLocationValid
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -94,13 +108,27 @@ struct ExperienceFormModal: View {
                 .focused($focusedField, equals: .location)
                 .frame(maxWidth: .infinity)
                 
-                LabeledDateRangeField(label: "Years", isRequired: true, startDate: $startDate, endDate: $endDate)
-                    .frame(maxWidth: .infinity)
+                LabeledDateRangeField(
+                    label: "Years",
+                    isRequired: true,
+                    startDate: $startDate,
+                    endDate: $endDate
+                )
+                .frame(maxWidth: .infinity)
             }
 
             LabeledTextEditor(label: "Description", text: $descriptionText)
 
             HStack {
+                if let onDelete {
+                    Button("Delete", role: .destructive) {
+                        isDeleteConfirmationPresented = true
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .tint(.red)
+                }
+
                 Spacer()
                 Button("Cancel") { onCancel() }
                     .buttonStyle(.bordered)
@@ -111,7 +139,15 @@ struct ExperienceFormModal: View {
                         .split(separator: "\n")
                         .map { $0.trimmingCharacters(in: .whitespaces) }
                         .filter { !$0.isEmpty }
-                    onSave(role, employmentType, company, location, startDate, endDate, lines)
+                    onSave(
+                        role,
+                        employmentType,
+                        company,
+                        location,
+                        startDate,
+                        endDate,
+                        lines
+                    )
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Color("PrimaryColor"))
@@ -121,13 +157,27 @@ struct ExperienceFormModal: View {
             }
         }
         .padding(MODAL_PADDING)
+        .alert("Delete this Experience?", isPresented: $isDeleteConfirmationPresented) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                onDelete?()
+            }
+        } message: {
+            Text("This action can't be undone.")
+        }
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
         // --- DETEKSI PERPINDAHAN FOKUS ---
-        .onChange(of: focusedField) { oldFocus, newFocus in
+        .onChange(of: focusedField) {
+ oldFocus,
+ newFocus in
             if oldFocus == .role && newFocus != .role { roleTouched = true }
-            if oldFocus == .company && newFocus != .company { companyTouched = true }
-            if oldFocus == .location && newFocus != .location { locationTouched = true }
+            if oldFocus == .company && newFocus != .company {
+                companyTouched = true
+            }
+            if oldFocus == .location && newFocus != .location {
+                locationTouched = true
+            }
         }
         .animation(.default, value: roleTouched)
         .animation(.default, value: companyTouched)

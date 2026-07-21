@@ -23,16 +23,23 @@ struct AwardSectionView: View {
                 .tint(Color("PrimaryColor"))
             }
 
-            VStack(spacing: ROW_SPACING) {
-                ForEach(viewModel.profile.awards) { award in
-                    ListItemCard(
-                        title: award.title,
-                        subtitle: award.issuer,
-                        action: { viewModel.startEditingAward(award) }
-                    )
-                    .contextMenu {
-                        Button("Delete", role: .destructive) {
-                            viewModel.deleteAward(award)
+            if viewModel.profile.awards.isEmpty {
+                SectionEmptyStateView(
+                    imageName: "AwardsEmptyState",
+                    message: "No awards yet."
+                )
+            } else {
+                VStack(spacing: ROW_SPACING) {
+                    ForEach(viewModel.profile.awards) { award in
+                        ListItemCard(
+                            title: award.title,
+                            subtitle: award.issuer,
+                            action: { viewModel.startEditingAward(award) }
+                        )
+                        .contextMenu {
+                            Button("Delete", role: .destructive) {
+                                viewModel.deleteAward(award)
+                            }
                         }
                     }
                 }
@@ -44,7 +51,13 @@ struct AwardSectionView: View {
             AwardFormModal(
                 award: viewModel.awardBeingEdited,
                 onSave: viewModel.saveAward,
-                onCancel: viewModel.cancelAwardEdit
+                onCancel: viewModel.cancelAwardEdit,
+                onDelete: viewModel.awardBeingEdited.map { award in
+                    {
+                        viewModel.deleteAward(award)
+                        viewModel.cancelAwardEdit()
+                    }
+                }
             )
         }
     }
