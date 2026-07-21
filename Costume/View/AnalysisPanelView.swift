@@ -24,6 +24,16 @@ struct AnalysisPanelView: View {
     private let TAB_PADDING: CGFloat = 24
     private let CONTENT_PADDING: CGFloat = 32
 
+    private var formattedDocumentName: String {
+        let profile = viewModel.document.profile
+        if let jobDesc = profile.jobDescription,
+           let role = jobDesc.role, !role.isEmpty,
+           let company = jobDesc.company, !company.isEmpty {
+            return "\(role) - \(company)"
+        }
+        return "Mabel_CV_Apple"
+    }
+
     var body: some View {
         ZStack(alignment: .top) {
             Color("BackgroundColor")
@@ -79,8 +89,13 @@ struct AnalysisPanelView: View {
                     // Fixed-width container ensures the layout does not jump when switching tabs
                     ZStack(alignment: .trailing) {
                         if viewModel.selectedRightTab == .resumePreview {
+                            // Tombol Simpan & Ekspor PDF pada panel pratinjau CV
                             Button(action: {
-                                viewModel.save()
+                                // Menjalankan proses di Main Thread agar penyimpanan database & ekspor PDF aman
+                                DispatchQueue.main.async {
+                                    viewModel.save() // Menyimpan perubahan data ke database SwiftData
+                                    PDFExporter.export(profile: viewModel.document.profile, defaultFilename: formattedDocumentName) // Memicu ekspor PDF
+                                }
                             }) {
                                 Image(systemName: "square.and.arrow.down")
                                     .font(.system(size: 14, weight: .bold))
