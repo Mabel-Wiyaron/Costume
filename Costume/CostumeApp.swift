@@ -38,7 +38,7 @@ struct CostumeApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DashboardView()
         }
         .modelContainer(sharedModelContainer)
     }

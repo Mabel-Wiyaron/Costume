@@ -17,10 +17,10 @@ let SECTIONS_PROMPT_TEMPLATE_V1 = {
     (
         role: String,
         abstract: String,
-        responsibilities: String,
-        requirements: String,
-        keywords: String,
-        availableSections: String
+        responsibilities: [String],
+        requirements: [String],
+        keywords: [String],
+        availableSections: [String]
     ) -> String in
     return """
         Role: \(role)

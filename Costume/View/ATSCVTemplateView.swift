@@ -107,9 +107,6 @@ struct ATSCVTemplateView: View {
                     
                     contactInfoView()
                     
-                    // Garis pembatas tebal di bawah header
-                    Divider()
-                        .background(Color.black)
                 }
                 .frame(maxWidth: .infinity)
             }
