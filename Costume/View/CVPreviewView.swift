@@ -11,18 +11,38 @@ import SwiftData
 struct CVPreviewView: View {
     // Digunakan untuk menyimpan dan mengelola konteks database SwiftData
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     // Kueri reaktif untuk mengambil data Profile dari SwiftData secara otomatis saat ada perubahan
     @Query private var profiles: [Profile]
+    
+    // Profil spesifik yang ingin di-preview (opsional)
+    var profile: Profile? = nil
+    
+    @State private var zoomScale: CGFloat = 1.0
+    @GestureState private var gestureZoomScale: CGFloat = 1.0
     
     // Nama dokumen default yang ditampilkan di bilah navigasi aplikasi
     var documentName: String = "Mabel_CV_Apple"
     
+    // Nama dokumen yang ditampilkan di bilah navigasi aplikasi (mengutamakan role - company format)
+    private var formattedDocumentName: String {
+        if let jobDesc = currentProfile.jobDescription,
+           let role = jobDesc.role, !role.isEmpty,
+           let company = jobDesc.company, !company.isEmpty {
+            return "\(role) - \(company)"
+        }
+        return documentName
+    }
+    
     // Menghitung profil aktif saat ini dari database.
     // Jika database kosong, mengembalikan profil default sementara untuk visualisasi awal
     private var currentProfile: Profile {
-        profiles.first ?? Profile(
+        profile ?? profiles.first ?? CVPreviewView.defaultProfile
+    }
+    
+    static var defaultProfile: Profile {
+        Profile(
             name: "MABEL WIYARON",
-            role: "Software Engineer",
             email: "hello@mabelwiyaron.com",
             location: "Surabaya, Indonesia",
             phone: "+6281234567890",
@@ -32,43 +52,95 @@ struct CVPreviewView: View {
         )
     }
     
+    private var pages: [PageContent] {
+        ATSCVTemplateView.distribute(profile: currentProfile)
+    }
+    
+    private func renderPage(_ page: PageContent) -> some View {
+        let currentScale = zoomScale * gestureZoomScale
+        return ATSCVTemplateView(profile: currentProfile, pageContent: page)
+            .background(Color.white)
+            .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 3)
+            .frame(width: 595, height: 842)
+            .scaleEffect(currentScale)
+            .frame(width: 595 * currentScale, height: 842 * currentScale)
+    }
+    
     var body: some View {
         // Wadah Navigasi Stack untuk mendukung transisi layar secara native (push & pop)
         NavigationStack {
             // 1. Area Lembar Kerja (Canvas) yang dapat digulir secara vertikal
             ScrollView {
-                // Mendistribusikan data profil ke beberapa halaman A4 secara dinamis berdasarkan tinggi konten
-                let pages = ATSCVTemplateView.distribute(profile: currentProfile)
                 VStack(spacing: 20) { // Memberikan jarak antar kertas A4 sebesar 20pt
                     ForEach(pages) { page in
                         // Merender satu halaman A4 spesifik sesuai dengan data porsinya
-                        ATSCVTemplateView(profile: currentProfile, pageContent: page)
-                            .background(Color.white) // Kertas berwarna putih polos
-                            .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 3) // Efek bayangan kertas premium
-                            .frame(width: 595, height: 842) // Ukuran standar kertas A4 (point)
+                        renderPage(page)
                     }
                 }
                 .padding(40)
                 .frame(maxWidth: .infinity)
+                .gesture(
+                    MagnificationGesture()
+                        .updating($gestureZoomScale) { value, state, _ in
+                            state = value
+                        }
+                        .onEnded { value in
+                            let nextScale = zoomScale * value
+                            zoomScale = max(0.5, min(2.0, nextScale))
+                        }
+                )
             }
             // 2. Latar belakang abu-abu terang standar dokumen viewer macOS
             .background(Color.background)
-            .navigationTitle(documentName)
-            
+            .navigationTitle(formattedDocumentName)
+            .navigationBarBackButtonHidden(true)
             // 3. Bilah Alat (Toolbar) standard macOS HIG
             .toolbar {
-                // Sisi Kiri: Navigasi tombol kembali
+                //back button
                 ToolbarItem(placement: .navigation) {
-                    Button(action: { print("Go Back") }) {
+                    Button(action: {
+                        dismiss()
+                    }) {
                         Image(systemName: "chevron.left")
                     }
-                    .help("Go Back") // Tooltip bantuan saat kursor melayang di atas tombol
+                }
+                
+                //zoom
+                ToolbarItemGroup(placement: .automatic) {
+                    HStack(spacing: 8) {
+                        Text(" ")
+                        Button(action: {
+                            zoomScale = max(0.5, zoomScale - 0.1)
+                        }) {
+                            Image(systemName: "minus.magnifyingglass")
+                        }
+                        .disabled(zoomScale <= 0.5)
+                        .buttonStyle(.plain)
+                        
+                        Text("\(Int(zoomScale * 100))%")
+                            .font(.system(.body, design: .monospaced))
+                            .frame(width: 45)
+                        
+                        Button(action: {
+                            zoomScale = min(2.0, zoomScale + 0.1)
+                        }) {
+                            Image(systemName: "plus.magnifyingglass")
+                        }
+                        .disabled(zoomScale >= 2.0)
+                        .buttonStyle(.plain)
+                        
+                        Button("Actual Size") {
+                            zoomScale = 1.0
+                        }
+                        .disabled(zoomScale == 1.0)
+                    }
                 }
                 
                 // Sisi Kanan: Tombol aksi utama (Edit & Ekspor)
                 ToolbarItemGroup(placement: .primaryAction) {
-                    // Tautan Navigasi untuk berpindah layar secara langsung ke menu Editor CV (EditProfileView)
-                    NavigationLink(destination: EditProfileView(profile: currentProfile, modelContext: modelContext)) {
+                    NavigationLink(destination: EditCVView(document: CVDocument(profile: currentProfile), jobDescription: currentProfile.jobDescription, modelContext: modelContext, onBack: {
+                        NotificationCenter.default.post(name: .popToDashboard, object: nil)
+                    })) {
                         Label("Edit", systemImage: "pencil")
                     }
                     .help("Edit Resumé")
@@ -92,7 +164,6 @@ struct CVPreviewView: View {
         
         let sampleProfile = Profile(
             name: "MABEL WIYARON",
-            role: "Software Engineer",
             email: "hello@mabelwiyaron.com",
             location: "Surabaya, Indonesia",
             phone: "+6281234567890",
