@@ -11,6 +11,7 @@ struct AwardFormModal: View {
     let award: Award?
     let onSave: (String, String, Date) -> Void
     let onCancel: () -> Void
+    var onDelete: (() -> Void)? = nil
 
     @State private var title: String = ""
     @State private var issuer: String = ""
@@ -23,6 +24,7 @@ struct AwardFormModal: View {
     @FocusState private var focusedField: Field?
     @State private var titleTouched = false
     @State private var issuerTouched = false
+    @State private var isDeleteConfirmationPresented = false
 
     private let MODAL_PADDING: CGFloat = 32
     private let MODAL_WIDTH: CGFloat = 700
@@ -72,6 +74,15 @@ struct AwardFormModal: View {
             LabeledDateField(label: "Year", isRequired: true, date: $issueDate)
 
             HStack {
+                if let onDelete {
+                    Button("Delete", role: .destructive) {
+                        isDeleteConfirmationPresented = true
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .tint(.red)
+                }
+
                 Spacer()
                 Button("Cancel") { onCancel() }
                     .buttonStyle(.bordered)
@@ -88,12 +99,24 @@ struct AwardFormModal: View {
             }
         }
         .padding(MODAL_PADDING)
+        .alert("Delete this Award?", isPresented: $isDeleteConfirmationPresented) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                onDelete?()
+            }
+        } message: {
+            Text("This action can't be undone.")
+        }
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
         // --- DETEKSI KAPAN USER PINDAH FOKUS ---
-        .onChange(of: focusedField) { oldFocus, newFocus in
+        .onChange(of: focusedField) {
+ oldFocus,
+ newFocus in
             if oldFocus == .title && newFocus != .title { titleTouched = true }
-            if oldFocus == .issuer && newFocus != .issuer { issuerTouched = true }
+            if oldFocus == .issuer && newFocus != .issuer {
+                issuerTouched = true
+            }
         }
         .animation(.default, value: titleTouched)
         .animation(.default, value: issuerTouched)
