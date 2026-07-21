@@ -138,7 +138,7 @@ struct DashboardView: View {
                                         Button(action: {
                                             handleNewProjectClick()
                                         }) {
-                                            NewProjectCard()
+                                            NewResumeCard()
                                         }
                                         .buttonStyle(.plain)
                                         .transition(.scale(scale: 0.9).combined(with: .opacity))
