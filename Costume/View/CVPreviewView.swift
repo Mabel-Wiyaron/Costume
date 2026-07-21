@@ -145,7 +145,13 @@ struct CVPreviewView: View {
                     }
                     .help("Edit Resumé")
                     
-                    Button(action: { print("Export") }) {
+                    // Tombol Aksi Ekspor CV ke format file PDF
+                    Button(action: {
+                        // Memastikan pemanggilan ekspor berjalan di Main Thread untuk keamanan thread SwiftData & UI
+                        DispatchQueue.main.async {
+                            PDFExporter.export(profile: currentProfile, defaultFilename: formattedDocumentName)
+                        }
+                    }) {
                         Label("Export to PDF", systemImage: "square.and.arrow.up")
                     }
                     .help("Export to PDF")
