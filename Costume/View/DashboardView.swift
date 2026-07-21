@@ -145,17 +145,24 @@ struct DashboardView: View {
                                     }
                                     
                                     ForEach(filteredProfiles) { profile in
-                                        // Membuat representasi data Resume untuk dirender ke dalam kartu (ResumeCard).
-                                        // Properti role, company, dan createdAt diambil secara aman dari relasi jobDescription.
                                         let resume = Resume(
                                             role: profile.jobDescription?.role ?? "Resumé Mockup",
                                             company: profile.jobDescription?.company ?? "costumé",
                                             date: formatDate(profile.jobDescription?.createdAt ?? Date())
                                         )
-                                        NavigationLink(destination: CVPreviewView(profile: profile)) {
-                                            ResumeCard(resume: resume)
-                                        }
-                                        .buttonStyle(.plain)
+                                        ResumeCardContainer(
+                                            profile: profile,
+                                            resume: resume,
+                                            onRename: { newRole, newCompany in
+                                                profile.jobDescription?.role = newRole
+                                                profile.jobDescription?.company = newCompany
+                                                try? modelContext.save()
+                                            },
+                                            onDelete: {
+                                                modelContext.delete(profile)
+                                                try? modelContext.save()
+                                            }
+                                        )
                                     }
                                 }
                                 .padding(.horizontal, 120)
