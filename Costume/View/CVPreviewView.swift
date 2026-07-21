@@ -99,7 +99,7 @@ struct CVPreviewView: View {
                 //back button
                 ToolbarItem(placement: .navigation) {
                     Button(action: {
-                        dismiss()
+                        NotificationCenter.default.post(name: .popToDashboard, object: nil)
                     }) {
                         Image(systemName: "chevron.left")
                     }
