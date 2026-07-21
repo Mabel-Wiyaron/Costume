@@ -10,44 +10,20 @@ import SwiftUI
 struct AwardSectionView: View {
     @Bindable var viewModel: EditProfileViewModel
 
-    private let CARD_PADDING: CGFloat = 32
-    private let ROW_SPACING: CGFloat = 12
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            SectionHeaderView(title: "Awards") {
-                Button("+ Add Award") {
-                    viewModel.startAddingAward()
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(Color("PrimaryColor"))
-            }
-
-            if viewModel.profile.awards.isEmpty {
-                SectionEmptyStateView(
-                    imageName: "AwardsEmptyState",
-                    message: "No awards yet."
-                )
-            } else {
-                VStack(spacing: ROW_SPACING) {
-                    ForEach(viewModel.profile.awards) { award in
-                        ListItemCard(
-                            title: award.title,
-                            subtitle: award.issuer,
-                            action: { viewModel.startEditingAward(award) }
-                        )
-                        .contextMenu {
-                            Button("Delete", role: .destructive) {
-                                viewModel.deleteAward(award)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        .padding(CARD_PADDING)
-        .cardBackground()
-        .sheet(isPresented: $viewModel.isAwardModalPresented) {
+        ProfileEntrySectionView(
+            title: "Awards",
+            addButtonLabel: "+ Add Award",
+            emptyStateImage: "AwardsEmptyState",
+            emptyStateMessage: "No awards yet.",
+            items: viewModel.profile.awards,
+            itemTitle: { $0.title },
+            itemSubtitle: { $0.issuer },
+            onAdd: viewModel.startAddingAward,
+            onSelect: viewModel.startEditingAward,
+            onDelete: viewModel.deleteAward,
+            isModalPresented: $viewModel.isAwardModalPresented
+        ) {
             AwardFormModal(
                 award: viewModel.awardBeingEdited,
                 onSave: viewModel.saveAward,
