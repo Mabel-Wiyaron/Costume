@@ -75,7 +75,7 @@ struct LoadingGenerateView: View {
             }
         }
         .onAppear {
-            simulateAILoading()
+            animateProgressBar()
             startScanningAnimation()
         }
     }
@@ -90,14 +90,12 @@ struct LoadingGenerateView: View {
                 wobbleAngle = 15
             }
         }
-    //TES ANIMASINYA DOANG, BISA DIHAPUS NNTI
-    private func simulateAILoading() {
-        Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { timer in
-            if loadingProgress < 100 {
+    private func animateProgressBar() {
+        Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
+            if loadingProgress < 95 {
                 loadingProgress += 1.0
             } else {
                 timer.invalidate()
-                //SAMBUNGIN KE EDIT CV DISINI
             }
         }
     }
