@@ -86,4 +86,11 @@ final class EditCVViewModel {
     func deleteAward(_ award: Award) {
         document.awards.removeAll { $0 === award }
     }
+
+    // MARK: - Keyword Matching
+
+    func updateKeywordStatus() {
+        guard let keywords = jobDescription?.keywords, !keywords.isEmpty else { return }
+        KeywordMatcher.updateStatus(for: keywords, using: document.profile)
+    }
 }
