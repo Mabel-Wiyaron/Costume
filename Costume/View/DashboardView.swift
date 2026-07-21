@@ -198,7 +198,7 @@ struct DashboardView: View {
             
             // 3. Check if the Master Profile has at least one Education entry
             guard !masterProfile.educations.isEmpty else {
-                alertMessage = "Your Profile Needs a Few More Details! Complete your profile by adding at least one experience."
+                alertMessage = "Your Profile Needs a Few More Details! Complete your profile by adding at least one education."
                 showAlert = true
                 return
             }
