@@ -11,6 +11,7 @@ struct EducationFormModal: View {
     let education: Education?
     let onSave: (String, String, String, String?, Date, Date?) -> Void
     let onCancel: () -> Void
+    var onDelete: (() -> Void)? = nil
 
     @State private var school: String = ""
     @State private var degree: String = ""
@@ -29,6 +30,7 @@ struct EducationFormModal: View {
     @State private var schoolTouched = false
     @State private var degreeTouched = false
     @State private var fieldOfStudyTouched = false
+    @State private var isDeleteConfirmationPresented: Bool = false
 
     private let MODAL_PADDING: CGFloat = 32
     private let MODAL_WIDTH: CGFloat = 700
@@ -38,7 +40,9 @@ struct EducationFormModal: View {
     private var isSaveEnabled: Bool {
         let cleanSchool = school.trimmingCharacters(in: .whitespacesAndNewlines)
         let cleanDegree = degree.trimmingCharacters(in: .whitespacesAndNewlines)
-        let cleanField = fieldOfStudy.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanField = fieldOfStudy.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
         
         return !cleanSchool.isEmpty && !cleanDegree.isEmpty && !cleanField.isEmpty
     }
@@ -86,6 +90,15 @@ struct EducationFormModal: View {
             }
 
             HStack {
+                if let onDelete {
+                    Button("Delete", role: .destructive) {
+                        isDeleteConfirmationPresented = true
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    .tint(.red)
+                }
+
                 Spacer()
                 Button("Cancel") {
                     onCancel()
@@ -94,7 +107,14 @@ struct EducationFormModal: View {
                 .controlSize(.large)
 
                 Button("Save") {
-                    onSave(school, degree, fieldOfStudy, grade.isEmpty ? nil : grade, startDate, endDate)
+                    onSave(
+                        school,
+                        degree,
+                        fieldOfStudy,
+                        grade.isEmpty ? nil : grade,
+                        startDate,
+                        endDate
+                    )
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(Color("PrimaryColor"))
@@ -104,13 +124,29 @@ struct EducationFormModal: View {
             }
         }
         .padding(MODAL_PADDING)
+        .alert("Delete this Education?", isPresented: $isDeleteConfirmationPresented) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                onDelete?()
+            }
+        } message: {
+            Text("This action can't be undone.")
+        }
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
         // Memicu 'touched' status ketika user meninggalkan/pindah dari field tersebut
-        .onChange(of: focusedField) { oldFocus, newFocus in
-            if oldFocus == .school && newFocus != .school { schoolTouched = true }
-            if oldFocus == .degree && newFocus != .degree { degreeTouched = true }
-            if oldFocus == .fieldOfStudy && newFocus != .fieldOfStudy { fieldOfStudyTouched = true }
+        .onChange(of: focusedField) {
+ oldFocus,
+            newFocus in
+            if oldFocus == .school && newFocus != .school {
+                schoolTouched = true
+            }
+            if oldFocus == .degree && newFocus != .degree {
+                degreeTouched = true
+            }
+            if oldFocus == .fieldOfStudy && newFocus != .fieldOfStudy {
+                fieldOfStudyTouched = true
+            }
         }
         .animation(.easeInOut(duration: 0.2), value: schoolTouched)
         .animation(.easeInOut(duration: 0.2), value: degreeTouched)
@@ -130,14 +166,17 @@ struct EducationFormModal: View {
     // MARK: - Computed Properties untuk Logika Error Tampilan
     // Logika computed properties untuk memicu error merah
     private var shouldShowSchoolError: Bool {
-        schoolTouched && school.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        schoolTouched && school
+            .trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
     private var shouldShowDegreeError: Bool {
-        degreeTouched && degree.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        degreeTouched && degree
+            .trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
     
     private var shouldShowFieldOfStudyError: Bool {
-        fieldOfStudyTouched && fieldOfStudy.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        fieldOfStudyTouched && fieldOfStudy
+            .trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 }
