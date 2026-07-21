@@ -1,8 +1,8 @@
 //
-//  JobDescriptionExtractionViewModel.swift
-//  Costume
+//   JobDescriptionExtractionViewModel.swift
+//   Costume
 //
-//  Created by Saujana Shafi on 15/07/26.
+//   Created by Saujana Shafi on 15/07/26.
 //
 
 import Foundation
@@ -11,11 +11,13 @@ import SwiftData
 @Observable
 final class JobDescriptionExtractionViewModel {
     var isLoading: Bool = false
+    var isFinished: Bool = false
+    var createdProfile: Profile? = nil
     var extractionResult: JobDescriptionGenerable? = nil
     
     private let agentService = JobDescriptionAgentService()
     
-    // Simpan reference model context dari SwiftUI View
+    // Reference model context from SwiftUI View
     var modelContext: ModelContext?
 
     func extract(from text: String) async throws -> JobDescriptionGenerable {
@@ -25,108 +27,133 @@ final class JobDescriptionExtractionViewModel {
     @MainActor
     func onSubmit(jobDescription: String) {
         guard let context = modelContext else {
-            print("❌ Error: ModelContext belum di-inject ke ViewModel")
+            print("❌ Error: ModelContext hasn't been injected into ViewModel")
             return
         }
         
-        // 1. Inisialisasi Model JobDescription awal dengan status 'processing'
+        // 1. Reset state & start loading
+        isLoading = true
+        isFinished = false
+        createdProfile = nil
+        
         let newJobDesc = JobDescription(
             content: jobDescription,
             role: "",
             company: "",
-            extractionStatus: "processing",
+            extractionStatus: "processing"
         )
         context.insert(newJobDesc)
         
-        isLoading = true
-        
         Task {
             do {
-                // 2. Lakukan API/Agent Call di Background
+                // 2. Perform AI Extraction (Background Service)
                 let result = try await extract(from: jobDescription)
                 
-                // 3. Proses data SwiftData kembali di MainActor
                 await MainActor.run {
                     self.extractionResult = result
-                    
                     newJobDesc.role = result.role
                     newJobDesc.company = result.company
                     
-                    // A. Cari Master Profile (Profile yang tidak memiliki JobDescription)
+                    // A. Fetch Master Profile
                     let masterProfile = fetchMasterProfile(using: context)
                     
-                    // B. Duplikasi Master Profile untuk JobDescription ini jika ditemukan
+                    // B. Duplicate Master Profile
+                    var profileToTailor: Profile?
                     if let master = masterProfile {
                         let duplicatedProfile = duplicate(profile: master, for: result, using: context)
                         newJobDesc.profile = duplicatedProfile
+                        profileToTailor = duplicatedProfile
+                    } else {
+                        // Fallback profile if no master exists
+                        let fallback = Profile(name: "Your Name", email: "", location: "", phone: "")
+                        context.insert(fallback)
+                        newJobDesc.profile = fallback
+                        profileToTailor = fallback
                     }
                     
-                    // C. Petakan Keywords dari array String ke entitas Model [Keyword]
+                    // C. Map Keywords
                     let mappedKeywords = result.keywords.map { keywordText in
-                        Keyword(name: keywordText, isMatched: false)
-                        // Catatan: Sesuaikan init Keyword Anda, pastikan relasi inverse ke newJobDesc terpasang
+                        Keyword(name: keywordText, status: KeywordStatus.missing)
                     }
                     newJobDesc.keywords = mappedKeywords
                     
-                    // D. Encode data struct asli ke JSON Data sebagai backup cadangan
+                    // D. Backup JSON
                     if let encodedData = try? JSONEncoder().encode(result) {
                         newJobDesc.extractedData = encodedData
                     }
                     
-                    // E. Perbarui status penyelesaian sukses
                     newJobDesc.extractionStatus = "completed"
                     newJobDesc.updatedAt = Date()
-                    
-                    // Save perubahan ke disk
                     try? context.save()
                     
-                    self.isLoading = false
-                    print("✅ Extraction & Cloning Sukses: \(result.role) at \(result.company)")
+                    // E. Continue to Agent Orchestration (Tailoring Section)
+                    if let targetProfile = profileToTailor {
+                        Task {
+                            do {
+                                let orchestrationVM = AgentOrchestrationViewModel()
+                                let tailoredProfile = try await orchestrationVM.tailor(for: result, from: targetProfile)
+                                
+                                await MainActor.run {
+                                    // 💡 CRITICAL FIX: Set createdProfile so navigation doesn't fail!
+                                    self.createdProfile = tailoredProfile
+                                    
+                                    // Trigger navigation push
+                                    self.isFinished = true
+                                }
+                                
+                                // Brief delay so SwiftUI handles the push animation gracefully
+                                try? await Task.sleep(nanoseconds: 300_000_000)
+                                
+                                await MainActor.run {
+                                    self.isLoading = false
+                                }
+                            } catch {
+                                await MainActor.run {
+                                    // Fallback to basic duplicated profile if tailoring agent fails
+                                    self.createdProfile = targetProfile
+                                    self.isFinished = true
+                                    self.isLoading = false
+                                }
+                            }
+                        }
+                    }
                 }
                 
             } catch {
                 await MainActor.run {
                     self.isLoading = false
+                    self.isFinished = false
                     newJobDesc.extractionStatus = "failed"
                     newJobDesc.updatedAt = Date()
                     try? context.save()
-                    print("❌ Extraction gagal: \(error.localizedDescription)")
+                    print("❌ Extraction failed: \(error.localizedDescription)")
                 }
             }
         }
     }
     
-    /// Mencari Master Profile berdasarkan kondisi: tidak memiliki relasi dengan JobDescription.
-    /// Memberikan trigger fatalError/assertionFailure jika ditemukan lebih dari satu master.
     @MainActor
     private func fetchMasterProfile(using context: ModelContext) -> Profile? {
-        // Asumsi properti relasi di model Profile bernama `jobDescription`
-        // Kita filter profile yang jobDescription-nya nil
         let descriptor = FetchDescriptor<Profile>(
             predicate: #Predicate<Profile> { $0.jobDescription == nil }
         )
         
         do {
             let matches = try context.fetch(descriptor)
-            
             if matches.count > 1 {
-                // Trigger error saat debug jika terdapat lebih dari 1 Master Profile
-                assertionFailure("❌ [DEBUG ERROR] Ditemukan \(matches.count) Master Profile! Seharusnya hanya ada 1 profile tanpa Job Description.")
+                assertionFailure("❌ [DEBUG ERROR] Found \(matches.count) Master Profiles!")
             }
-            
             return matches.first
         } catch {
-            print("❌ Gagal mengambil master profile: \(error)")
+            print("❌ Failed to fetch master profile: \(error)")
             return nil
         }
     }
     
-    /// Menduplikasi profile lama menjadi profile baru yang terikat khusus ke hasil ekstraksi ini
     @MainActor
     private func duplicate(profile: Profile, for result: JobDescriptionGenerable, using context: ModelContext) -> Profile {
-        // 1. Duplikasi properti dasar
         let newProfile = Profile(
-            name: "\(profile.name) - \(result.role)",
+            name: profile.name,
             email: profile.email,
             location: profile.location,
             phone: profile.phone,
@@ -137,14 +164,12 @@ final class JobDescriptionExtractionViewModel {
         
         context.insert(newProfile)
         
-        // 2. Deep Copy Relasi: ProfileLink (Aman untuk dibuat baru)
         newProfile.links = profile.links.map { link in
             let newLink = ProfileLink(platform: link.platform, url: link.url)
             context.insert(newLink)
             return newLink
         }
         
-        // 3. Deep Copy Relasi: Experience (Gunakan kembali array Skill yang sudah ada agar tidak duplikat)
         newProfile.experiences = profile.experiences.map { exp in
             let newExp = Experience(
                 role: exp.role,
@@ -154,13 +179,12 @@ final class JobDescriptionExtractionViewModel {
                 startDate: exp.startDate,
                 endDate: exp.endDate,
                 descriptionText: exp.descriptionText,
-                skills: exp.skills // 👈 Gak usah bikin Skill baru, pasang object Skill yang lama!
+                skills: exp.skills
             )
             context.insert(newExp)
             return newExp
         }
         
-        // 4. Deep Copy Relasi: Education
         newProfile.educations = profile.educations.map { edu in
             let newEdu = Education(
                 school: edu.school,
@@ -169,13 +193,12 @@ final class JobDescriptionExtractionViewModel {
                 startDate: edu.startDate,
                 endDate: edu.endDate,
                 grade: edu.grade,
-                skills: edu.skills // 👈 Gunakan kembali array skill lama
+                skills: edu.skills
             )
             context.insert(newEdu)
             return newEdu
         }
         
-        // 5. Deep Copy Relasi: Certification
         newProfile.certifications = profile.certifications.map { cert in
             let newCert = Certification(
                 name: cert.name,
@@ -184,13 +207,12 @@ final class JobDescriptionExtractionViewModel {
                 expirationDate: cert.expirationDate,
                 credentialID: cert.credentialID,
                 credentialURL: cert.credentialURL,
-                skills: cert.skills // 👈 Gunakan kembali array skill lama
+                skills: cert.skills
             )
             context.insert(newCert)
             return newCert
         }
         
-        // 6. Deep Copy Relasi: Project
         newProfile.projects = profile.projects.map { proj in
             let newProj = Project(
                 role: proj.role,
@@ -199,13 +221,12 @@ final class JobDescriptionExtractionViewModel {
                 endDate: proj.endDate,
                 website: proj.website,
                 descriptionText: proj.descriptionText,
-                skills: proj.skills // 👈 Gunakan kembali array skill lama
+                skills: proj.skills
             )
             context.insert(newProj)
             return newProj
         }
         
-        // 7. Deep Copy Relasi: Award
         newProfile.awards = profile.awards.map { award in
             let newAward = Award(
                 title: award.title,
@@ -216,7 +237,6 @@ final class JobDescriptionExtractionViewModel {
             return newAward
         }
         
-        // 8. Deep Copy Relasi: Language
         newProfile.languages = profile.languages.map { lang in
             let newLang = Language(
                 name: lang.name,
@@ -226,8 +246,6 @@ final class JobDescriptionExtractionViewModel {
             return newLang
         }
         
-        // 9. Relasi Utama: Profile.skills
-        // 💡 JANGAN dipetakan ke Skill(name:) baru. Langsung tunjuk ke object unik yang sudah ada di database!
         newProfile.skills = profile.skills
         
         return newProfile
