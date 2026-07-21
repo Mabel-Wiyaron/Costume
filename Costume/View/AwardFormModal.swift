@@ -24,6 +24,7 @@ struct AwardFormModal: View {
     @FocusState private var focusedField: Field?
     @State private var titleTouched = false
     @State private var issuerTouched = false
+    @State private var isDeleteConfirmationPresented = false
 
     private let MODAL_PADDING: CGFloat = 32
     private let MODAL_WIDTH: CGFloat = 700
@@ -75,7 +76,7 @@ struct AwardFormModal: View {
             HStack {
                 if let onDelete {
                     Button("Delete", role: .destructive) {
-                        onDelete()
+                        isDeleteConfirmationPresented = true
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.large)
@@ -98,6 +99,14 @@ struct AwardFormModal: View {
             }
         }
         .padding(MODAL_PADDING)
+        .alert("Delete this Award?", isPresented: $isDeleteConfirmationPresented) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                onDelete?()
+            }
+        } message: {
+            Text("This action can't be undone.")
+        }
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
         // --- DETEKSI KAPAN USER PINDAH FOKUS ---

@@ -30,6 +30,7 @@ struct CertificationFormModal: View {
     @State private var issuerTouched = false
     @State private var credentialIDTouched = false
     @State private var credentialURLTouched = false
+    @State private var isDeleteConfirmationPresented = false
 
     private let MODAL_PADDING: CGFloat = 32
     private let MODAL_WIDTH: CGFloat = 700
@@ -130,7 +131,7 @@ struct CertificationFormModal: View {
             HStack {
                 if let onDelete {
                     Button("Delete", role: .destructive) {
-                        onDelete()
+                        isDeleteConfirmationPresented = true
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.large)
@@ -160,6 +161,14 @@ struct CertificationFormModal: View {
             }
         }
         .padding(MODAL_PADDING)
+        .alert("Delete this Certification?", isPresented: $isDeleteConfirmationPresented) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                onDelete?()
+            }
+        } message: {
+            Text("This action can't be undone.")
+        }
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
         // --- DETEKSI PERPINDAHAN FOKUS ---

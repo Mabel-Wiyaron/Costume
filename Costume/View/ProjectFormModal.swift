@@ -28,6 +28,7 @@ struct ProjectFormModal: View {
     @State private var nameTouched = false
     @State private var roleTouched = false
     @State private var websiteTouched = false
+    @State private var isDeleteConfirmationPresented = false
 
     private let MODAL_PADDING: CGFloat = 32
     private let MODAL_WIDTH: CGFloat = 700
@@ -106,7 +107,7 @@ struct ProjectFormModal: View {
             HStack {
                 if let onDelete {
                     Button("Delete", role: .destructive) {
-                        onDelete()
+                        isDeleteConfirmationPresented = true
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.large)
@@ -133,6 +134,14 @@ struct ProjectFormModal: View {
             }
         }
         .padding(MODAL_PADDING)
+        .alert("Delete this Project?", isPresented: $isDeleteConfirmationPresented) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                onDelete?()
+            }
+        } message: {
+            Text("This action can't be undone.")
+        }
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
         // --- DETEKSI PERPINDAHAN FOKUS ---

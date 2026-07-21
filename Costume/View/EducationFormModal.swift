@@ -30,6 +30,7 @@ struct EducationFormModal: View {
     @State private var schoolTouched = false
     @State private var degreeTouched = false
     @State private var fieldOfStudyTouched = false
+    @State private var isDeleteConfirmationPresented: Bool = false
 
     private let MODAL_PADDING: CGFloat = 32
     private let MODAL_WIDTH: CGFloat = 700
@@ -91,7 +92,7 @@ struct EducationFormModal: View {
             HStack {
                 if let onDelete {
                     Button("Delete", role: .destructive) {
-                        onDelete()
+                        isDeleteConfirmationPresented = true
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.large)
@@ -123,6 +124,14 @@ struct EducationFormModal: View {
             }
         }
         .padding(MODAL_PADDING)
+        .alert("Delete this Education?", isPresented: $isDeleteConfirmationPresented) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                onDelete?()
+            }
+        } message: {
+            Text("This action can't be undone.")
+        }
         .frame(width: MODAL_WIDTH)
         .onAppear(perform: populateFieldsIfEditing)
         // Memicu 'touched' status ketika user meninggalkan/pindah dari field tersebut
