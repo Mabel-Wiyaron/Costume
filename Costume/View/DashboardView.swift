@@ -56,171 +56,199 @@ struct DashboardView: View {
             return sortedProfiles.filter { profile in
                 let role = profile.jobDescription?.role ?? "Resumé Mockup"
                 let company = profile.jobDescription?.company ?? "costumé"
-                let dateString = formatDate(profile.jobDescription?.createdAt ?? Date())
+                let dateString = formatDate(
+                    profile.jobDescription?.createdAt ?? Date()
+                )
                 return role.localizedCaseInsensitiveContains(searchText) ||
-                       company.localizedCaseInsensitiveContains(searchText) ||
-                       dateString.localizedCaseInsensitiveContains(searchText)
+                company.localizedCaseInsensitiveContains(searchText) ||
+                dateString.localizedCaseInsensitiveContains(searchText)
             }
         }
     }
     
     
     var body: some View {
-            NavigationStack {
-                ZStack(alignment: .top) {
-                    Color.background
-                        .ignoresSafeArea()
+        NavigationStack {
+            ZStack(alignment: .top) {
+                Color.background
+                    .ignoresSafeArea()
                     
-                    CustomHeaderShape()
-                        .fill(Color(.primary))
-                        .frame(height: 260)
-                        .ignoresSafeArea(edges: .top)
+                CustomHeaderShape()
+                    .fill(Color(.primary))
+                    .frame(height: 260)
+                    .ignoresSafeArea(edges: .top)
                     
-                    VStack(alignment: .leading, spacing: 35) {
+                VStack(alignment: .leading, spacing: 35) {
                         
+                    HStack {
+                        Text("costumé") //LOGO NANTI DISINI
+                            .font(.system(size: 28, weight: .bold))
+                            .foregroundColor(.white)
+                            
+                        Spacer()
+                            
                         HStack {
-                            Text("costumé") //LOGO NANTI DISINI
-                                .font(.system(size: 28, weight: .bold))
-                                .foregroundColor(.white)
-                            
-                            Spacer()
-                            
-                            HStack {
                             Image(systemName: "magnifyingglass")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.black)
-                            TextField("Search resumé...", text: $searchText)
-                            .textFieldStyle(.plain)
-                            .foregroundColor(.primary)
-                            if !searchText.isEmpty {
-                            Button(action: {
-                            searchText = ""
-                            }) {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.gray)
-                            }
-                        .buttonStyle(.plain)
-                        .transition(.opacity)
-                            }
-                        }
-                    .padding(8)
-                    .background(Color.white.opacity(0.8))
-                        .cornerRadius(20)
-                    .frame(width: 250)
-                        .animation(.easeInOut(duration: 0.2), value: searchText.isEmpty)
-                            NavigationLink(destination: EditProfileView()) {
-                                Image(systemName: "person")
-                                    .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(.black)
-                                    .frame(width: 40, height: 40)
-                                    .background(Color.white.opacity(0.8))
-                                    .clipShape(Circle())
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        .padding(.horizontal, 120)
-                        .padding(.top, 80)
-                        
-                        HStack(spacing: 12) {
-                            Text("􀈕 All your Resumé")
-                        }
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 120)
-                        
-                        ScrollView {
-                            if !searchText.isEmpty && filteredProfiles.isEmpty {
-                                EmptyStateView(searchText: searchText)
-                            } else {
-                                LazyVGrid(columns: columns, spacing: 24) {
-                                    if searchText.isEmpty {
-                                        Button(action: {
-                                            handleNewProjectClick()
-                                        }) {
-                                            NewResumeCard()
-                                        }
-                                        .buttonStyle(.plain)
-                                        .transition(.scale(scale: 0.9).combined(with: .opacity))
-                                    }
-                                    
-                                    ForEach(filteredProfiles) { profile in
-                                        let resume = Resume(
-                                            role: profile.jobDescription?.role ?? "Resumé Mockup",
-                                            company: profile.jobDescription?.company ?? "costumé",
-                                            date: formatDate(profile.jobDescription?.createdAt ?? Date())
-                                        )
-                                        ResumeCardContainer(
-                                            profile: profile,
-                                            resume: resume,
-                                            onRename: { newRole, newCompany in
-                                                profile.jobDescription?.role = newRole
-                                                profile.jobDescription?.company = newCompany
-                                                try? modelContext.save()
-                                            },
-                                            onDelete: {
-                                                modelContext.delete(profile)
-                                                try? modelContext.save()
-                                            }
-                                        )
-                                    }
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.background)
+                            
+                            ZStack(alignment: .leading) {
+                                if searchText.isEmpty {
+                                    Text("Search resumé...")
+                                        .foregroundColor(.background)
                                 }
-                                .padding(.horizontal, 120)
-                                .padding(.bottom, 80)
-                                .animation(.spring(response: 0.4, dampingFraction: 0.8), value: searchText)
+                                TextField("", text: $searchText)
+                                    .textFieldStyle(.plain)
+                                    .foregroundColor(.background)
+                            }
+                            
+                            if !searchText.isEmpty {
+                                Button(action: {
+                                    searchText = ""
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.gray)
+                                }
+                                .buttonStyle(.plain)
+                                .transition(.opacity)
                             }
                         }
-                        // Programmatic destination for the New Project button
-                        .navigationDestination(isPresented: $navigateToInputForm) {
-                            JobDescInputFormView()
+                        .padding(8)
+                        .background(Color.white.opacity(0.8))
+                        .cornerRadius(20)
+                        .frame(width: 250)
+                        .animation(
+                            .easeInOut(duration: 0.2),
+                            value: searchText.isEmpty
+                        )
+                        NavigationLink(destination: EditProfileView()) {
+                            Image(systemName: "person")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.black)
+                                .frame(width: 40, height: 40)
+                                .background(Color.white.opacity(0.8))
+                                .clipShape(Circle())
                         }
-                        // Navigation destination triggered from Alert button
-                        .navigationDestination(isPresented: $navigateToEditProfile) {
-                            EditProfileView()
-                        }
-                        // Alert shown if profile validation fails
-                        .alert("Complete Your Profile First!", isPresented: $showAlert) {
-                            Button("Cancel", role: .cancel) { }
-                            Button("Setup Profile") {
-                                navigateToEditProfile = true
+                        .buttonStyle(.plain)
+                    }
+                    .padding(.horizontal, 120)
+                    .padding(.top, 80)
+                        
+                    HStack(spacing: 12) {
+                        Text("􀈕 All your Resumé")
+                    }
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 120)
+                        
+                    ScrollView {
+                        if !searchText.isEmpty && filteredProfiles.isEmpty {
+                            EmptyStateView(searchText: searchText)
+                        } else {
+                            LazyVGrid(columns: columns, spacing: 24) {
+                                if searchText.isEmpty {
+                                    Button(action: {
+                                        handleNewProjectClick()
+                                    }) {
+                                        NewResumeCard()
+                                    }
+                                    .buttonStyle(.plain)
+                                    .transition(
+                                        .scale(scale: 0.9)
+                                        .combined(with: .opacity)
+                                    )
+                                }
+                                    
+                                ForEach(filteredProfiles) { profile in
+                                    let resume = Resume(
+                                        role: profile.jobDescription?.role ?? "Resumé Mockup",
+                                        company: profile.jobDescription?.company ?? "costumé",
+                                        date: formatDate(
+                                            profile.jobDescription?.createdAt ?? Date()
+                                        )
+                                    )
+                                    ResumeCardContainer(
+                                        profile: profile,
+                                        resume: resume,
+                                        onRename: { newRole, newCompany in
+                                            profile.jobDescription?.role = newRole
+                                            profile.jobDescription?.company = newCompany
+                                            try? modelContext.save()
+                                        },
+                                        onDelete: {
+                                            modelContext.delete(profile)
+                                            try? modelContext.save()
+                                        }
+                                    )
+                                }
                             }
-                        } message: {
-                            Text(alertMessage)
+                            .padding(.horizontal, 120)
+                            .padding(.bottom, 80)
+                            .animation(
+                                .spring(response: 0.4, dampingFraction: 0.8),
+                                value: searchText
+                            )
                         }
+                    }
+                    // Programmatic destination for the New Project button
+                    .navigationDestination(isPresented: $navigateToInputForm) {
+                        JobDescInputFormView()
+                    }
+                    // Navigation destination triggered from Alert button
+                    .navigationDestination(
+                        isPresented: $navigateToEditProfile
+                    ) {
+                        EditProfileView()
+                    }
+                    // Alert shown if profile validation fails
+                    .alert(
+                        "Complete Your Profile First!",
+                        isPresented: $showAlert
+                    ) {
+                        Button("Cancel", role: .cancel) { }
+                        Button("Setup Profile") {
+                            navigateToEditProfile = true
+                        }
+                    } message: {
+                        Text(alertMessage)
                     }
                 }
             }
-            .id(navigationId)
-            .onReceive(NotificationCenter.default.publisher(for: .popToDashboard)) { _ in
-                navigationId = UUID()
-            }
         }
-        private func handleNewProjectClick() {
-            // 1. Check if a Master Profile exists (a Profile where jobDescription is nil)
-            guard let masterProfile = profiles.first(where: { $0.jobDescription == nil }) else {
-                alertMessage = "Before creating a new Resume, you'll need to complete your profile. New Resume are tailored from it, so this only needs to happen once."
-                showAlert = true
-                return
-            }
-            
-            // 3. Check if the Master Profile has at least one Education entry
-            guard !masterProfile.educations.isEmpty else {
-                alertMessage = "Your Profile Needs a Few More Details! Complete your profile by adding at least one education."
-                showAlert = true
-                return
-            }
-            
-            // 2. Check if the Master Profile has at least one Work Experience entry
-            guard !masterProfile.experiences.isEmpty else {
-                alertMessage = "Your Profile Needs a Few More Details! Complete your profile by adding at least one experience."
-                showAlert = true
-                return
-            }
-            
-            // All checks passed -> Navigate to Job Description Input Form
-            navigateToInputForm = true
+        .id(navigationId)
+        .onReceive(
+            NotificationCenter.default.publisher(for: .popToDashboard)
+        ) { _ in
+            navigationId = UUID()
         }
     }
+    private func handleNewProjectClick() {
+        // 1. Check if a Master Profile exists (a Profile where jobDescription is nil)
+        guard let masterProfile = profiles.first(where: { $0.jobDescription == nil }) else {
+            alertMessage = "Before creating a new Resume, you'll need to complete your profile. New Resume are tailored from it, so this only needs to happen once."
+            showAlert = true
+            return
+        }
+            
+        // 3. Check if the Master Profile has at least one Education entry
+        guard !masterProfile.educations.isEmpty else {
+            alertMessage = "Your Profile Needs a Few More Details! Complete your profile by adding at least one education."
+            showAlert = true
+            return
+        }
+            
+        // 2. Check if the Master Profile has at least one Work Experience entry
+        guard !masterProfile.experiences.isEmpty else {
+            alertMessage = "Your Profile Needs a Few More Details! Complete your profile by adding at least one experience."
+            showAlert = true
+            return
+        }
+            
+        // All checks passed -> Navigate to Job Description Input Form
+        navigateToInputForm = true
+    }
+}
 
 struct EmptyStateView: View {
     let searchText: String
