@@ -102,6 +102,10 @@ struct JobDescInputFormView: View {
                     .padding(.horizontal, MIN_HORIZONTAL_MARGIN)
                     .frame(maxWidth: MAX_CARD_WIDTH + (MIN_HORIZONTAL_MARGIN * 2))
                     .frame(maxWidth: .infinity, alignment: .center)
+                    .onAppear {
+                        // Pasang context ke view model agar bisa dipakai saat submit
+                        jobDescExtVM.modelContext = modelContext
+                    }
                     
                     Spacer()
                 }
