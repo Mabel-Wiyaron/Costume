@@ -77,7 +77,7 @@ struct LoadingGenerateView: View {
         .onAppear {
             animateProgressBar()
             startScanningAnimation()
-        }
+        }.navigationBarBackButtonHidden(true)
     }
     private func startScanningAnimation() {
             // 1. The Circular Orbit (Smooth, continuous 360-degree loop)
