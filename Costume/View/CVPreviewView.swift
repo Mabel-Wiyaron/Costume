@@ -67,100 +67,97 @@ struct CVPreviewView: View {
     }
     
     var body: some View {
-        // Wadah Navigasi Stack untuk mendukung transisi layar secara native (push & pop)
-        NavigationStack {
-            // 1. Area Lembar Kerja (Canvas) yang dapat digulir secara vertikal
-            ScrollView {
-                VStack(spacing: 20) { // Memberikan jarak antar kertas A4 sebesar 20pt
-                    ForEach(pages) { page in
-                        // Merender satu halaman A4 spesifik sesuai dengan data porsinya
-                        renderPage(page)
-                    }
+        // 1. Area Lembar Kerja (Canvas) yang dapat digulir secara vertikal
+        ScrollView {
+            VStack(spacing: 20) { // Memberikan jarak antar kertas A4 sebesar 20pt
+                ForEach(pages) { page in
+                    // Merender satu halaman A4 spesifik sesuai dengan data porsinya
+                    renderPage(page)
                 }
-                .padding(40)
-                .frame(maxWidth: .infinity)
-                .gesture(
-                    MagnificationGesture()
-                        .updating($gestureZoomScale) { value, state, _ in
-                            state = value
-                        }
-                        .onEnded { value in
-                            let nextScale = zoomScale * value
-                            zoomScale = max(0.5, min(2.0, nextScale))
-                        }
-                )
             }
-            // 2. Latar belakang abu-abu terang standar dokumen viewer macOS
-            .background(Color.background)
-            .navigationTitle(formattedDocumentName)
-            .navigationBarBackButtonHidden(true)
-            // 3. Bilah Alat (Toolbar) standard macOS HIG
-            .toolbar {
-                //back button
-                ToolbarItem(placement: .navigation) {
+            .padding(40)
+            .frame(maxWidth: .infinity)
+            .gesture(
+                MagnificationGesture()
+                    .updating($gestureZoomScale) { value, state, _ in
+                        state = value
+                    }
+                    .onEnded { value in
+                        let nextScale = zoomScale * value
+                        zoomScale = max(0.5, min(2.0, nextScale))
+                    }
+            )
+        }
+        // 2. Latar belakang abu-abu terang standar dokumen viewer macOS
+        .background(Color.background)
+        .navigationTitle(formattedDocumentName)
+        .navigationBarBackButtonHidden(true)
+        // 3. Bilah Alat (Toolbar) standard macOS HIG
+        .toolbar {
+            //back button
+            ToolbarItem(placement: .navigation) {
+                Button(action: {
+                    NotificationCenter.default.post(name: .popToDashboard, object: nil)
+                }) {
+                    Image(systemName: "chevron.left")
+                }
+            }
+            
+            //zoom
+            ToolbarItemGroup(placement: .automatic) {
+                HStack(spacing: 8) {
+                    Text(" ")
                     Button(action: {
-                        NotificationCenter.default.post(name: .popToDashboard, object: nil)
+                        zoomScale = max(0.5, zoomScale - 0.1)
                     }) {
-                        Image(systemName: "chevron.left")
+                        Image(systemName: "minus.magnifyingglass")
                     }
-                }
-                
-                //zoom
-                ToolbarItemGroup(placement: .automatic) {
-                    HStack(spacing: 8) {
-                        Text(" ")
-                        Button(action: {
-                            zoomScale = max(0.5, zoomScale - 0.1)
-                        }) {
-                            Image(systemName: "minus.magnifyingglass")
-                        }
-                        .disabled(zoomScale <= 0.5)
-                        .buttonStyle(.plain)
-                        
-                        Text("\(Int(zoomScale * 100))%")
-                            .font(.system(.body, design: .monospaced))
-                            .frame(width: 45)
-                        
-                        Button(action: {
-                            zoomScale = min(2.0, zoomScale + 0.1)
-                        }) {
-                            Image(systemName: "plus.magnifyingglass")
-                        }
-                        .disabled(zoomScale >= 2.0)
-                        .buttonStyle(.plain)
-                        
-                        Button("Actual Size") {
-                            zoomScale = 1.0
-                        }
-                        .disabled(zoomScale == 1.0)
-                    }
-                }
-                
-                // Sisi Kanan: Tombol aksi utama (Edit & Ekspor)
-                ToolbarItemGroup(placement: .primaryAction) {
-                    NavigationLink(destination: EditCVView(document: CVDocument(profile: currentProfile), jobDescription: currentProfile.jobDescription, modelContext: modelContext, onBack: {
-                        NotificationCenter.default.post(name: .popToDashboard, object: nil)
-                    })) {
-                        Label("Edit", systemImage: "pencil")
-                    }
-                    .help("Edit Resumé")
+                    .disabled(zoomScale <= 0.5)
+                    .buttonStyle(.plain)
                     
-                    // Tombol Aksi Ekspor CV ke format file PDF
+                    Text("\(Int(zoomScale * 100))%")
+                        .font(.system(.body, design: .monospaced))
+                        .frame(width: 45)
+                    
                     Button(action: {
-                        // Memastikan pemanggilan ekspor berjalan di Main Thread untuk keamanan thread SwiftData & UI
-                        DispatchQueue.main.async {
-                            PDFExporter.export(profile: currentProfile, defaultFilename: formattedDocumentName)
-                        }
+                        zoomScale = min(2.0, zoomScale + 0.1)
                     }) {
-                        Label("Export to PDF", systemImage: "square.and.arrow.up")
+                        Image(systemName: "plus.magnifyingglass")
                     }
-                    .help("Export to PDF")
+                    .disabled(zoomScale >= 2.0)
+                    .buttonStyle(.plain)
+                    
+                    Button("Actual Size") {
+                        zoomScale = 1.0
+                    }
+                    .disabled(zoomScale == 1.0)
                 }
             }
-            // Memicu inisialisasi pengisian data default ketika view ini pertama kali muncul di layar
-            .onAppear {
-                createDefaultProfileIfNeeded()
+            
+            // Sisi Kanan: Tombol aksi utama (Edit & Ekspor)
+            ToolbarItemGroup(placement: .primaryAction) {
+                NavigationLink(destination: EditCVView(document: CVDocument(profile: currentProfile), jobDescription: currentProfile.jobDescription, modelContext: modelContext, onBack: {
+                    NotificationCenter.default.post(name: .popToDashboard, object: nil)
+                })) {
+                    Label("Edit", systemImage: "pencil")
+                }
+                .help("Edit Resumé")
+                
+                // Tombol Aksi Ekspor CV ke format file PDF
+                Button(action: {
+                    // Memastikan pemanggilan ekspor berjalan di Main Thread untuk keamanan thread SwiftData & UI
+                    DispatchQueue.main.async {
+                        PDFExporter.export(profile: currentProfile, defaultFilename: formattedDocumentName)
+                    }
+                }) {
+                    Label("Export to PDF", systemImage: "square.and.arrow.up")
+                }
+                .help("Export to PDF")
             }
+        }
+        // Memicu inisialisasi pengisian data default ketika view ini pertama kali muncul di layar
+        .onAppear {
+            createDefaultProfileIfNeeded()
         }
     }
     

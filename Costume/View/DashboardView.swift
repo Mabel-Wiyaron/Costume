@@ -220,6 +220,8 @@ struct DashboardView: View {
         .onReceive(
             NotificationCenter.default.publisher(for: .popToDashboard)
         ) { _ in
+            navigateToInputForm = false
+            navigateToEditProfile = false
             navigationId = UUID()
         }
     }
