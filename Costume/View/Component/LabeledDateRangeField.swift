@@ -58,7 +58,7 @@ struct LabeledDateRangeField: View {
         VStack(alignment: .leading, spacing: 16) {
             DatePicker("Start", selection: $startDate, displayedComponents: .date)
 
-            Toggle("Currently studying", isOn: Binding(
+            Toggle("Currently ongoing", isOn: Binding(
                 get: { endDate == nil },
                 set: { isOngoing in endDate = isOngoing ? nil : Date() }
             ))
