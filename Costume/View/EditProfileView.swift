@@ -35,10 +35,10 @@ struct EditProfileView: View {
                                 PersonalInfoFormView(viewModel: vm)
                             case .education:
                                 EducationSectionView(viewModel: vm)
-                            case .skills:
-                                SkillsSectionView(skills: $bindableVM.profile.skills, isSaveEnabled: vm.isSkillsSaveEnabled, onSave: vm.save)
                             case .experience:
                                 ExperienceSectionView(viewModel: vm)
+                            case .skills:
+                                SkillsSectionView(skills: $bindableVM.profile.skills, isSaveEnabled: vm.isSkillsSaveEnabled, onSave: vm.save)
                             case .project:
                                 ProjectSectionView(viewModel: vm)
                             case .certification:
