@@ -115,8 +115,8 @@ struct ResumeCardContainer: View {
                     .frame(width: 20, height: 20)
 
                 Menu {
-                    Button("Rename Resumé", action: startEditing)
-                    Button("Delete Resumé", role: .destructive) {
+                    Button("􁚛 Rename", action: startEditing)
+                    Button("􀈑 Delete", role: .destructive) {
                         isDeleteAlertPresented = true
                     }
                 } label: {
