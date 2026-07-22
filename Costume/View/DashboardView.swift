@@ -90,16 +90,16 @@ struct DashboardView: View {
                         HStack {
                             Image(systemName: "magnifyingglass")
                                 .font(.system(size: 16, weight: .semibold))
-                                .foregroundColor(.background)
+                                .foregroundColor(.black)
                             
                             ZStack(alignment: .leading) {
                                 if searchText.isEmpty {
                                     Text("Search resumé...")
-                                        .foregroundColor(.background)
+                                        .foregroundColor(.gray)
                                 }
                                 TextField("", text: $searchText)
                                     .textFieldStyle(.plain)
-                                    .foregroundColor(.background)
+                                    .foregroundColor(.black)
                             }
                             
                             if !searchText.isEmpty {
