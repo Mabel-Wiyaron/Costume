@@ -68,7 +68,7 @@ final class EditProfileViewModel {
 
     private var hasUnsavedSkillsChanges: Bool {
         let current = ProfileSnapshot(from: profile)
-        return current.skills != lastSavedSnapshot.skills
+        return current.skillNames != lastSavedSnapshot.skillNames
     }
     
     // Logika Validasi Murni
@@ -376,7 +376,8 @@ fileprivate struct ProfileSnapshot: Equatable {
     let github: String
     let summary: String
     
-    let skills: [Skill] // <-- 1. Tambahkan array skills di sini
+    // Store simple value types (Strings) for clear equality comparison
+    let skillNames: [String]
         
     init(from profile: Profile) {
         self.name = profile.name
@@ -387,9 +388,8 @@ fileprivate struct ProfileSnapshot: Equatable {
         self.website = profile.website?.absoluteString ?? ""
         self.summary = profile.summary ?? ""
         
-        // 2. Masukkan array skills dari profile ke snapshot
-        // Jika bertipe data String biasa, langsung masukkan. Jika objek, map ke string id/nama-nya.
-        self.skills = profile.skills
+        // Map skills to their string names (or skill.id.uuidString if skill has a UUID)
+        self.skillNames = profile.skills.map { $0.name }
         
         if let githubURL = profile.links.first(where: { $0.platform == .github })?.url {
             self.github = githubURL.absoluteString
