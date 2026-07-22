@@ -123,7 +123,7 @@ struct AnalysisPanelView: View {
                     Group {
                         switch viewModel.selectedRightTab {
                         case .jobDescriptionAnalysis:
-                            JobDescriptionAnalysisView(jobDescription: viewModel.jobDescription)
+                            JobDescriptionAnalysisView(jobDescription: viewModel.jobDescription, onRefresh: { viewModel.updateKeywordStatus() })
                         case .resumePreview:
                             resumePreview
                         }
