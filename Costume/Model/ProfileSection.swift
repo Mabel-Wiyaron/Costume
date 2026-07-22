@@ -10,8 +10,8 @@ import Foundation
 enum ProfileSection: String, CaseIterable, Identifiable {
     case personalInfo
     case education
-    case skills
     case experience
+    case skills
     case project
     case certification
     case awards
@@ -20,10 +20,10 @@ enum ProfileSection: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .personalInfo: return "Personal Info"
-        case .education: return "Education"
+        case .personalInfo: return "Personal Info*"
+        case .education: return "Education*"
+        case .experience: return "Experience*"
         case .skills: return "Skills"
-        case .experience: return "Experience"
         case .project: return "Project"
         case .certification: return "Certification"
         case .awards: return "Awards"
@@ -34,8 +34,8 @@ enum ProfileSection: String, CaseIterable, Identifiable {
         switch self {
         case .personalInfo: return "doc.text"
         case .education: return "graduationcap"
-        case .skills: return "clock"
         case .experience: return "briefcase"
+        case .skills: return "clock"
         case .project: return "folder"
         case .certification: return "medal"
         case .awards: return "trophy"
