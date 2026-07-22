@@ -9,6 +9,7 @@ import SwiftUI
 
 struct JobDescriptionAnalysisView: View {
     let jobDescription: JobDescription?
+    let onRefresh: (() -> Void)?
 
     @State private var showKeywordPopover = false
     @State private var showOriginalPopover = false
@@ -16,6 +17,11 @@ struct JobDescriptionAnalysisView: View {
     private let SECTION_SPACING: CGFloat = 24
     private let TAG_SPACING: CGFloat = 8
     private let CARD_PADDING: CGFloat = 32
+
+    init(jobDescription: JobDescription?, onRefresh: (() -> Void)? = nil) {
+        self.jobDescription = jobDescription
+        self.onRefresh = onRefresh
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: SECTION_SPACING) {
@@ -34,6 +40,7 @@ struct JobDescriptionAnalysisView: View {
         }
         .padding(CARD_PADDING)
         .cardBackground()
+        .onAppear { onRefresh?() }
     }
     
     private func header(for jobDescription: JobDescription) -> some View {
