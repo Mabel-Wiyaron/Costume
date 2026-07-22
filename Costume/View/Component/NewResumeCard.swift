@@ -7,14 +7,14 @@
 
 import SwiftUI
 
-struct NewProjectCard: View {
+struct NewResumeCard: View {
     var body: some View {
         VStack(spacing: 12) {
             Image(systemName: "plus")
                 .font(.system(size: 50, weight: .medium))
                 .foregroundColor(.accentColor)
 
-            Text("New Project")
+            Text("New Resumé")
                 .font(.title)
                 .fontWeight(.bold)
                 .foregroundColor(.text)
@@ -39,6 +39,6 @@ struct NewProjectCard: View {
 }
 
 #Preview {
-    NewProjectCard()
+    NewResumeCard()
         .padding()
 }
