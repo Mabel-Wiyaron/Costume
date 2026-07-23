@@ -76,11 +76,11 @@ enum JobDescriptionAgentError: Error {
 
 struct JobDescriptionAgentService: AgentProtocol {
     var languageModel: LanguageModelProtocol
-    
-    init() {
-        languageModel = AppleIntelligenceService(
-            instructions: JOB_DESCRIPTION_INSTRUCTIONS_V1
-        )
+
+    init(languageModel: LanguageModelProtocol = AppleIntelligenceService()) {
+        self.languageModel = languageModel
+        
+        self.languageModel.instructions = JOB_DESCRIPTION_INSTRUCTIONS_V1
     }
     
     func invoke(for message: String) async throws -> JobDescriptionGenerable {
