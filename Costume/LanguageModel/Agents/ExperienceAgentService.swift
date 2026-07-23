@@ -28,13 +28,12 @@ let EXPERIENCE_PROMPT_TEMPLATE_V1 = {
 
 // TODO: Partitions the descriptions into Prompt Template
 @Generable(description: "")
-struct ExperienceGenerable {
+struct ExperienceGenerable: Decodable {
     @Guide(
         description:
             "A at least 1 and up to 5 (Only if it's really needed) brief description of your role. Use the XYZ CV Writing Framework. Use strong action verbs. Quantify if possible. Use the following format: - Action Verb, Quantification. Example: - Increased UI development efficiency by 30% by building reusable components using SwiftUI and MVVM architecture.",
         .minimumCount(1),
         .maximumCount(5),
-        
     )
     let descriptions: [String]
 }
@@ -42,10 +41,10 @@ struct ExperienceGenerable {
 struct ExperienceAgentService: AgentProtocol {
     var languageModel: LanguageModelProtocol
 
-    init() {
-        languageModel = AppleIntelligenceService(
-            instructions: EXPERIENCE_INSTRUCTIONS_V1
-        )
+    init(languageModel: LanguageModelProtocol = AppleIntelligenceService()) {
+        self.languageModel = languageModel
+
+        self.languageModel.instructions = EXPERIENCE_INSTRUCTIONS_V1
     }
 
     func invoke(for message: String) async throws -> ExperienceGenerable {

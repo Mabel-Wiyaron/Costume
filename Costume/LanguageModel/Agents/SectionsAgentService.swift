@@ -34,7 +34,7 @@ let SECTIONS_PROMPT_TEMPLATE_V1 = {
 
 // TODO: Partitions the descriptions into Prompt Template
 @Generable(description: "")
-enum SectionTitleGenerable: String {
+enum SectionTitleGenerable: String, Decodable {
     case profile = "profile"
     case summary = "summary"
     case experience = "experience"
@@ -47,7 +47,7 @@ enum SectionTitleGenerable: String {
 }
 
 @Generable(description: "")
-struct SectionGenerable {
+struct SectionGenerable: Decodable {
     @Guide(description: "Section title")
     let title: SectionTitleGenerable
     // TODO: Might need to specify the length of expected output. Right now its just too short
@@ -62,7 +62,7 @@ struct SectionGenerable {
 }
 
 @Generable(description: "")
-struct SectionsGenerable {
+struct SectionsGenerable: Decodable {
     @Guide(description: "List of CV Sections")
     let sections: [SectionGenerable]
 }
@@ -70,10 +70,10 @@ struct SectionsGenerable {
 struct SectionsAgentService: AgentProtocol {
     var languageModel: LanguageModelProtocol
 
-    init() {
-        languageModel = AppleIntelligenceService(
-            instructions: SECTIONS_INSTRUCTIONS_V1
-        )
+    init(languageModel: LanguageModelProtocol = AppleIntelligenceService()) {
+        self.languageModel = languageModel
+
+        self.languageModel.instructions = SECTIONS_INSTRUCTIONS_V1
     }
 
     func invoke(for message: String) async throws -> SectionsGenerable {

@@ -9,61 +9,47 @@ import Foundation
 import FoundationModels
 
 struct AppleIntelligenceService: LanguageModelProtocol {
-    var session: LanguageModelSession
+    var instructions: String
+    var temperature: Double
 
-    private let instructions: String
-    private let generationOptions: GenerationOptions
-
-    init(instructions: String) {
+    init(instructions: String = "", temperature: Double = 0.5) {
         self.instructions = instructions
-        self.session = LanguageModelSession(
+        self.temperature = temperature
+    }
+
+    private func getSession() async throws -> LanguageModelSession {
+        return LanguageModelSession(
             model: SystemLanguageModel(),
-            instructions: instructions
+            instructions: self.instructions
         )
-        self.generationOptions = .init()
     }
 
     func invoke(for message: String) async throws -> String {
-        return try await self.session.respond(
+        return try await self.getSession().respond(
             to: message,
-            options: self.generationOptions
+            options: .init(temperature: self.temperature)
         ).content
     }
-    func invoke<Content>(
-        generating type: Content.Type = Content.self,
-        @PromptBuilder prompt: () throws -> Prompt
-    ) async throws -> LanguageModelSession.Response<Content>
-    where Content: Generable {
-        return try await self.session.respond(
-            generating: type,
-            prompt: prompt
-        )
-    }
-
-    //    func invoke(for message: String, generating: any Generable.Type) {
-    //        return try await self.session.respond(
-    //            prompt: message,
-    //            generating: generating.self
-    //        ).content
-    //    }
 
     func generate<Content>(content type: Content.Type, for message: String)
-        async throws -> Content where Content: Generable
+        async throws -> Content where Content: Generable & Decodable
     {
-        return try await self.session.respond(to: message, generating: type)
-            .content
+        return try await self.getSession().respond(
+            to: message,
+            generating: type,
+            options: .init(temperature: self.temperature)
+        )
+        .content
     }
 
     func generate(schema: GenerationSchema, for message: String) async throws
         -> GeneratedContent
     {
-        return try await self.session.respond(to: message, schema: schema)
-            .content
-    }
-
-    func reset() {
-        // TODO: Reset the session
-        // For now it could not mutate object
-        // self.session = LanguageModelSession(instructions: self.instructions)
+        return try await self.getSession().respond(
+            to: message,
+            schema: schema,
+            options: .init(temperature: self.temperature)
+        )
+        .content
     }
 }

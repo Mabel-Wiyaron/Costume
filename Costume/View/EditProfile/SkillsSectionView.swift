@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SkillsSectionView: View {
     @Binding var skills: [Skill]
+    var isSaveEnabled: Bool = true // Add this property
     var onSave: (() -> Void)? = nil
 
     private let CARD_PADDING: CGFloat = 32
@@ -31,6 +32,7 @@ struct SkillsSectionView: View {
                         .tint(Color("PrimaryColor"))
                         .controlSize(.large)
                         .keyboardShortcut(.defaultAction)
+                        .disabled(!isSaveEnabled) // 👈 Controls button state
                 }
             }
         }
