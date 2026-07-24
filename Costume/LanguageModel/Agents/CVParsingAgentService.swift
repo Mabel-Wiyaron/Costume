@@ -91,7 +91,7 @@ struct CVExperienceGenerable: Codable {
     @Guide(description: "YYYY-MM")
     let startDate: String?
     
-    @Guide(description: "YYYY-MM or Present")
+    @Guide(description: "YYYY-MM or null")
     let endDate: String?
 }
 
@@ -100,7 +100,7 @@ struct CVEducationGenerable: Codable {
     @Guide(description: "Institution or university name")
     let school: String
     
-    @Guide(description: "Degree earned (e.g., Bachelor of Science)")
+    @Guide(description: "Degree earned")
     let degree: String
     
     @Guide(description: "Field or major of study")
@@ -109,16 +109,16 @@ struct CVEducationGenerable: Codable {
     @Guide(description: "Start year")
     let startDate: String?
     
-    @Guide(description: "End or graduation year")
+    @Guide(description: "End date or null")
     let endDate: String?
 }
 
 @Generable(description: "Project entry")
 struct CVProjectGenerable: Codable {
-    @Guide(description: "Candidate's role in the project")
+    @Guide(description: "role in the project")
     let role: String?
     
-    @Guide(description: "Project title or name")
+    @Guide(description: "Project title")
     let name: String
     
     @Guide(description: "Key details, metrics, and achievements as separate bullet points")
