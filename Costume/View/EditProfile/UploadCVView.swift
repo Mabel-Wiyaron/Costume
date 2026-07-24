@@ -9,25 +9,14 @@ import SwiftUI
 import UniformTypeIdentifiers
 import SwiftData
 
-enum CVParsingError: LocalizedError {
-    case cvTooLong
-    case invalidFormat
-    
-    var errorDescription: String? {
-        switch self {
-        case .cvTooLong:
-            return "The CV contains too many pages. Please upload a resume with 3 pages or fewer."
-        case .invalidFormat:
-            return "Failed to read the PDF format."
-        }
-    }
-}
-
 struct UploadCVView: View {
     @Bindable var viewModel: CVParsingViewModel
     
+    let sandboxedProfile: Profile
     let masterProfile: Profile
-    @Environment(\.modelContext) private var modelContext
+    let mainContext: ModelContext
+    
+    @Environment(\.modelContext) private var childContext
 
     @State private var isTargeted = false
     @State private var isImporterPresented = false
@@ -37,16 +26,17 @@ struct UploadCVView: View {
     private let CARD_PADDING: CGFloat = 32
     private let SECTION_SPACING: CGFloat = 24
     
-    init(viewModel: CVParsingViewModel, masterProfile: Profile) {
+    init(viewModel: CVParsingViewModel, sandboxedProfile: Profile, masterProfile: Profile, mainContext: ModelContext) {
         self._viewModel = Bindable(wrappedValue: viewModel)
+        self.sandboxedProfile = sandboxedProfile
         self.masterProfile = masterProfile
+        self.mainContext = mainContext
     }
-
+    
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: SECTION_SPACING) {
                 
-                // MARK: - Header
                 VStack(alignment: .leading, spacing: 12) {
                     SectionHeaderView(title: "Existing Master Resumé")
                     
@@ -55,15 +45,12 @@ struct UploadCVView: View {
                         .foregroundStyle(.secondary)
                 }
 
-                // MARK: - Dropzone Box
                 dropZoneView
                 
-                // MARK: - Footer Helper Text
                 Text("*Drop a PDF file here (5MB or less)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 
-                // Error indicator
                 if let displayError = errorMessage ?? viewModel.errorMessage {
                     Text(displayError)
                         .font(.caption)
@@ -82,7 +69,6 @@ struct UploadCVView: View {
         }
     }
 
-    // MARK: - Dropzone UI Component
     private var dropZoneView: some View {
         VStack(spacing: 16) {
             if viewModel.isProcessing {
@@ -134,21 +120,16 @@ struct UploadCVView: View {
         }
     }
 
-    // MARK: - File Handlers
-
     private func handleFileSelection(result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
             guard let url = urls.first else { return }
             processSelectedPDF(at: url)
         case .failure(let error):
-            // Match specific custom error enum
-            if let parsingError = error as? CVParsingError {
+            if let parsingError = error as? CVParsingAgentError {
                 switch parsingError {
-                case .cvTooLong:
+                case .cvTextTooLong:
                     self.errorMessage = "Your CV is too long. Please upload a shorter resume."
-                default:
-                    self.errorMessage = error.localizedDescription
                 }
             } else {
                 self.errorMessage = error.localizedDescription
@@ -185,7 +166,6 @@ struct UploadCVView: View {
     }
 
     private func processSelectedPDF(at url: URL) {
-        // Copy to temporary directory to prevent security permission loss
         let isScoped = url.startAccessingSecurityScopedResource()
         
         let destinationURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + "_" + url.lastPathComponent)
@@ -195,9 +175,7 @@ struct UploadCVView: View {
                 try FileManager.default.removeItem(at: destinationURL)
             }
             try FileManager.default.copyItem(at: url, to: destinationURL)
-        } catch {
-            // Fallback to original URL if copying fails
-        }
+        } catch {}
         
         if isScoped {
             url.stopAccessingSecurityScopedResource()
@@ -205,7 +183,6 @@ struct UploadCVView: View {
         
         let usableURL = FileManager.default.fileExists(atPath: destinationURL.path) ? destinationURL : url
 
-        // Check file size (5MB limit)
         if let resources = try? usableURL.resourceValues(forKeys: [.fileSizeKey]),
            let fileSize = resources.fileSize, fileSize > 5 * 1024 * 1024 {
             self.errorMessage = "File size exceeds 5MB limit."
@@ -215,15 +192,15 @@ struct UploadCVView: View {
         self.errorMessage = nil
         self.selectedFileName = usableURL.lastPathComponent
         
-        // Pass usable temporary URL to async parsing task
         Task {
             await viewModel.processDroppedCV(
                 fileURL: usableURL,
+                sandboxedProfile: sandboxedProfile,
                 masterProfile: masterProfile,
-                modelContext: modelContext
+                childContext: childContext,
+                mainContext: mainContext
             )
             
-            // Clean up temporary file after processing completes
             try? FileManager.default.removeItem(at: usableURL)
         }
     }

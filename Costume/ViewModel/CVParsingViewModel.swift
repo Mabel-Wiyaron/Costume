@@ -16,24 +16,31 @@ final class CVParsingViewModel {
     
     private let agent = CVParsingAgentService()
     
-    /// Main entry point: Processes a dropped PDF file URL and overwrites the master profile
     @MainActor
-    func processDroppedCV(fileURL: URL, masterProfile: Profile, modelContext: ModelContext) async {
+    func processDroppedCV(
+        fileURL: URL,
+        sandboxedProfile: Profile,
+        masterProfile: Profile,
+        childContext: ModelContext,
+        mainContext: ModelContext
+    ) async {
         isProcessing = true
         errorMessage = nil
         
         defer { isProcessing = false }
         
         do {
-            // 1. Extract text from PDF (PDFKit with Vision OCR fallback)
+            // 1. Extract raw text
             let rawText = try await CVTextExtractor.extractText(from: fileURL)
-            print(rawText)
             
-            // 2. Invoke Foundation Model Agent
+            // 2. Run Foundation Model Agent
             let dto = try await agent.invoke(for: rawText)
             
-            // 3. Map DTO onto master profile and save
-            overwrite(masterProfile: masterProfile, with: dto, in: modelContext)
+            // 3. Overwrite data in the child/sandbox context
+            overwrite(profile: sandboxedProfile, with: dto, in: childContext)
+            
+            // 4. Overwrite data in the main context & save disk store
+            overwrite(profile: masterProfile, with: dto, in: mainContext)
             
         } catch {
             self.errorMessage = error.localizedDescription
@@ -43,30 +50,29 @@ final class CVParsingViewModel {
     // MARK: - SwiftData Master Profile Mapping
 
     @MainActor
-    private func overwrite(masterProfile: Profile, with generable: CVImportGenerable, in context: ModelContext) {
-        masterProfile.name = generable.name
-        masterProfile.email = generable.email
-        masterProfile.phone = generable.phone
-        masterProfile.location = generable.location
+    private func overwrite(profile: Profile, with generable: CVImportGenerable, in context: ModelContext) {
+        profile.name = generable.name
+        profile.email = generable.email
+        profile.phone = generable.phone
+        profile.location = generable.location
         
-        // Convert string representations to Swift URL objects
         if let linkedinString = generable.linkedin, let url = URL(string: linkedinString) {
-            masterProfile.linkedin = url
+            profile.linkedin = url
         } else {
-            masterProfile.linkedin = nil
+            profile.linkedin = nil
         }
         
         if let websiteString = generable.website, let url = URL(string: websiteString) {
-            masterProfile.website = url
+            profile.website = url
         } else {
-            masterProfile.website = nil
+            profile.website = nil
         }
         
-        masterProfile.summary = generable.summary
+        profile.summary = generable.summary
         
-        // Clear & overwrite Experiences
-        masterProfile.experiences.forEach { context.delete($0) }
-        masterProfile.experiences.removeAll()
+        // Clear & re-insert Experiences
+        profile.experiences.forEach { context.delete($0) }
+        profile.experiences.removeAll()
         generable.experiences.forEach { exp in
             let newExp = Experience(
                 role: exp.role,
@@ -77,12 +83,13 @@ final class CVParsingViewModel {
                 endDate: parseDate(exp.endDate),
                 descriptionText: exp.descriptionText?.components(separatedBy: "\n") ?? []
             )
-            masterProfile.experiences.append(newExp)
+            context.insert(newExp)
+            profile.experiences.append(newExp)
         }
-        
-        // Clear & overwrite Educations
-        masterProfile.educations.forEach { context.delete($0) }
-        masterProfile.educations.removeAll()
+
+        // Clear & re-insert Educations
+        profile.educations.forEach { context.delete($0) }
+        profile.educations.removeAll()
         generable.educations.forEach { edu in
             let newEdu = Education(
                 school: edu.school,
@@ -91,12 +98,13 @@ final class CVParsingViewModel {
                 startDate: parseDate(edu.startDate) ?? Date(),
                 endDate: parseDate(edu.endDate)
             )
-            masterProfile.educations.append(newEdu)
+            context.insert(newEdu)
+            profile.educations.append(newEdu)
         }
-        
-        // Clear & overwrite Projects
-        masterProfile.projects.forEach { context.delete($0) }
-        masterProfile.projects.removeAll()
+
+        // Clear & re-insert Projects
+        profile.projects.forEach { context.delete($0) }
+        profile.projects.removeAll()
         generable.projects.forEach { proj in
             let newProj = Project(
                 role: proj.role ?? "",
@@ -105,12 +113,13 @@ final class CVParsingViewModel {
                 endDate: parseDate(proj.endDate),
                 descriptionText: proj.descriptionText
             )
-            masterProfile.projects.append(newProj)
+            context.insert(newProj)
+            profile.projects.append(newProj)
         }
-        
-        // Clear & overwrite Certifications
-        masterProfile.certifications.forEach { context.delete($0) }
-        masterProfile.certifications.removeAll()
+
+        // Clear & re-insert Certifications
+        profile.certifications.forEach { context.delete($0) }
+        profile.certifications.removeAll()
         generable.certifications.forEach { cert in
             let newCert = Certification(
                 name: cert.name,
@@ -118,39 +127,48 @@ final class CVParsingViewModel {
                 issueDate: parseDate(cert.issueDate) ?? Date(),
                 credentialID: cert.credentialID ?? ""
             )
-            masterProfile.certifications.append(newCert)
+            context.insert(newCert)
+            profile.certifications.append(newCert)
         }
 
-        // Clear & overwrite Awards
-        masterProfile.awards.forEach { context.delete($0) }
-        masterProfile.awards.removeAll()
+        // Clear & re-insert Awards
+        profile.awards.forEach { context.delete($0) }
+        profile.awards.removeAll()
         generable.awards.forEach { award in
             let newAward = Award(
                 title: award.title,
                 issuer: award.issuer,
                 issueDate: parseDate(award.issueDate) ?? Date()
             )
-            masterProfile.awards.append(newAward)
-        }
-        
-        // Clear & overwrite Skills
-        masterProfile.skills.forEach { context.delete($0) }
-        masterProfile.skills.removeAll()
-        generable.skills.forEach { skillName in
-            masterProfile.skills.append(Skill(name: skillName))
+            context.insert(newAward)
+            profile.awards.append(newAward)
         }
 
-        // Clear & overwrite Languages
-        masterProfile.languages.forEach { context.delete($0) }
-        masterProfile.languages.removeAll()
+        // Clear & re-insert Skills
+        profile.skills.forEach { context.delete($0) }
+        profile.skills.removeAll()
+        generable.skills.forEach { skillName in
+            let newSkill = Skill(name: skillName)
+            context.insert(newSkill)
+            profile.skills.append(newSkill)
+        }
+
+        // Clear & re-insert Languages
+        profile.languages.forEach { context.delete($0) }
+        profile.languages.removeAll()
         generable.languages.forEach { lang in
-            masterProfile.languages.append(Language(name: lang.name, proficiency: lang.proficiency ?? ""))
+            let newLang = Language(name: lang.name, proficiency: lang.proficiency ?? "")
+            context.insert(newLang)
+            profile.languages.append(newLang)
         }
         
-        try? context.save()
+        do {
+            try context.save()
+        } catch {
+            print("Failed to save context: \(error)")
+        }
     }
-    // MARK: - Date Parsing Helper
-    
+
     private func parseDate(_ dateString: String?) -> Date? {
         guard let dateString = dateString, !dateString.isEmpty else { return nil }
         
