@@ -91,6 +91,10 @@ struct JobDescriptionGenerable: Codable {
     let keywords: [String]
 }
 
+extension JobDescriptionGenerable: SchemaDescribing {
+    static let propertyDescriptions = JOB_DESCRIPTION_SCHEMA_DESCRIPTIONS_V1
+}
+
 enum JobDescriptionAgentError: Error {
     case jobDescriptionTooLong
 }
