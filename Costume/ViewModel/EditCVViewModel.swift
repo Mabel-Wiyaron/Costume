@@ -10,15 +10,15 @@ import SwiftData
 import Observation
 
 enum CVAnalysisTab: String, CaseIterable, Identifiable {
-    case jobDescriptionAnalysis
     case resumePreview
+    case jobDescriptionAnalysis
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .jobDescriptionAnalysis: return "Job Description Analysis"
         case .resumePreview: return "Resumé Preview"
+        case .jobDescriptionAnalysis: return "Job Description Analysis"
         }
     }
 }
@@ -27,7 +27,7 @@ enum CVAnalysisTab: String, CaseIterable, Identifiable {
 final class EditCVViewModel {
     var document: CVDocument
     var jobDescription: JobDescription?
-    var selectedRightTab: CVAnalysisTab = .jobDescriptionAnalysis
+    var selectedRightTab: CVAnalysisTab = .resumePreview
 
     private let modelContext: ModelContext?
 
