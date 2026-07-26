@@ -102,8 +102,11 @@ extension SectionsGenerable: SchemaDescribing {
 struct SectionsAgentService: AgentProtocol {
     var languageModel: LanguageModelProtocol
 
+    // TODO: Remove the hardcoded model once finished dealing with enum response_format issue
     init(languageModel: LanguageModelProtocol = AppleIntelligenceService()) {
-        self.languageModel = languageModel
+        self.languageModel = AppleIntelligenceService(
+            temperature: languageModel.temperature,
+        )
 
         self.languageModel.instructions = SECTIONS_INSTRUCTIONS_V1
     }
