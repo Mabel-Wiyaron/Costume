@@ -1,5 +1,3 @@
-//  EditProfileView.swift
-
 import SwiftData
 import SwiftUI
 
@@ -8,6 +6,7 @@ struct EditProfileView: View {
     
     var profile: Profile? = nil
     @State private var viewModel: EditProfileViewModel? = nil
+    @State private var cvViewModel: CVParsingViewModel? = nil
 
     private let OUTER_PADDING: CGFloat = 40
     private let CARD_MAX_WIDTH: CGFloat = 800
@@ -31,7 +30,22 @@ struct EditProfileView: View {
                     ScrollView {
                         VStack(alignment: .leading) {
                             switch bindableVM.selectedSection {
-                            case .personalInfo, .none:
+                            case .uploadCV, .none:
+                                if let cvViewModel = cvViewModel {
+                                    // 1. Fetch mainContext profile
+                                    let mainProfile = (try? mainContext.model(for: vm.profile.persistentModelID) as? Profile) ?? vm.profile
+                                        
+                                    // 2. Pass both sandboxedProfile (child context) & mainProfile (main context)
+                                    UploadCVView(
+                                        viewModel: cvViewModel,
+                                        sandboxedProfile: vm.profile,
+                                        masterProfile: mainProfile,
+                                        mainContext: mainContext
+                                    )
+                                } else {
+                                    ProgressView("Initializing parser...")
+                                }
+                            case .personalInfo:
                                 PersonalInfoFormView(viewModel: vm)
                             case .education:
                                 EducationSectionView(viewModel: vm)
@@ -65,7 +79,8 @@ struct EditProfileView: View {
     private func setupViewModel() {
         guard viewModel == nil else { return }
         
-        // 1. Fetch/Find target profile from main context
+        self.cvViewModel = CVParsingViewModel()
+
         let targetProfile: Profile
         if let profile = profile {
             targetProfile = profile
@@ -82,23 +97,28 @@ struct EditProfileView: View {
             } else {
                 let newProfile = Profile(name: "", email: "", location: "", phone: "")
                 mainContext.insert(newProfile)
+                try? mainContext.save()
                 targetProfile = newProfile
             }
         }
-        
-        // 2. Create an isolated Child Context (Sandboxed Draft)
+
         let childContext = ModelContext(mainContext.container)
-        
-        // Disable autosave explicitly on the draft context
         childContext.autosaveEnabled = false
-        
-        // 3. Fetch the sandboxed instance of the profile
+
         let targetID = targetProfile.persistentModelID
+        let activeViewModel: EditProfileViewModel
+
         if let sandboxedProfile = childContext.model(for: targetID) as? Profile {
-            self.viewModel = EditProfileViewModel(profile: sandboxedProfile, modelContext: childContext)
+            activeViewModel = EditProfileViewModel(profile: sandboxedProfile, modelContext: childContext)
         } else {
-            // Fallback if sandboxing isn't available
-            self.viewModel = EditProfileViewModel(profile: targetProfile, modelContext: mainContext)
+            activeViewModel = EditProfileViewModel(profile: targetProfile, modelContext: mainContext)
         }
+
+        let hasMasterProfileData = !targetProfile.name.trimmingCharacters(in: .whitespaces).isEmpty ||
+                                   !targetProfile.email.trimmingCharacters(in: .whitespaces).isEmpty
+
+        activeViewModel.selectedSection = hasMasterProfileData ? .personalInfo : .uploadCV
+
+        self.viewModel = activeViewModel
     }
 }
