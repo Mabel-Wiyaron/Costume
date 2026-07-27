@@ -24,10 +24,10 @@ struct EditProfileView: View {
                 ProgressView()
             }
         } detail: {
-            ZStack {
+            ZStack(alignment: .top) {
                 Color("BackgroundColor")
                     .ignoresSafeArea()
-
+                
                 if let vm = viewModel {
                     @Bindable var bindableVM = vm
                     
@@ -37,7 +37,7 @@ struct EditProfileView: View {
                             case .uploadCV, .none:
                                 if let cvViewModel = cvViewModel {
                                     let mainProfile = (try? mainContext.model(for: vm.profile.persistentModelID) as? Profile) ?? vm.profile
-                                        
+                                    
                                     UploadCVView(
                                         viewModel: cvViewModel,
                                         sandboxedProfile: vm.profile,
@@ -54,7 +54,7 @@ struct EditProfileView: View {
                             case .experience:
                                 ExperienceSectionView(viewModel: vm)
                             case .skills:
-                                SkillsSectionView(skills: $bindableVM.profile.skills, isSaveEnabled: vm.isSkillsSaveEnabled, onSave: vm.save)
+                                SkillsSectionView(skills: $bindableVM.profile.skills, isSaveEnabled: vm.isSkillsSaveEnabled, onSave: vm.saveWithConfirmation)
                             case .project:
                                 ProjectSectionView(viewModel: vm)
                             case .certification:
@@ -67,10 +67,21 @@ struct EditProfileView: View {
                         .padding(OUTER_PADDING)
                         .frame(maxWidth: .infinity, alignment: .top)
                     }
+                    
+                    if vm.showSaveConfirmation {
+                        SaveConfirmationToast()
+                            .frame(maxWidth: CARD_MAX_WIDTH)
+                            .padding(.horizontal, OUTER_PADDING)
+                            .padding(.top, OUTER_PADDING)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                            .zIndex(1)
+                            .allowsHitTesting(false)
+                    }
                 } else {
                     ProgressView()
                 }
             }
+            .animation(.easeInOut(duration: 0.25), value: viewModel?.showSaveConfirmation)
         }
         .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 300)
         .navigationBarBackButtonHidden(true)

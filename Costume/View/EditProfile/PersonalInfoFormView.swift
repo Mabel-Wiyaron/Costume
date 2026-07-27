@@ -105,7 +105,7 @@ struct PersonalInfoFormView: View {
                 HStack {
                     Spacer()
                     Button("Save") {
-                        viewModel.save()
+                        viewModel.saveWithConfirmation()
                     }
                     .buttonStyle(.borderedProminent)
                     .tint(Color("AppPrimaryColor"))

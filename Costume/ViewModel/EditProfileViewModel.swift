@@ -28,6 +28,9 @@ final class EditProfileViewModel {
     
     var isAwardModalPresented: Bool = false
     var awardBeingEdited: Award? = nil
+    
+    var showSaveConfirmation: Bool = false
+    private var saveConfirmationTask: Task<Void, Never>?
 
     // --- SNAPSHOT UNTUK STRATEGI PENGUNCIAN TOMBOL SIMPAN ---
     private var lastSavedSnapshot: ProfileSnapshot
@@ -102,6 +105,18 @@ final class EditProfileViewModel {
         try? modelContext.save()
         // Perbarui acuan snapshot setelah penyimpanan berhasil dilakukan
         lastSavedSnapshot = ProfileSnapshot(from: profile)
+    }
+    
+    @MainActor
+    func saveWithConfirmation() {
+        save()
+        saveConfirmationTask?.cancel()
+        showSaveConfirmation = true
+        saveConfirmationTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            guard !Task.isCancelled else { return }
+            showSaveConfirmation = false
+        }
     }
     
     func discardChanges() {
