@@ -60,7 +60,7 @@ struct JobDescInputFormView: View {
                                     .overlay(
                                         RoundedRectangle(cornerRadius: TEXT_EDITOR_CORNER_RADIUS)
                                             .stroke(
-                                                isFocused ? Color.accentColor : Color.black.opacity(0.2),
+                                                isFocused ? Color("AppAccentColor") : Color.black.opacity(0.2),
                                                 lineWidth: isFocused ? BORDER_WIDTH_FOCUSED : BORDER_WIDTH_UNFOCUSED
                                             )
                                     )
@@ -78,7 +78,7 @@ struct JobDescInputFormView: View {
                             Text("\(jobDescription.count) / \(MAX_CHARACTER_LIMIT)")
                                 .font(.caption)
                                 .fontWeight(.medium)
-                                .foregroundStyle(jobDescription.count >= MAX_CHARACTER_LIMIT ? .red : .secondary)
+                                .foregroundStyle(jobDescription.count >= MAX_CHARACTER_LIMIT ? .red : .gray)
                         }
                         
                         Button(action: {
@@ -91,7 +91,7 @@ struct JobDescInputFormView: View {
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: BUTTON_HEIGHT)
-                                .background(jobDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color("PrimaryColor").opacity(0.5) : Color("PrimaryColor"))
+                                .background(jobDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? Color("AppPrimaryColor").opacity(0.5) : Color("AppPrimaryColor"))
                                 .clipShape(RoundedRectangle(cornerRadius: BUTTON_CORNER_RADIUS))
                         }
                         .disabled(jobDescExtVM.isSubmitDisabled(for: jobDescription))

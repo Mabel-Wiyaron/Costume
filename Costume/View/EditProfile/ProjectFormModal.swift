@@ -102,7 +102,11 @@ struct ProjectFormModal: View {
             )
             .focused($focusedField, equals: .website)
 
-            LabeledTextEditor(label: "Description", text: $descriptionText)
+            LabeledTextEditor(
+                label: "Description",
+                helperText: "Explain what you did, the skills you used, and what you accomplished in this role. Whenever possible, quantify your accomplishments using numbers and percentages.",
+                text: $descriptionText
+            )
 
             HStack {
                 if let onDelete {
@@ -127,7 +131,7 @@ struct ProjectFormModal: View {
                     onSave(name, role, startDate, endDate, website, lines)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(Color("PrimaryColor"))
+                .tint(Color("AppPrimaryColor"))
                 .controlSize(.large)
                 .keyboardShortcut(.defaultAction)
                 .disabled(!isSaveEnabled)

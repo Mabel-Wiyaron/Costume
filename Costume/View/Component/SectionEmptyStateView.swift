@@ -22,7 +22,7 @@ struct SectionEmptyStateView: View {
                 .frame(height: IMAGE_HEIGHT)
             Text(message)
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color("AppSecondaryColor"))
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, VERTICAL_PADDING)

@@ -20,7 +20,7 @@ struct SidebarRow: View {
         Button(action: action) {
             Label(section.title, systemImage: section.iconName)
                 .font(.title3)
-                .foregroundStyle(isSelected ? Color("PrimaryColor") : Color.white)
+                .foregroundStyle(isSelected ? Color("AppPrimaryColor") : Color.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .contentShape(Rectangle())
                 .padding(.vertical, VERTICAL_PADDING)

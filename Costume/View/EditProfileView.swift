@@ -8,6 +8,9 @@ struct EditProfileView: View {
     @State private var viewModel: EditProfileViewModel? = nil
     @State private var cvViewModel: CVParsingViewModel? = nil
 
+    @State private var pendingSection: ProfileSection? = nil
+    @State private var isUnsavedChangesAlertPresented = false
+
     private let OUTER_PADDING: CGFloat = 40
     private let CARD_MAX_WIDTH: CGFloat = 800
 
@@ -15,7 +18,10 @@ struct EditProfileView: View {
         NavigationSplitView {
             if let vm = viewModel {
                 @Bindable var bindableVM = vm
-                ProfileSidebarView(selectedSection: $bindableVM.selectedSection)
+                ProfileSidebarView(
+                    selectedSection: $bindableVM.selectedSection,
+                    onSelect: { section in attemptNavigate(to: section) }
+                )
             } else {
                 ProgressView()
             }
@@ -32,10 +38,8 @@ struct EditProfileView: View {
                             switch bindableVM.selectedSection {
                             case .uploadCV, .none:
                                 if let cvViewModel = cvViewModel {
-                                    // 1. Fetch mainContext profile
                                     let mainProfile = (try? mainContext.model(for: vm.profile.persistentModelID) as? Profile) ?? vm.profile
                                         
-                                    // 2. Pass both sandboxedProfile (child context) & mainProfile (main context)
                                     UploadCVView(
                                         viewModel: cvViewModel,
                                         sandboxedProfile: vm.profile,
@@ -74,6 +78,40 @@ struct EditProfileView: View {
         .onAppear {
             setupViewModel()
         }
+        .alert("Save changes to your profile?", isPresented: $isUnsavedChangesAlertPresented) {
+            Button("Save") {
+                viewModel?.save()
+                commitPendingNavigation()
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(Color("AppPrimaryColor"))
+            Button("Discard Changes", role: .destructive) {
+                viewModel?.discardChanges()
+                commitPendingNavigation()
+            }
+            Button("Cancel", role: .cancel) {
+                pendingSection = nil
+            }
+        } message: {
+            Text("Your changes will be lost if you don't save them.")
+        }
+    }
+
+    private func attemptNavigate(to section: ProfileSection) {
+        guard let vm = viewModel, section != vm.selectedSection else { return }
+        if vm.hasUnsavedChanges {
+            pendingSection = section
+            isUnsavedChangesAlertPresented = true
+        } else {
+            vm.selectedSection = section
+        }
+    }
+
+    private func commitPendingNavigation() {
+        if let pendingSection {
+            viewModel?.selectedSection = pendingSection
+        }
+        pendingSection = nil
     }
 
     private func setupViewModel() {

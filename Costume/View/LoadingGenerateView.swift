@@ -18,7 +18,7 @@ struct LoadingGenerateView: View {
                 .ignoresSafeArea()
             
             CustomHeaderShape()
-                .fill(Color(.primary))
+                .fill(Color("AppPrimaryColor"))
                 .frame(height: 300)
                 .ignoresSafeArea(edges: .top)
             
@@ -64,7 +64,7 @@ struct LoadingGenerateView: View {
                     ProgressView(value: loadingProgress, total: 100)
                         .progressViewStyle(.linear)
                         .frame(width: 320)
-                        .tint(.accent)
+                        .tint(Color("AppAccentColor"))
                         .padding(.top, -10)
                         .padding(.horizontal, 100)
                     

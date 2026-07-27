@@ -12,7 +12,7 @@ struct NewResumeCard: View {
         VStack(spacing: 12) {
             Image(systemName: "plus")
                 .font(.system(size: 50, weight: .medium))
-                .foregroundColor(.accentColor)
+                .foregroundColor(Color("AppAccentColor"))
 
             Text("New Resumé")
                 .font(.title)
@@ -24,7 +24,7 @@ struct NewResumeCard: View {
         .cornerRadius(12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.accent)
+                .fill(Color("AppAccentColor"))
                 .offset(y:8)
             )
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)

@@ -35,11 +35,11 @@ struct LabeledPicker<Option: Hashable & CaseIterable>: View {
             } label: {
                 HStack {
                     Text(optionTitle(selection))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(Color("TextColor"))
                     Spacer()
                     Image(systemName: "chevron.down")
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.gray)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(12)

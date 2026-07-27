@@ -10,7 +10,9 @@ import SwiftUI
 struct LabeledTextEditor: View {
     let label: String
     var isRequired: Bool = false
+    var helperText: String = ""
     @Binding var text: String
+    var maxCharacters: Int = 1000
     
     @FocusState var isFocused: Bool
 
@@ -30,6 +32,11 @@ struct LabeledTextEditor: View {
                         .foregroundStyle(.red)
                 }
             }
+            if !helperText.isEmpty {
+                Text(helperText)
+                    .font(.footnote)
+                    .foregroundStyle(.gray)
+            }
             TextEditor(text: $text)
                 .focused($isFocused)
                 .font(.body)
@@ -38,9 +45,22 @@ struct LabeledTextEditor: View {
                 .padding(12)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(currentBorderColor, lineWidth: isFocused ? 2 : 1)
+                        .stroke(
+                            currentBorderColor,
+                            lineWidth: isFocused ? 2 : 1
+                        )
                 )
                 .animation(.easeInOut(duration: 0.2), value: isFocused)
+                .onChange(of: text) { oldValue, newValue in
+                    guard newValue.count > maxCharacters else { return }
+                    text = String(newValue.prefix(maxCharacters))
+                }
+            Text("\(text.count) / \(maxCharacters)")
+                .font(.caption)
+                .foregroundStyle(
+                    text.count >= maxCharacters ? .red : .gray
+                )
+                .frame(maxWidth: .infinity, alignment: .trailing)
         }
     }
     

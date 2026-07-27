@@ -71,7 +71,7 @@ struct JobDescriptionAnalysisView: View {
                 
                 Button(action: { showKeywordPopover.toggle() }) {
                     Image(systemName: "questionmark.circle")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.gray)
                 }
                 .buttonStyle(.plain)
                 .popover(isPresented: $showKeywordPopover, arrowEdge: .top) {
@@ -91,7 +91,7 @@ struct JobDescriptionAnalysisView: View {
             if jobDescription.keywords.isEmpty {
                 Text("No keywords extracted yet.")
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color("TextColor"))
             } else {
                 FlowLayout(spacing: TAG_SPACING) {
                     ForEach(jobDescription.keywords) { keyword in
@@ -109,7 +109,7 @@ struct JobDescriptionAnalysisView: View {
                 .frame(width: 10, height: 10)
             Text(status.legendLabel)
                 .font(.footnote)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color("TextColor"))
         }
     }
 
@@ -122,7 +122,7 @@ struct JobDescriptionAnalysisView: View {
                 
                 Button(action: { showOriginalPopover.toggle() }) {
                     Image(systemName: "questionmark.circle")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.gray)
                 }
                 .buttonStyle(.plain)
                 .popover(isPresented: $showOriginalPopover, arrowEdge: .top) {
@@ -134,7 +134,7 @@ struct JobDescriptionAnalysisView: View {
             }
             Text(jobDescription.content)
                 .font(.body)
-                .foregroundStyle(.primary)
+                .foregroundStyle(Color("TextColor"))
         }
     }
 
@@ -145,7 +145,7 @@ struct JobDescriptionAnalysisView: View {
                 .fontWeight(.bold)
             Text("Paste a job description for this CV to see the AI keyword analysis here.")
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(Color("AppSecondaryColor"))
         }
     }
 }
