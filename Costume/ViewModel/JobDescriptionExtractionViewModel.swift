@@ -164,6 +164,18 @@ final class JobDescriptionExtractionViewModel {
         
         context.insert(newProfile)
         
+        var skillCopies: [ObjectIdentifier: Skill] = [:]
+        func copiedSkills(_ originals: [Skill]) -> [Skill] {
+            originals.map { original in
+                let key = ObjectIdentifier(original)
+                if let existing = skillCopies[key] { return existing }
+                let copy = Skill(name: original.name)
+                context.insert(copy)
+                skillCopies[key] = copy
+                return copy
+            }
+        }
+        
         newProfile.links = profile.links.map { link in
             let newLink = ProfileLink(platform: link.platform, url: link.url)
             context.insert(newLink)
@@ -179,7 +191,7 @@ final class JobDescriptionExtractionViewModel {
                 startDate: exp.startDate,
                 endDate: exp.endDate,
                 descriptionText: exp.descriptionText,
-                skills: exp.skills
+                skills: copiedSkills(exp.skills)
             )
             context.insert(newExp)
             return newExp
@@ -193,7 +205,7 @@ final class JobDescriptionExtractionViewModel {
                 startDate: edu.startDate,
                 endDate: edu.endDate,
                 grade: edu.grade,
-                skills: edu.skills
+                skills: copiedSkills(edu.skills)
             )
             context.insert(newEdu)
             return newEdu
@@ -207,7 +219,7 @@ final class JobDescriptionExtractionViewModel {
                 expirationDate: cert.expirationDate,
                 credentialID: cert.credentialID,
                 credentialURL: cert.credentialURL,
-                skills: cert.skills
+                skills: copiedSkills(cert.skills)
             )
             context.insert(newCert)
             return newCert
@@ -221,7 +233,7 @@ final class JobDescriptionExtractionViewModel {
                 endDate: proj.endDate,
                 website: proj.website,
                 descriptionText: proj.descriptionText,
-                skills: proj.skills
+                skills: copiedSkills(proj.skills)
             )
             context.insert(newProj)
             return newProj
@@ -246,7 +258,7 @@ final class JobDescriptionExtractionViewModel {
             return newLang
         }
         
-        newProfile.skills = profile.skills
+        newProfile.skills = copiedSkills(profile.skills)
         
         return newProfile
     }
