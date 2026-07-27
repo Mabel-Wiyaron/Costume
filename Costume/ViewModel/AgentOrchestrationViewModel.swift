@@ -6,9 +6,15 @@
 //
 
 import Foundation
+import SwiftUI
 
 @Observable
 final class AgentOrchestrationViewModel {
+    @AppStorage("useExternalAPI") private var persistedUseExternalAPI = false
+    @AppStorage("externalAPIBaseURL") private var persistedBaseURL = ""
+    @AppStorage("externalAPIKey") private var persistedApiKey = ""
+    @AppStorage("externalAPIModel") private var persistedModel = ""
+
     // MARK: - Agents
     let sectionsAgent: SectionsAgentService = .init()
 
@@ -161,6 +167,18 @@ final class AgentOrchestrationViewModel {
         }
 
         return profile
+    }
+
+    func getLanguageModel() async -> LanguageModelProtocol {
+        if persistedUseExternalAPI {
+            return OpenAIService(
+                endpoint: URL(string: persistedBaseURL)!,
+                apiKey: persistedApiKey,
+                model: persistedModel
+            )
+        }
+
+        return AppleIntelligenceService()
     }
 
     func runProfileAgent(for message: String) async throws -> ProfileGenerable {
