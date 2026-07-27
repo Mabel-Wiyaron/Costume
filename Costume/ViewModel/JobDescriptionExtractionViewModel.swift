@@ -7,9 +7,15 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 
 @Observable
 final class JobDescriptionExtractionViewModel {
+    @AppStorage("useExternalAPI") private var persistedUseExternalAPI = false
+    @AppStorage("externalAPIBaseURL") private var persistedBaseURL = ""
+    @AppStorage("externalAPIKey") private var persistedApiKey = ""
+    @AppStorage("externalAPIModel") private var persistedModel = ""
+
     var isLoading: Bool = false
     var isFinished: Bool = false
     var createdProfile: Profile? = nil
@@ -253,5 +259,26 @@ final class JobDescriptionExtractionViewModel {
     
     func isSubmitDisabled(for text: String) -> Bool {
         isLoading || text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
+    func getLanguageModel() async -> LanguageModelProtocol {
+        if persistedUseExternalAPI {
+            return OpenAIService(
+                endpoint: URL(string: persistedBaseURL)!,
+                apiKey: persistedApiKey,
+                model: persistedModel
+            )
+        }
+
+        return AppleIntelligenceService()
+    }
+
+    func runJobDescriptionAgent(for message: String) async throws -> JobDescriptionGenerable
+    {
+        let jobDescriptionAgent: JobDescriptionAgentService = .init(
+            languageModel: await getLanguageModel()
+        )
+
+        return try await jobDescriptionAgent.invoke(for: message)
     }
 }
