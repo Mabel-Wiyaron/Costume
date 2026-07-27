@@ -10,10 +10,10 @@ import SwiftUI
 
 @Observable
 final class AgentOrchestrationViewModel {
-    @AppStorage("useExternalAPI") private var persistedUseExternalAPI = false
-    @AppStorage("externalAPIBaseURL") private var persistedBaseURL = ""
-    @AppStorage("externalAPIKey") private var persistedApiKey = ""
-    @AppStorage("externalAPIModel") private var persistedModel = ""
+    @ObservationIgnored @AppStorage("useExternalAPI") private var persistedUseExternalAPI = false
+    @ObservationIgnored @AppStorage("externalAPIBaseURL") private var persistedBaseURL = ""
+    @ObservationIgnored @AppStorage("externalAPIKey") private var persistedApiKey = ""
+    @ObservationIgnored @AppStorage("externalAPIModel") private var persistedModel = ""
 
     // MARK: - Agents
     let sectionsAgent: SectionsAgentService = .init()

@@ -11,10 +11,10 @@ import SwiftUI
 
 @Observable
 final class JobDescriptionExtractionViewModel {
-    @AppStorage("useExternalAPI") private var persistedUseExternalAPI = false
-    @AppStorage("externalAPIBaseURL") private var persistedBaseURL = ""
-    @AppStorage("externalAPIKey") private var persistedApiKey = ""
-    @AppStorage("externalAPIModel") private var persistedModel = ""
+    @ObservationIgnored @AppStorage("useExternalAPI") private var persistedUseExternalAPI = false
+    @ObservationIgnored @AppStorage("externalAPIBaseURL") private var persistedBaseURL = ""
+    @ObservationIgnored @AppStorage("externalAPIKey") private var persistedApiKey = ""
+    @ObservationIgnored @AppStorage("externalAPIModel") private var persistedModel = ""
 
     var isLoading: Bool = false
     var isFinished: Bool = false
@@ -27,7 +27,7 @@ final class JobDescriptionExtractionViewModel {
     var modelContext: ModelContext?
 
     func extract(from text: String) async throws -> JobDescriptionGenerable {
-        return try await agentService.invoke(for: text)
+        return try await runJobDescriptionAgent(for: text)
     }
     
     @MainActor
@@ -281,4 +281,6 @@ final class JobDescriptionExtractionViewModel {
 
         return try await jobDescriptionAgent.invoke(for: message)
     }
+
 }
+
