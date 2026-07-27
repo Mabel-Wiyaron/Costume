@@ -33,7 +33,7 @@ final class AgentOrchestrationViewModel {
         for jobDescription: JobDescriptionGenerable,
         from profile: Profile
     ) async throws -> Profile {
-        let sections: SectionsGenerable = try await sectionsAgent.invoke(
+        let sections: SectionsGenerable = try await runSectionsAgent(
             for: SECTIONS_PROMPT_TEMPLATE_V1(
                 jobDescription.role,
                 jobDescription.abstract,
@@ -181,6 +181,15 @@ final class AgentOrchestrationViewModel {
         return AppleIntelligenceService()
     }
 
+    func runSectionsAgent(for message: String) async throws -> SectionsGenerable
+    {
+        let sectionsAgent: SectionsAgentService = .init(
+            languageModel: await getLanguageModel()
+        )
+
+        return try await sectionsAgent.invoke(for: message)
+    }
+
     func runProfileAgent(for message: String) async throws -> ProfileGenerable {
         let profileAgent: ProfileAgentService = .init()
 
@@ -196,7 +205,9 @@ final class AgentOrchestrationViewModel {
     func runExperienceAgent(for message: String) async throws
         -> ExperienceGenerable
     {
-        let experienceAgent: ExperienceAgentService = .init()
+        let experienceAgent: ExperienceAgentService = .init(
+            languageModel: await getLanguageModel()
+        )
 
         return try await experienceAgent.invoke(for: message)
     }
@@ -216,7 +227,9 @@ final class AgentOrchestrationViewModel {
     }
 
     func runProjectAgent(for message: String) async throws -> ProjectGenerable {
-        let projectAgent: ProjectAgentService = .init()
+        let projectAgent: ProjectAgentService = .init(
+            languageModel: await getLanguageModel()
+        )
 
         return try await projectAgent.invoke(for: message)
     }
