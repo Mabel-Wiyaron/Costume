@@ -57,7 +57,7 @@ let SECTIONS_SCHEMA_DESCRIPTIONS_V1: [String: String] = [
 ]
 
 @Generable(description: "")
-enum SectionTitleGenerable: String, Decodable {
+enum SectionTitleGenerable: String, Decodable, CaseIterable {
     case profile = "profile"
     case summary = "summary"
     case experience = "experience"
@@ -85,17 +85,28 @@ struct SectionGenerable: Decodable {
     let keywords: [String]
 }
 
+extension SectionGenerable: SchemaDescribing {
+    static let propertyDescriptions = SECTION_SCHEMA_DESCRIPTIONS_V1
+}
+
 @Generable(description: "")
 struct SectionsGenerable: Decodable {
     @Guide(description: SECTIONS_LIST_V1, .count(4))
     let sections: [SectionGenerable]
 }
 
+extension SectionsGenerable: SchemaDescribing {
+    static let propertyDescriptions = SECTIONS_SCHEMA_DESCRIPTIONS_V1
+}
+
 struct SectionsAgentService: AgentProtocol {
     var languageModel: LanguageModelProtocol
 
+    // TODO: Remove the hardcoded model once finished dealing with enum response_format issue
     init(languageModel: LanguageModelProtocol = AppleIntelligenceService()) {
-        self.languageModel = languageModel
+        self.languageModel = AppleIntelligenceService(
+            temperature: languageModel.temperature,
+        )
 
         self.languageModel.instructions = SECTIONS_INSTRUCTIONS_V1
     }

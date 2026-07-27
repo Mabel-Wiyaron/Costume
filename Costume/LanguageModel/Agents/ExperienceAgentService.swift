@@ -58,6 +58,12 @@ struct ExperienceGenerable: Decodable {
     let descriptions: [String]
 }
 
+extension ExperienceGenerable: SchemaDescribing {
+    static let propertyDescriptions: [String: String] = [
+        "descriptions": EXPERIENCE_DESCRIPTIONS_V1
+    ]
+}
+
 struct ExperienceAgentService: AgentProtocol {
     var languageModel: LanguageModelProtocol
 
