@@ -87,7 +87,7 @@ struct AnalysisPanelView: View {
                         .disabled(zoomScale >= 1.5)
                         .help("Zoom In")
 
-                        Button("100%") {
+                        Button("Actual Size") {
                             zoomScale = 1.0
                         }
                         .disabled(zoomScale == 1.0)
