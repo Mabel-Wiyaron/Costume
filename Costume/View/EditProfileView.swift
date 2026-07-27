@@ -3,13 +3,11 @@ import SwiftUI
 
 struct EditProfileView: View {
     @Environment(\.modelContext) private var mainContext
+    @Environment(\.dismiss) private var dismiss
     
     var profile: Profile? = nil
     @State private var viewModel: EditProfileViewModel? = nil
     @State private var cvViewModel: CVParsingViewModel? = nil
-
-    @State private var pendingSection: ProfileSection? = nil
-    @State private var isUnsavedChangesAlertPresented = false
 
     private let OUTER_PADDING: CGFloat = 40
     private let CARD_MAX_WIDTH: CGFloat = 800
@@ -75,43 +73,43 @@ struct EditProfileView: View {
             }
         }
         .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 300)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigation) {
+                Button(action: attemptBack) {
+                    Image(systemName: "chevron.left")
+                }
+            }
+        }
         .onAppear {
             setupViewModel()
-        }
-        .alert("Save changes to your profile?", isPresented: $isUnsavedChangesAlertPresented) {
-            Button("Save") {
-                viewModel?.save()
-                commitPendingNavigation()
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(Color("AppPrimaryColor"))
-            Button("Discard Changes", role: .destructive) {
-                viewModel?.discardChanges()
-                commitPendingNavigation()
-            }
-            Button("Cancel", role: .cancel) {
-                pendingSection = nil
-            }
-        } message: {
-            Text("Your changes will be lost if you don't save them.")
         }
     }
 
     private func attemptNavigate(to section: ProfileSection) {
-        guard let vm = viewModel, section != vm.selectedSection else { return }
-        if vm.hasUnsavedChanges {
-            pendingSection = section
-            isUnsavedChangesAlertPresented = true
-        } else {
-            vm.selectedSection = section
-        }
+        guard viewModel?.selectedSection != section else { return }
+        proceedIfConfirmed { viewModel?.selectedSection = section }
     }
 
-    private func commitPendingNavigation() {
-        if let pendingSection {
-            viewModel?.selectedSection = pendingSection
+    private func attemptBack() {
+        proceedIfConfirmed { dismiss() }
+    }
+
+    private func proceedIfConfirmed(action: () -> Void) {
+        guard let vm = viewModel, vm.hasUnsavedChanges else {
+            action()
+            return
         }
-        pendingSection = nil
+        switch UnsavedChangesAlert.present() {
+        case .save:
+            vm.save()
+            action()
+        case .discardChanges:
+            vm.discardChanges()
+            action()
+        case .cancel:
+            break
+        }
     }
 
     private func setupViewModel() {
