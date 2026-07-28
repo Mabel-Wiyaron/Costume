@@ -55,8 +55,7 @@ struct AnalysisPanelView: View {
                     case .resumePreview:
                         ScrollView([.vertical, .horizontal], showsIndicators: true) {
                             resumePreview
-                                .padding(.horizontal, CONTENT_PADDING)
-                                .padding(.bottom, CONTENT_PADDING)
+                                .padding(CONTENT_PADDING)
                         }
                     }
                 }
@@ -123,8 +122,8 @@ struct AnalysisPanelView: View {
                     .frame(width: 595, height: 842)
                     // 2. Scale smoothly from top-center
                     .scaleEffect(currentScale, anchor: .top)
-                    // 3. Update the layout frame to match scaled visual height exact dimensions
-                    .frame(width: 595 * currentScale, height: 842 * currentScale)
+                    // 3. Update the layout frame to match scaled visual dimensions aligned at top
+                    .frame(width: 595 * currentScale, height: 842 * currentScale, alignment: .top)
             }
         }
         .frame(maxWidth: .infinity)
