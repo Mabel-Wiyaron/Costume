@@ -89,6 +89,7 @@ struct ResumeCardContainer: View {
     let resume: Resume
     var onRename: (String, String) -> Void
     var onDelete: () -> Void
+    var onExport: (() -> Void)? = nil
 
     @State private var isEditing = false
     @State private var draftRole: String = ""
@@ -125,6 +126,7 @@ struct ResumeCardContainer: View {
 
                 Menu {
                     Button("􁚛 Rename", action: startEditing)
+                    Button("􀈂 Export", action: exportPDF)
                     Button("􀈑 Delete", role: .destructive) {
                         isDeleteAlertPresented = true
                     }
@@ -166,6 +168,15 @@ struct ResumeCardContainer: View {
         onRename(draftRole, draftCompany)
         isEditing = false
         focusedField = nil
+    }
+
+    private func exportPDF() {
+        if let onExport = onExport {
+            onExport()
+        } else {
+            let filename = "\(resume.role) - \(resume.company)"
+            PDFExporter.export(profile: profile, defaultFilename: filename)
+        }
     }
 }
 
