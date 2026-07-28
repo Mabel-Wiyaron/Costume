@@ -108,5 +108,7 @@ func sanitizeCVText(_ text: String) -> String {
     // 3. Remove common low-signal characters (bullet dots, special decorative symbols)
     cleaned = cleaned.replacingOccurrences(of: #"[•|▪|‣|◦|●|★|–|—]"#, with: "-", options: .regularExpression)
     
+    cleaned = cleaned.replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+    
     return cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
 }

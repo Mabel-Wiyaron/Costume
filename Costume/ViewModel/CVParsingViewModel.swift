@@ -33,14 +33,18 @@ final class CVParsingViewModel {
             // 1. Extract raw text
             let rawText = try await CVTextExtractor.extractText(from: fileURL)
             
+            let contactInfo = ContactInfoExtractor.extract(from: rawText)
+            let cleanedText = ContactInfoExtractor.strippingContactInfo(from: rawText, using: contactInfo)
+            print(cleanedText)
+            
             // 2. Run Foundation Model Agent
-            let dto = try await agent.invoke(for: rawText)
+            let dto = try await agent.invoke(for: cleanedText)
             
             // 3. Overwrite data in the child/sandbox context
-            overwrite(profile: sandboxedProfile, with: dto, in: childContext)
+            overwrite(profile: sandboxedProfile, with: dto, contactInfo: contactInfo, in: childContext)
             
             // 4. Overwrite data in the main context & save disk store
-            overwrite(profile: masterProfile, with: dto, in: mainContext)
+            overwrite(profile: masterProfile, with: dto, contactInfo: contactInfo, in: mainContext)
             
         } catch {
             self.errorMessage = error.localizedDescription
@@ -50,19 +54,19 @@ final class CVParsingViewModel {
     // MARK: - SwiftData Master Profile Mapping
 
     @MainActor
-    private func overwrite(profile: Profile, with generable: CVImportGenerable, in context: ModelContext) {
+    private func overwrite(profile: Profile, with generable: CVImportGenerable, contactInfo: ExtractedContactInfo, in context: ModelContext) {
         profile.name = generable.name
         profile.email = generable.email
         profile.phone = generable.phone
-        profile.location = generable.location
+        profile.location = combinedLocation(contactInfo: contactInfo, fallback: generable.location) ?? generable.location
         
-        if let linkedinString = generable.linkedin, let url = URL(string: linkedinString) {
+        if let linkedinString = contactInfo.linkedin ?? generable.linkedin, let url = URL(string: linkedinString) {
             profile.linkedin = url
         } else {
             profile.linkedin = nil
         }
         
-        if let websiteString = generable.website, let url = URL(string: websiteString) {
+        if let websiteString = contactInfo.website ?? generable.website, let url = URL(string: websiteString) {
             profile.website = url
         } else {
             profile.website = nil
@@ -166,6 +170,19 @@ final class CVParsingViewModel {
             try context.save()
         } catch {
             print("Failed to save context: \(error)")
+        }
+    }
+    
+    private func combinedLocation(contactInfo: ExtractedContactInfo, fallback: String?) -> String? {
+        switch (contactInfo.city, contactInfo.region) {
+        case let (city?, region?):
+            return "\(city), \(region)"
+        case let (city?, nil):
+            return city
+        case let (nil, region?):
+            return region
+        case (nil, nil):
+            return fallback
         }
     }
 

@@ -58,7 +58,7 @@ final class CVParsingViewModelTests: XCTestCase {
         }
 
         // 2. Locate test PDF file in test bundle
-        guard let samplePDFURL = Bundle(for: type(of: self)).url(forResource: "SampleCV", withExtension: "pdf") else {
+        guard let samplePDFURL = Bundle(for: type(of: self)).url(forResource: "SampleCV2", withExtension: "pdf") else {
             XCTFail("SampleCV.pdf not found in test bundle. Please add a test PDF.")
             return
         }
@@ -90,6 +90,7 @@ final class CVParsingViewModelTests: XCTestCase {
         print("Name: \(masterProfile.name)")
         print("Email: \(masterProfile.email)")
         print("Summary: \(masterProfile.summary)")
+        print("Location: \(masterProfile.location)")
         print("LinkedIn: \(masterProfile.linkedin?.absoluteString ?? "None")")
         print("Experiences Count: \(masterProfile.experiences.count)")
         print("Skills: \(masterProfile.skills.map { $0.name })")
