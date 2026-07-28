@@ -149,7 +149,8 @@ struct SchemaBuilder {
     }
 
     static func responseFormatInstruction<T: Decodable>(
-        for type: T.Type
+        for type: T.Type,
+        propertyDescriptions: [String: String]? = nil
     ) throws -> String {
         let instance = try T(from: PlaceholderDecoder())
         let jsonObject = try reflectToJSONValue(instance)
@@ -157,7 +158,14 @@ struct SchemaBuilder {
             withJSONObject: jsonObject,
             options: [.prettyPrinted, .sortedKeys]
         )
-        return String(data: data, encoding: .utf8) ?? "{}"
+        var result = String(data: data, encoding: .utf8) ?? "{}"
+        if let descriptions = propertyDescriptions, !descriptions.isEmpty {
+            let fields = descriptions.map { key, value in
+                "  - \(key): \(value)"
+            }.sorted().joined(separator: "\n")
+            result += "\n\nField descriptions:\n\(fields)"
+        }
+        return result
     }
 
     private static func reflectToJSONValue(_ value: Any) throws -> Any {
