@@ -25,7 +25,7 @@ struct ProfileSidebarView: View {
                     .padding(.horizontal, 4)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    ForEach(ProfileSection.allCases) { section in
+                    ForEach(ProfileSection.profileSections) { section in
                         SidebarRow(
                             section: section,
                             isSelected: section == selectedSection,
@@ -41,9 +41,21 @@ struct ProfileSidebarView: View {
                 }
 
                 Spacer()
+
+                Divider()
+                    .overlay(Color.white.opacity(0.3))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(ProfileSection.settingsSections) { section in
+                        SidebarRow(
+                            section: section,
+                            isSelected: section == selectedSection,
+                            action: { selectedSection = section }
+                        )
+                    }
+                }
             }
-            .padding(.top, 16)
-            .padding(.horizontal, 16)
+            .padding(16)
         }
     }
 }
