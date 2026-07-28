@@ -18,6 +18,7 @@ struct EditorPanelView: View {
     private let BACK_BUTTON_SIZE: CGFloat = 32
     private let COLUMN_SPACING: CGFloat = 32
     private let CARD_PADDING: CGFloat = 32
+    private let SAVE_BAR_VERTICAL_PADDING: CGFloat = 16
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -25,7 +26,7 @@ struct EditorPanelView: View {
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {
-
+                
                 Text("Editor Panel")
                     .font(.largeTitle)
                     .fontWeight(.bold)
@@ -33,47 +34,47 @@ struct EditorPanelView: View {
                     .padding(.horizontal, HEADER_HORIZONTAL_PADDING)
                     .padding(.top, 12)
                     .padding(.bottom, 20)
-
+                
                 ScrollView {
                     VStack(alignment: .leading, spacing: SECTION_SPACING) {
                         personalInfoCard
                         summaryCard
-
+                        
                         InlineEntryListCard(
                             title: "Experience",
                             addButtonLabel: "+ Add Experience",
                             entryTitle: { "Experience #\($0 + 1)" },
-                            items: Array(viewModel.document.experiences.reversed()),
+                            items: viewModel.document.experiences,
                             onAdd: viewModel.addExperience,
                             onDelete: viewModel.deleteExperience
                         ) { experience in
                             ExperienceEntryFields(experience: experience)
                         }
-
+                        
                         InlineEntryListCard(
                             title: "Education",
                             addButtonLabel: "+ Add Education",
                             entryTitle: { "Education #\($0 + 1)" },
-                            items: Array(viewModel.document.educations.reversed()),
+                            items: viewModel.document.educations,
                             onAdd: viewModel.addEducation,
                             onDelete: viewModel.deleteEducation
                         ) { education in
                             EducationEntryFields(education: education)
                         }
-
+                        
                         InlineEntryListCard(
                             title: "Project",
                             addButtonLabel: "+ Add Project",
                             entryTitle: { "Project #\($0 + 1)" },
-                            items: Array(viewModel.document.projects.reversed()),
+                            items: viewModel.document.projects,
                             onAdd: viewModel.addProject,
                             onDelete: viewModel.deleteProject
                         ) { project in
                             ProjectEntryFields(project: project)
                         }
-
+                        
                         skillsCard
-
+                        
                         InlineEntryListCard(
                             title: "Certifications",
                             addButtonLabel: "+ Add Certification",
@@ -84,7 +85,7 @@ struct EditorPanelView: View {
                         ) { certification in
                             CertificationEntryFields(certification: certification)
                         }
-
+                        
                         InlineEntryListCard(
                             title: "Awards",
                             addButtonLabel: "+ Add Award",
@@ -98,6 +99,7 @@ struct EditorPanelView: View {
                     }
                     .padding(CONTENT_PADDING)
                 }
+                saveBar
             }
         }
     }
@@ -148,5 +150,23 @@ struct EditorPanelView: View {
         }
         .padding(CARD_PADDING)
         .cardBackground()
+    }
+    
+    private var saveBar: some View {
+        HStack {
+            Spacer()
+            Button("Save") {
+                viewModel.save()
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(Color("AppPrimaryColor"))
+            .controlSize(.large)
+            .keyboardShortcut(.defaultAction)
+            .disabled(!viewModel.isSaveEnabled)
+        }
+        .padding(.horizontal, HEADER_HORIZONTAL_PADDING)
+        .padding(.vertical, SAVE_BAR_VERTICAL_PADDING)
+        .frame(maxWidth: .infinity)
+        .background(Color("CardColor").shadow(radius: 16, y: -8))
     }
 }
