@@ -78,12 +78,53 @@ final class EditCVViewModel {
         return NSPredicate(format: "SELF MATCHES %@", phoneRegex).evaluate(with: phone)
     }
 
+    var isExperienceListValid: Bool {
+        document.experiences.allSatisfy {
+            !$0.role.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            !$0.company.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            !$0.location.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+    }
+
+    var isEducationListValid: Bool {
+        document.educations.allSatisfy {
+            !$0.school.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            !$0.degree.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            !$0.fieldOfStudy.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+    }
+
+    var isProjectListValid: Bool {
+        document.projects.allSatisfy {
+            !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            !$0.role.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+    }
+
+    var isCertificationListValid: Bool {
+        document.certifications.allSatisfy {
+            !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            !$0.issuer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            !$0.credentialID.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+    }
+
+    var isAwardListValid: Bool {
+        document.awards.allSatisfy {
+            !$0.title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+            !$0.issuer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
+    }
+
     var hasUnsavedChanges: Bool {
         EditCVSnapshot(from: document.profile) != lastSavedSnapshot
     }
 
     var isSaveEnabled: Bool {
-        hasUnsavedChanges && isNameValid && isEmailValid && isPhoneValid
+        hasUnsavedChanges &&
+        isNameValid && isEmailValid && isPhoneValid &&
+        isExperienceListValid && isEducationListValid && isProjectListValid &&
+        isCertificationListValid && isAwardListValid
     }
 
     // MARK: - Experience
