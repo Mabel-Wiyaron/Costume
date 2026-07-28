@@ -104,6 +104,7 @@ struct ATSCVTemplateView: View {
                 VStack(alignment: .center, spacing: 4) {
                     Text(profile.name.isEmpty ? "YOUR NAME" : profile.name.uppercased())
                         .font(.system(size: 20, weight: .black))
+                        .multilineTextAlignment(.center)
                     
                     contactInfoView()
                     
