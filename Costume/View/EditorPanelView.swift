@@ -83,7 +83,9 @@ struct EditorPanelView: View {
                             onAdd: viewModel.addCertification,
                             onDelete: viewModel.deleteCertification
                         ) { certification in
-                            CertificationEntryFields(certification: certification)
+                            CertificationEntryFields(
+                                certification: certification
+                            )
                         }
                         
                         InlineEntryListCard(
@@ -101,28 +103,66 @@ struct EditorPanelView: View {
                 }
                 saveBar
             }
+            if viewModel.showSaveConfirmation {
+                SaveConfirmationToast()
+                    .padding(.horizontal, HEADER_HORIZONTAL_PADDING)
+                    .padding(.top, HEADER_TOP_PADDING)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .zIndex(1)
+                    .allowsHitTesting(false)
+            }
         }
+        .animation(
+            .easeInOut(duration: 0.25),
+            value: viewModel.showSaveConfirmation
+        )
     }
 
     private var personalInfoCard: some View {
         VStack(alignment: .leading, spacing: 16) {
             SectionHeaderView(title: "Personal Information")
 
-            LabeledTextField(label: "Name", isRequired: true, text: $viewModel.document.name)
+            LabeledTextField(
+                label: "Name",
+                isRequired: true,
+                text: $viewModel.document.name
+            )
 
             HStack(alignment: .top, spacing: COLUMN_SPACING) {
-                LabeledTextField(label: "Contact", isRequired: true, placeholder: "+62 1234567890", text: $viewModel.document.phone)
-                LabeledTextField(label: "LinkedIn", text: $viewModel.document.linkedin.stringValue)
+                LabeledTextField(
+                    label: "Contact",
+                    isRequired: true,
+                    placeholder: "+62 1234567890",
+                    text: $viewModel.document.phone
+                )
+                LabeledTextField(
+                    label: "LinkedIn",
+                    text: $viewModel.document.linkedin.stringValue
+                )
             }
 
             HStack(alignment: .top, spacing: COLUMN_SPACING) {
-                LabeledTextField(label: "Email", isRequired: true, text: $viewModel.document.email)
-                LabeledTextField(label: "Personal Website", text: $viewModel.document.website.stringValue)
+                LabeledTextField(
+                    label: "Email",
+                    isRequired: true,
+                    text: $viewModel.document.email
+                )
+                LabeledTextField(
+                    label: "Personal Website",
+                    text: $viewModel.document.website.stringValue
+                )
             }
 
             HStack(alignment: .top, spacing: COLUMN_SPACING) {
-                LabeledTextField(label: "Location", text: $viewModel.document.location)
-                LabeledTextField(label: "Github", text: $viewModel.document.links.urlString(forPlatform: .github))
+                LabeledTextField(
+                    label: "Location",
+                    text: $viewModel.document.location
+                )
+                LabeledTextField(
+                    label: "Github",
+                    text: $viewModel.document.links
+                        .urlString(forPlatform: .github)
+                )
             }
         }
         .padding(CARD_PADDING)
@@ -132,7 +172,10 @@ struct EditorPanelView: View {
     private var summaryCard: some View {
         VStack(alignment: .leading, spacing: 16) {
             SectionHeaderView(title: "Summary")
-            LabeledTextEditor(label: "About Me", text: $viewModel.document.summary.stringValue)
+            LabeledTextEditor(
+                label: "About Me",
+                text: $viewModel.document.summary.stringValue
+            )
         }
         .padding(CARD_PADDING)
         .cardBackground()
@@ -156,7 +199,7 @@ struct EditorPanelView: View {
         HStack {
             Spacer()
             Button("Save") {
-                viewModel.save()
+                viewModel.saveWithConfirmation()
             }
             .buttonStyle(.borderedProminent)
             .tint(Color("AppPrimaryColor"))

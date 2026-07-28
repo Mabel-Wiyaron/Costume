@@ -31,6 +31,8 @@ final class EditCVViewModel {
 
     private let modelContext: ModelContext?
     private var lastSavedSnapshot: EditCVSnapshot?
+    var showSaveConfirmation: Bool = false
+    private var saveConfirmationTask: Task<Void, Never>?
 
     init(document: CVDocument, jobDescription: JobDescription? = nil, modelContext: ModelContext? = nil) {
         self.document = document
@@ -45,6 +47,18 @@ final class EditCVViewModel {
         try? modelContext?.save()
         sortEntries()
         lastSavedSnapshot = EditCVSnapshot(from: document.profile)
+    }
+    
+    @MainActor
+    func saveWithConfirmation() {
+        save()
+        saveConfirmationTask?.cancel()
+        showSaveConfirmation = true
+        saveConfirmationTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            guard !Task.isCancelled else { return }
+            showSaveConfirmation = false
+        }
     }
 
     // MARK: - Ordering
