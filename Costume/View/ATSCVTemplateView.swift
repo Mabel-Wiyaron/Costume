@@ -104,6 +104,7 @@ struct ATSCVTemplateView: View {
                 VStack(alignment: .center, spacing: 4) {
                     Text(profile.name.isEmpty ? "YOUR NAME" : profile.name.uppercased())
                         .font(.system(size: 20, weight: .black))
+                        .multilineTextAlignment(.center)
                     
                     contactInfoView()
                     
@@ -150,6 +151,7 @@ struct ATSCVTemplateView: View {
                                 ForEach(experience.descriptionText, id: \.self) { bullet in
                                     if !bullet.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                         Text("• \(bullet)")
+                                            .fixedSize(horizontal: false, vertical: true)
                                     }
                                 }
                             }
