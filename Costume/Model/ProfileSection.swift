@@ -16,6 +16,7 @@ enum ProfileSection: String, CaseIterable, Identifiable {
     case project
     case certification
     case awards
+    case llmSettings
 
     var id: String { rawValue }
 
@@ -29,6 +30,7 @@ enum ProfileSection: String, CaseIterable, Identifiable {
         case .project: return "Project"
         case .certification: return "Certification"
         case .awards: return "Awards"
+        case .llmSettings: return "LLM Settings"
         }
     }
 
@@ -42,6 +44,16 @@ enum ProfileSection: String, CaseIterable, Identifiable {
         case .project: return "folder"
         case .certification: return "medal"
         case .awards: return "trophy"
+        case .llmSettings: return "gearshape"
         }
     }
+
+    static let profileSections: [ProfileSection] = [
+        .uploadCV, .personalInfo, .education, .experience,
+        .skills, .project, .certification, .awards
+    ]
+
+    static let settingsSections: [ProfileSection] = [
+        .llmSettings
+    ]
 }

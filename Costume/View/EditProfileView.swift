@@ -61,6 +61,8 @@ struct EditProfileView: View {
                                 CertificationSectionView(viewModel: vm)
                             case .awards:
                                 AwardSectionView(viewModel: vm)
+                            case .llmSettings:
+                                LLMSettingsView()
                             }
                         }
                         .frame(maxWidth: CARD_MAX_WIDTH, alignment: .top)
