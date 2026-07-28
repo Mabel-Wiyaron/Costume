@@ -151,6 +151,7 @@ struct ATSCVTemplateView: View {
                                 ForEach(experience.descriptionText, id: \.self) { bullet in
                                     if !bullet.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                         Text("• \(bullet)")
+                                            .fixedSize(horizontal: false, vertical: true)
                                     }
                                 }
                             }
