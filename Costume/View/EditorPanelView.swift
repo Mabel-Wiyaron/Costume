@@ -21,7 +21,7 @@ struct EditorPanelView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            Color("PrimaryColor")
+            Color("AppPrimaryColor")
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 0) {

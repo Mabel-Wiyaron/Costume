@@ -35,7 +35,7 @@ struct LabeledDateField: View {
                 isPickerPresented = true
             } label: {
                 Text(displayText)
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(Color("TextColor"))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(12)
                     .overlay(

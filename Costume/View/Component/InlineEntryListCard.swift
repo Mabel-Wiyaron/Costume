@@ -25,7 +25,7 @@ struct InlineEntryListCard<Item: Identifiable & AnyObject, EntryFields: View>: V
             SectionHeaderView(title: title) {
                 Button(addButtonLabel, action: onAdd)
                     .buttonStyle(.borderedProminent)
-                    .tint(Color("PrimaryColor"))
+                    .tint(Color("AppPrimaryColor"))
             }
 
             VStack(alignment: .leading, spacing: ENTRY_SPACING) {
@@ -37,7 +37,7 @@ struct InlineEntryListCard<Item: Identifiable & AnyObject, EntryFields: View>: V
 
                     if index < items.count - 1 {
                         Rectangle()
-                            .fill(Color("AccentColor"))
+                            .fill(Color("AppAccentColor"))
                             .frame(height: DIVIDER_HEIGHT)
                     }
                 }

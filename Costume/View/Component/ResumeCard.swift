@@ -27,7 +27,7 @@ struct ResumeCard: View {
                 Spacer()
                 Text(resume.date)
                     .font(.body)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.gray)
                 Color.clear.frame(width: 20, height: 16)
             }
             Spacer()
@@ -44,7 +44,7 @@ struct ResumeCard: View {
                 TextField("", text: $draftCompany)
                     .textFieldStyle(.plain)
                     .font(.body)
-                    .foregroundColor(.accent)
+                    .foregroundColor(Color("AppAccentColor"))
                     .focused(focusedField, equals: .company)
                     .onSubmit(onCommitRename)
             } else {
@@ -55,7 +55,7 @@ struct ResumeCard: View {
 
                 Text(resume.company)
                     .font(.body)
-                    .foregroundColor(.accent)
+                    .foregroundColor(Color("AppAccentColor"))
             }
         }
         .padding(25)
@@ -69,7 +69,7 @@ struct ResumeCard: View {
         .cornerRadius(12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.accent)
+                .fill(Color("AppAccentColor"))
                 .offset(y: 8)
         )
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
@@ -121,7 +121,7 @@ struct ResumeCardContainer: View {
                     }
                 } label: {
                     Image(systemName: "ellipsis")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color("AppSecondaryColor"))
                         .frame(width: 20, height: 20)
                 }
                 .menuStyle(.borderlessButton)

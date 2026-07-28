@@ -74,7 +74,7 @@ struct DashboardView: View {
                     .ignoresSafeArea()
                     
                 CustomHeaderShape()
-                    .fill(Color(.primary))
+                    .fill(Color("AppPrimaryColor"))
                     .frame(height: 260)
                     .ignoresSafeArea(edges: .top)
                     
@@ -264,11 +264,11 @@ struct EmptyStateView: View {
             Text("No results found for \"\(searchText)\"")
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundColor(.primary)
+                .foregroundColor(Color("AppPrimaryColor"))
             
             Text("Try searching for a different role, company, or date.")
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(Color("AppSecondaryColor"))
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 150)
