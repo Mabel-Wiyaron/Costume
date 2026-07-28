@@ -3,6 +3,7 @@ import SwiftUI
 
 struct EditProfileView: View {
     @Environment(\.modelContext) private var mainContext
+    @Environment(\.dismiss) private var dismiss
     
     var profile: Profile? = nil
     @State private var viewModel: EditProfileViewModel? = nil
@@ -15,15 +16,18 @@ struct EditProfileView: View {
         NavigationSplitView {
             if let vm = viewModel {
                 @Bindable var bindableVM = vm
-                ProfileSidebarView(selectedSection: $bindableVM.selectedSection)
+                ProfileSidebarView(
+                    selectedSection: $bindableVM.selectedSection,
+                    onSelect: { section in attemptNavigate(to: section) }
+                )
             } else {
                 ProgressView()
             }
         } detail: {
-            ZStack {
+            ZStack(alignment: .top) {
                 Color("BackgroundColor")
                     .ignoresSafeArea()
-
+                
                 if let vm = viewModel {
                     @Bindable var bindableVM = vm
                     
@@ -32,10 +36,8 @@ struct EditProfileView: View {
                             switch bindableVM.selectedSection {
                             case .uploadCV, .none:
                                 if let cvViewModel = cvViewModel {
-                                    // 1. Fetch mainContext profile
                                     let mainProfile = (try? mainContext.model(for: vm.profile.persistentModelID) as? Profile) ?? vm.profile
-                                        
-                                    // 2. Pass both sandboxedProfile (child context) & mainProfile (main context)
+                                    
                                     UploadCVView(
                                         viewModel: cvViewModel,
                                         sandboxedProfile: vm.profile,
@@ -52,7 +54,7 @@ struct EditProfileView: View {
                             case .experience:
                                 ExperienceSectionView(viewModel: vm)
                             case .skills:
-                                SkillsSectionView(skills: $bindableVM.profile.skills, isSaveEnabled: vm.isSkillsSaveEnabled, onSave: vm.save)
+                                SkillsSectionView(skills: $bindableVM.profile.skills, isSaveEnabled: vm.isSkillsSaveEnabled, onSave: vm.saveWithConfirmation)
                             case .project:
                                 ProjectSectionView(viewModel: vm)
                             case .certification:
@@ -65,14 +67,59 @@ struct EditProfileView: View {
                         .padding(OUTER_PADDING)
                         .frame(maxWidth: .infinity, alignment: .top)
                     }
+                    
+                    if vm.showSaveConfirmation {
+                        SaveConfirmationToast()
+                            .frame(maxWidth: CARD_MAX_WIDTH)
+                            .padding(.horizontal, OUTER_PADDING)
+                            .padding(.top, OUTER_PADDING)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                            .zIndex(1)
+                            .allowsHitTesting(false)
+                    }
                 } else {
                     ProgressView()
                 }
             }
+            .animation(.easeInOut(duration: 0.25), value: viewModel?.showSaveConfirmation)
         }
         .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 300)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigation) {
+                Button(action: attemptBack) {
+                    Image(systemName: "chevron.left")
+                }
+            }
+        }
         .onAppear {
             setupViewModel()
+        }
+    }
+
+    private func attemptNavigate(to section: ProfileSection) {
+        guard viewModel?.selectedSection != section else { return }
+        proceedIfConfirmed { viewModel?.selectedSection = section }
+    }
+
+    private func attemptBack() {
+        proceedIfConfirmed { dismiss() }
+    }
+
+    private func proceedIfConfirmed(action: () -> Void) {
+        guard let vm = viewModel, vm.hasUnsavedChanges else {
+            action()
+            return
+        }
+        switch UnsavedChangesAlert.present() {
+        case .save:
+            vm.save()
+            action()
+        case .discardChanges:
+            vm.discardChanges()
+            action()
+        case .cancel:
+            break
         }
     }
 

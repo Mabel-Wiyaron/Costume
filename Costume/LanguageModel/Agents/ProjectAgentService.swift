@@ -59,6 +59,12 @@ struct ProjectGenerable: Decodable {
     let descriptions: [String]
 }
 
+extension ProjectGenerable: SchemaDescribing {
+    static let propertyDescriptions: [String: String] = [
+        "descriptions": PROJECT_DESCRIPTIONS_V1
+    ]
+}
+
 struct ProjectAgentService: AgentProtocol {
     var languageModel: LanguageModelProtocol
 

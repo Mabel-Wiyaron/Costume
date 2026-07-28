@@ -25,7 +25,7 @@ struct PersonalInfoFormView: View {
 
                     Text("Tip: The more detailed your profile is, the better our AI can personalize your CV.")
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("TextColor"))
 
                     // --- FIELD: NAME ---
                     LabeledTextField(
@@ -52,6 +52,7 @@ struct PersonalInfoFormView: View {
 
                         LabeledTextField(
                             label: "LinkedIn",
+                            placeholder: "linkedin.com/in/username",
                             text: $viewModel.profile.linkedin.stringValue
                         )
                         .frame(maxWidth: .infinity)
@@ -71,6 +72,7 @@ struct PersonalInfoFormView: View {
 
                         LabeledTextField(
                             label: "Personal Website",
+                            placeholder: "https://user.com",
                             text: $viewModel.profile.website.stringValue
                         )
                         .frame(maxWidth: .infinity)
@@ -85,6 +87,7 @@ struct PersonalInfoFormView: View {
                         
                         LabeledTextField(
                             label: "Github",
+                            placeholder: "www.github.com/user",
                             text: $viewModel.profile.links.urlString(forPlatform: .github)
                         )
                         .frame(maxWidth: .infinity)
@@ -102,10 +105,10 @@ struct PersonalInfoFormView: View {
                 HStack {
                     Spacer()
                     Button("Save") {
-                        viewModel.save()
+                        viewModel.saveWithConfirmation()
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(Color("PrimaryColor"))
+                    .tint(Color("AppPrimaryColor"))
                     .controlSize(.large)
                     .keyboardShortcut(.defaultAction)
                     .disabled(!viewModel.isPersonalInfoSaveEnabled)

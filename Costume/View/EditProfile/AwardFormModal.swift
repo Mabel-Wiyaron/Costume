@@ -92,7 +92,7 @@ struct AwardFormModal: View {
                     onSave(title, issuer, issueDate)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(Color("PrimaryColor"))
+                .tint(Color("AppPrimaryColor"))
                 .controlSize(.large)
                 .keyboardShortcut(.defaultAction)
                 .disabled(!isSaveEnabled)

@@ -42,14 +42,14 @@ struct UploadCVView: View {
                     
                     Text("Your profile will be automatically filled with your master resumé details. You can always edit and update your profile later.")
                         .font(.footnote)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(Color("AppSecondaryColor"))
                 }
 
                 dropZoneView
                 
                 Text("*Drop a PDF file here (5MB or less)")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color("AppSecondaryColor"))
                 
                 if let displayError = errorMessage ?? viewModel.errorMessage {
                     Text(displayError)
@@ -85,11 +85,11 @@ struct UploadCVView: View {
                 if let selectedFileName {
                     Text("Selected: \(selectedFileName)")
                         .font(.system(size: 15, weight: .medium))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(Color("AppPrimaryColor"))
                 } else {
                     Text("Drop your resume here")
                         .font(.system(size: 16, weight: .medium))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(Color("AppPrimaryColor"))
                 }
 
                 Button(action: {

@@ -20,7 +20,7 @@ struct SkillChip: View {
                 .font(.subheadline)
             Button(action: onRemove) {
                 Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.gray)
             }
             .buttonStyle(.plain)
         }

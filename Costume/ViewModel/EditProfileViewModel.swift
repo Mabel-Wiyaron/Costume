@@ -28,6 +28,9 @@ final class EditProfileViewModel {
     
     var isAwardModalPresented: Bool = false
     var awardBeingEdited: Award? = nil
+    
+    var showSaveConfirmation: Bool = false
+    private var saveConfirmationTask: Task<Void, Never>?
 
     // --- SNAPSHOT UNTUK STRATEGI PENGUNCIAN TOMBOL SIMPAN ---
     private var lastSavedSnapshot: ProfileSnapshot
@@ -51,6 +54,14 @@ final class EditProfileViewModel {
     var isSkillsSaveEnabled: Bool {
         hasUnsavedSkillsChanges
     }
+    
+    var hasUnsavedChanges: Bool {
+            switch selectedSection {
+            case .personalInfo: return hasUnsavedPersonalInfoChanges
+            case .skills: return hasUnsavedSkillsChanges
+            default: return false
+            }
+        }
 
     // --- Logika Pengecekan Parsial ---
 
@@ -94,6 +105,30 @@ final class EditProfileViewModel {
         try? modelContext.save()
         // Perbarui acuan snapshot setelah penyimpanan berhasil dilakukan
         lastSavedSnapshot = ProfileSnapshot(from: profile)
+    }
+    
+    @MainActor
+    func saveWithConfirmation() {
+        save()
+        saveConfirmationTask?.cancel()
+        showSaveConfirmation = true
+        saveConfirmationTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            guard !Task.isCancelled else { return }
+            showSaveConfirmation = false
+        }
+    }
+    
+    func discardChanges() {
+        profile.name = lastSavedSnapshot.name
+        profile.phone = lastSavedSnapshot.phone
+        profile.email = lastSavedSnapshot.email
+        profile.location = lastSavedSnapshot.location
+        profile.linkedin = lastSavedSnapshot.linkedin.isEmpty ? nil : URL(string: lastSavedSnapshot.linkedin)
+        profile.website = lastSavedSnapshot.website.isEmpty ? nil : URL(string: lastSavedSnapshot.website)
+        profile.summary = lastSavedSnapshot.summary.isEmpty ? nil : lastSavedSnapshot.summary
+        profile.links = lastSavedSnapshot.links
+        profile.skills = lastSavedSnapshot.skills
     }
 
     // MARK: - Education
@@ -366,7 +401,7 @@ final class EditProfileViewModel {
 
 // --- PEMBANTU SNAPSHOT DATA ---
 // Struktur ringan bertipe Value (Struct) untuk melacak perbedaan konten string mentah
-fileprivate struct ProfileSnapshot: Equatable {
+fileprivate struct ProfileSnapshot {
     let name: String
     let phone: String
     let linkedin: String
@@ -375,10 +410,15 @@ fileprivate struct ProfileSnapshot: Equatable {
     let location: String
     let github: String
     let summary: String
-    
-    // Store simple value types (Strings) for clear equality comparison
+
+    // Live references to the original relationship objects, kept so Discard can
+    // restore them directly. modelContext.rollback() does not reliably revert
+    // property values already written into the live Profile object bound to the UI.
+    let links: [ProfileLink]
+    let skills: [Skill]
+
     let skillNames: [String]
-        
+
     init(from profile: Profile) {
         self.name = profile.name
         self.phone = profile.phone
@@ -387,10 +427,11 @@ fileprivate struct ProfileSnapshot: Equatable {
         self.linkedin = profile.linkedin?.absoluteString ?? ""
         self.website = profile.website?.absoluteString ?? ""
         self.summary = profile.summary ?? ""
-        
-        // Map skills to their string names (or skill.id.uuidString if skill has a UUID)
+
+        self.links = profile.links
+        self.skills = profile.skills
         self.skillNames = profile.skills.map { $0.name }
-        
+
         if let githubURL = profile.links.first(where: { $0.platform == .github })?.url {
             self.github = githubURL.absoluteString
         } else {

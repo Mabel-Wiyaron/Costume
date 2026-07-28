@@ -29,7 +29,7 @@ struct SkillsSectionView: View {
                     Spacer()
                     Button("Save") { onSave() }
                         .buttonStyle(.borderedProminent)
-                        .tint(Color("PrimaryColor"))
+                        .tint(Color("AppPrimaryColor"))
                         .controlSize(.large)
                         .keyboardShortcut(.defaultAction)
                         .disabled(!isSaveEnabled) // 👈 Controls button state

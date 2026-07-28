@@ -19,7 +19,7 @@ struct CardBackground: ViewModifier {
             .shadow(color: .black.opacity(SHADOW_OPACITY), radius: SHADOW_RADIUS, y: 2)
             .background(
                 RoundedRectangle(cornerRadius: CORNER_RADIUS)
-                    .fill(Color.accentColor)
+                    .fill(Color("AppAccentColor"))
                     .offset(y: 8)
             )
             .padding(.bottom, 8)

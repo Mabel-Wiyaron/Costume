@@ -9,11 +9,12 @@ import SwiftUI
 
 struct ProfileSidebarView: View {
     @Binding var selectedSection: ProfileSection?
+    var onSelect: ((ProfileSection) -> Void)? = nil
     var onBack: (() -> Void)? = nil
 
     var body: some View {
         ZStack {
-            Color("PrimaryColor")
+            Color("AppPrimaryColor")
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 16) {
@@ -28,7 +29,13 @@ struct ProfileSidebarView: View {
                         SidebarRow(
                             section: section,
                             isSelected: section == selectedSection,
-                            action: { selectedSection = section }
+                            action: {
+                                if let onSelect {
+                                    onSelect(section)
+                                } else {
+                                    selectedSection = section
+                                }
+                            }
                         )
                     }
                 }
