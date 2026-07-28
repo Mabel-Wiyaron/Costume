@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 //STRUKTUR DATA
 struct Resume: Identifiable {
@@ -83,6 +84,7 @@ struct ResumeCard: View {
 // Owns state and composes NavigationLink + ellipsis menu as siblings,
 // so the menu never lives inside the NavigationLink's press-state hierarchy.
 struct ResumeCardContainer: View {
+    @Environment(\.modelContext) private var modelContext
     let profile: Profile
     let resume: Resume
     var onRename: (String, String) -> Void
@@ -97,7 +99,14 @@ struct ResumeCardContainer: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            NavigationLink(destination: CVPreviewView(profile: profile)) {
+            NavigationLink(destination: EditCVView(
+                document: CVDocument(profile: profile),
+                jobDescription: profile.jobDescription,
+                modelContext: modelContext,
+                onBack: {
+                    NotificationCenter.default.post(name: .popToDashboard, object: nil)
+                }
+            )) {
                 ResumeCard(
                     resume: resume,
                     isEditing: $isEditing,

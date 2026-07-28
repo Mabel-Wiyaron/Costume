@@ -124,9 +124,13 @@ struct JobDescInputFormView: View {
             // 🚀 NAVIGATION DESTINATION
             .navigationDestination(isPresented: $jobDescExtVM.isFinished) {
                 if let profile = jobDescExtVM.createdProfile {
-                    CVPreviewView(
-                        profile: profile,
-                        documentName: "\(profile.name)_CV_\(profile.jobDescription?.company ?? "Tailored")"
+                    EditCVView(
+                        document: CVDocument(profile: profile),
+                        jobDescription: profile.jobDescription,
+                        modelContext: modelContext,
+                        onBack: {
+                            NotificationCenter.default.post(name: .popToDashboard, object: nil)
+                        }
                     )
                 }
             }
