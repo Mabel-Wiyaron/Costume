@@ -14,18 +14,18 @@ struct SaveConfirmationToast: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Image(systemName: "checkmark.circle.fill")
+            Image(systemName: "checkmark.circle")
                 .font(.system(size: 16, weight: .semibold))
             Text("Changes Saved Successfully!")
                 .font(.system(size: 15, weight: .semibold))
             Spacer(minLength: 0)
         }
-        .foregroundStyle(Color("AppPrimaryColor"))
+        .foregroundStyle(.teal)
         .padding(.horizontal, HORIZONTAL_PADDING)
         .padding(.vertical, VERTICAL_PADDING)
         .frame(maxWidth: .infinity)
         .background(Color("CardColor"))
         .clipShape(RoundedRectangle(cornerRadius: CORNER_RADIUS))
-        .shadow(color: .black.opacity(0.4), radius: 16, y: 6)
+        .shadow(color: .black.opacity(0.6), radius: 16, y: 8)
     }
 }
