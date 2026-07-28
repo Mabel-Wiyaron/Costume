@@ -126,7 +126,7 @@ struct ResumeCardContainer: View {
 
                 Menu {
                     Button("􁚛 Rename", action: startEditing)
-                    Button("􀈂 Export", action: exportPDF)
+                    Button("􀈂 Export", action: exportPDF) // Triggers PDF export dialog
                     Button("􀈑 Delete", role: .destructive) {
                         isDeleteAlertPresented = true
                     }
@@ -170,6 +170,7 @@ struct ResumeCardContainer: View {
         focusedField = nil
     }
 
+    /// Triggers PDF Export dialog for the resume card profile
     private func exportPDF() {
         if let onExport = onExport {
             onExport()
