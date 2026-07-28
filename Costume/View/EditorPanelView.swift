@@ -43,7 +43,7 @@ struct EditorPanelView: View {
                             title: "Experience",
                             addButtonLabel: "+ Add Experience",
                             entryTitle: { "Experience #\($0 + 1)" },
-                            items: viewModel.document.experiences,
+                            items: Array(viewModel.document.experiences.reversed()),
                             onAdd: viewModel.addExperience,
                             onDelete: viewModel.deleteExperience
                         ) { experience in
@@ -54,7 +54,7 @@ struct EditorPanelView: View {
                             title: "Education",
                             addButtonLabel: "+ Add Education",
                             entryTitle: { "Education #\($0 + 1)" },
-                            items: viewModel.document.educations,
+                            items: Array(viewModel.document.educations.reversed()),
                             onAdd: viewModel.addEducation,
                             onDelete: viewModel.deleteEducation
                         ) { education in
@@ -65,7 +65,7 @@ struct EditorPanelView: View {
                             title: "Project",
                             addButtonLabel: "+ Add Project",
                             entryTitle: { "Project #\($0 + 1)" },
-                            items: viewModel.document.projects,
+                            items: Array(viewModel.document.projects.reversed()),
                             onAdd: viewModel.addProject,
                             onDelete: viewModel.deleteProject
                         ) { project in
