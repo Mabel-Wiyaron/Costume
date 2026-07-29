@@ -10,7 +10,7 @@ import SwiftUI
 
 @Observable
 final class AgentOrchestrationViewModel {
-    @ObservationIgnored @AppStorage("useExternalAPI") private var persistedUseExternalAPI = false
+    @ObservationIgnored @AppStorage("modelPreference") private var persistedModelPreference: ModelPreference = .default
     @ObservationIgnored @AppStorage("externalAPIBaseURL") private var persistedBaseURL = ""
     @ObservationIgnored @AppStorage("externalAPIKey") private var persistedApiKey = ""
     @ObservationIgnored @AppStorage("externalAPIModel") private var persistedModel = ""
@@ -168,17 +168,20 @@ final class AgentOrchestrationViewModel {
 
         return profile
     }
-
+    
     func getLanguageModel() async -> LanguageModelProtocol {
-        if persistedUseExternalAPI {
+        switch persistedModelPreference {
+        case .mlx:
+            return MLXService()
+        case .openai:
             return OpenAIService(
                 endpoint: URL(string: persistedBaseURL)!,
                 apiKey: persistedApiKey,
                 model: persistedModel
             )
+        default:
+            return AppleIntelligenceService()
         }
-
-        return AppleIntelligenceService()
     }
 
     func runSectionsAgent(for message: String) async throws -> SectionsGenerable
