@@ -133,12 +133,15 @@ final class EditCVViewModel {
     var hasUnsavedChanges: Bool {
         EditCVSnapshot(from: document.profile) != lastSavedSnapshot
     }
+    
+    var hasInvalidData: Bool {
+        !isNameValid || !isEmailValid || !isPhoneValid ||
+        !isExperienceListValid || !isEducationListValid || !isProjectListValid ||
+        !isCertificationListValid || !isAwardListValid
+    }
 
     var isSaveEnabled: Bool {
-        hasUnsavedChanges &&
-        isNameValid && isEmailValid && isPhoneValid &&
-        isExperienceListValid && isEducationListValid && isProjectListValid &&
-        isCertificationListValid && isAwardListValid
+        hasUnsavedChanges && !hasInvalidData
     }
 
     // MARK: - Experience

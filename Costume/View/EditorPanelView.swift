@@ -197,6 +197,11 @@ struct EditorPanelView: View {
     
     private var saveBar: some View {
         HStack {
+            if viewModel.hasInvalidData {
+                Text("*There are unfilled required sections. Please complete them to continue saving.")
+                    .foregroundColor(.red)
+                    .font(.footnote)
+            }
             Spacer()
             Button("Save") {
                 viewModel.saveWithConfirmation()
