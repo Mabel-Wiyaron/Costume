@@ -36,6 +36,9 @@ struct EditCVView: View {
                 }
             }
         }
+        .onAppear {
+            viewModel.startLiveMatching()
+        }
     }
 }
 
