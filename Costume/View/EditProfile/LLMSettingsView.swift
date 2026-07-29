@@ -8,21 +8,35 @@
 import Foundation
 import SwiftUI
 
+enum ModelPreference: Int {
+    case mlx = 1
+    case openai = 2
+    case `default` = 0
+}
+
 struct LLMSettingsView: View {
-    @AppStorage("useExternalAPI") private var persistedUseExternalAPI = false
+    @AppStorage("modelPreference") private var persistedModelPreference:
+        ModelPreference = .default
     @AppStorage("externalAPIBaseURL") private var persistedBaseURL = ""
     @AppStorage("externalAPIKey") private var persistedApiKey = ""
     @AppStorage("externalAPIModel") private var persistedModel = ""
 
-    @State private var draftUseExternalAPI = false
     @State private var draftBaseURL = ""
     @State private var draftApiKey = ""
     @State private var draftModel = ""
 
+    private var isOpenAI: Bool {
+        persistedModelPreference == .openai
+    }
+
     private var isSaveEnabled: Bool {
-        guard !draftModel.trimmingCharacters(in: .whitespaces).isEmpty else { return false }
+        guard !draftModel.trimmingCharacters(in: .whitespaces).isEmpty else {
+            return false
+        }
         let trimmed = draftBaseURL.trimmingCharacters(in: .whitespaces)
-        guard !trimmed.isEmpty, let url = URL(string: trimmed) else { return false }
+        guard !trimmed.isEmpty, let url = URL(string: trimmed) else {
+            return false
+        }
         return url.scheme != nil && url.host != nil
     }
 
@@ -32,14 +46,22 @@ struct LLMSettingsView: View {
                 SectionHeaderView(title: "AI Model Settings")
 
                 HStack {
-                    Text("Custom API")
+                    Text("Model Preference")
                         .font(.body)
                     Spacer()
-                    Toggle(isOn: $draftUseExternalAPI) {}
-                        .toggleStyle(.switch)
+                    Picker(
+                        selection: $persistedModelPreference,
+                        label: Text("Model")
+                    ) {
+                        Text("Default").tag(ModelPreference.default)
+                        Text("Local").tag(ModelPreference.mlx)
+                        Text("API").tag(ModelPreference.openai)
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.segmented)
                 }
 
-                if draftUseExternalAPI {
+                if isOpenAI {
                     VStack(spacing: 12) {
                         LabeledTextField(
                             label: "Base URL",
@@ -56,6 +78,19 @@ struct LLMSettingsView: View {
                             placeholder: "gpt-4o",
                             text: $draftModel
                         )
+                        HStack {
+                            Spacer()
+                            Button("Save") {
+                                persistedBaseURL = draftBaseURL
+                                persistedApiKey = draftApiKey
+                                persistedModel = draftModel
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(Color("PrimaryColor"))
+                            .controlSize(.large)
+                            .disabled(!isSaveEnabled)
+                        }
+
                     }
                     .transition(
                         .opacity.combined(
@@ -63,30 +98,15 @@ struct LLMSettingsView: View {
                         )
                     )
                 }
-
-                HStack {
-                    Spacer()
-                    Button("Save") {
-                        persistedUseExternalAPI = draftUseExternalAPI
-                        persistedBaseURL = draftBaseURL
-                        persistedApiKey = draftApiKey
-                        persistedModel = draftModel
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color("PrimaryColor"))
-                    .controlSize(.large)
-                    .disabled(!isSaveEnabled)
-                }
             }
             .padding(32)
             .cardBackground()
             .animation(
                 .easeInOut(duration: 0.25),
-                value: draftUseExternalAPI
+                value: isOpenAI
             )
         }
         .onAppear {
-            draftUseExternalAPI = persistedUseExternalAPI
             draftBaseURL = persistedBaseURL
             draftApiKey = persistedApiKey
             draftModel = persistedModel
