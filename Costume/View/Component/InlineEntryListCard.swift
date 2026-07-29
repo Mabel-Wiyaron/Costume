@@ -58,8 +58,6 @@ struct InlineEntryListCard<Item: Identifiable & AnyObject, EntryFields: View>: V
                     self.itemToDelete = nil
                 }
             }
-        } message: {
-            Text("This action can't be undone.")
         }
     }
 
