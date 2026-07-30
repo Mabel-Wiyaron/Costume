@@ -118,6 +118,27 @@ struct EditorPanelView: View {
         )
     }
 
+    private enum PersonalInfoField: Hashable {
+        case name, phone, email
+    }
+    @FocusState private var focusedPersonalInfoField: PersonalInfoField?
+
+    @State private var nameTouched = false
+    @State private var phoneTouched = false
+    @State private var emailTouched = false
+
+    private var shouldShowNameError: Bool {
+        nameTouched && !viewModel.isNameValid
+    }
+
+    private var shouldShowPhoneError: Bool {
+        phoneTouched && !viewModel.isPhoneValid
+    }
+
+    private var shouldShowEmailError: Bool {
+        emailTouched && !viewModel.isEmailValid
+    }
+
     private var personalInfoCard: some View {
         VStack(alignment: .leading, spacing: 16) {
             SectionHeaderView(title: "Personal Information")
@@ -125,16 +146,22 @@ struct EditorPanelView: View {
             LabeledTextField(
                 label: "Name",
                 isRequired: true,
-                text: $viewModel.document.name
+                text: $viewModel.document.name,
+                isError: shouldShowNameError,
+                errorMessage: "Name is required"
             )
+            .focused($focusedPersonalInfoField, equals: .name)
 
             HStack(alignment: .top, spacing: COLUMN_SPACING) {
                 LabeledTextField(
                     label: "Contact",
                     isRequired: true,
                     placeholder: "+62 1234567890",
-                    text: $viewModel.document.phone
+                    text: $viewModel.document.phone,
+                    isError: shouldShowPhoneError,
+                    errorMessage: viewModel.document.phone.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Contact number is required" : "Invalid phone format (e.g., +6281234567)"
                 )
+                .focused($focusedPersonalInfoField, equals: .phone)
                 LabeledTextField(
                     label: "LinkedIn",
                     text: $viewModel.document.linkedin.stringValue
@@ -145,8 +172,11 @@ struct EditorPanelView: View {
                 LabeledTextField(
                     label: "Email",
                     isRequired: true,
-                    text: $viewModel.document.email
+                    text: $viewModel.document.email,
+                    isError: shouldShowEmailError,
+                    errorMessage: viewModel.document.email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Email is required" : "Invalid email format (e.g., name@example.com)"
                 )
+                .focused($focusedPersonalInfoField, equals: .email)
                 LabeledTextField(
                     label: "Personal Website",
                     text: $viewModel.document.website.stringValue
@@ -167,6 +197,14 @@ struct EditorPanelView: View {
         }
         .padding(CARD_PADDING)
         .cardBackground()
+        .onChange(of: focusedPersonalInfoField) { oldFocus, newFocus in
+            if oldFocus == .name && newFocus != .name { nameTouched = true }
+            if oldFocus == .phone && newFocus != .phone { phoneTouched = true }
+            if oldFocus == .email && newFocus != .email { emailTouched = true }
+        }
+        .animation(.default, value: nameTouched)
+        .animation(.default, value: phoneTouched)
+        .animation(.default, value: emailTouched)
     }
 
     private var summaryCard: some View {

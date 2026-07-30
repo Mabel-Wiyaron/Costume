@@ -48,6 +48,12 @@ final class EditCVViewModel {
         sortEntries()
         lastSavedSnapshot = EditCVSnapshot(from: document.profile)
     }
+
+    func deleteDocument() {
+        guard let modelContext else { return }
+        modelContext.delete(document.profile)
+        try? modelContext.save()
+    }
     
     @MainActor
     func saveWithConfirmation() {

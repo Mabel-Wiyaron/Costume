@@ -21,7 +21,7 @@ struct EditCVView: View {
                 HSplitView {
                     EditorPanelView(viewModel: viewModel, onBack: onBack)
                         .frame(minWidth: 460, idealWidth: 520)
-                    AnalysisPanelView(viewModel: viewModel)
+                    AnalysisPanelView(viewModel: viewModel, onBack: onBack)
                         .frame(minWidth: 460, idealWidth: 640)
                 }
             } else {
