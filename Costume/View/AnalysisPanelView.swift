@@ -114,7 +114,9 @@ struct AnalysisPanelView: View {
                     isDeleteConfirmationPresented = true
                 }) {
                     Image(systemName: "trash")
+                        .foregroundStyle(.red)
                 }
+                .tint(.red)
                 .help("Delete CV")
             }
         }
