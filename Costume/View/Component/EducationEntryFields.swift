@@ -12,17 +12,67 @@ struct EducationEntryFields: View {
 
     private let COLUMN_SPACING: CGFloat = 32
 
+    private enum Field: Hashable {
+        case school, degree, fieldOfStudy
+    }
+    @FocusState private var focusedField: Field?
+
+    @State private var schoolTouched = false
+    @State private var degreeTouched = false
+    @State private var fieldOfStudyTouched = false
+
+    private var shouldShowSchoolError: Bool {
+        schoolTouched && education.school.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    private var shouldShowDegreeError: Bool {
+        degreeTouched && education.degree.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    private var shouldShowFieldOfStudyError: Bool {
+        fieldOfStudyTouched && education.fieldOfStudy.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            LabeledTextField(label: "School", isRequired: true, text: schoolBinding)
-            LabeledTextField(label: "Degree", isRequired: true, text: degreeBinding)
-            LabeledTextField(label: "Field of Study", isRequired: true, text: fieldOfStudyBinding)
+            LabeledTextField(
+                label: "School",
+                isRequired: true,
+                text: schoolBinding,
+                isError: shouldShowSchoolError,
+                errorMessage: "School name is required"
+            )
+            .focused($focusedField, equals: .school)
+
+            LabeledTextField(
+                label: "Degree",
+                isRequired: true,
+                text: degreeBinding,
+                isError: shouldShowDegreeError,
+                errorMessage: "Degree is required"
+            )
+            .focused($focusedField, equals: .degree)
+
+            LabeledTextField(
+                label: "Field of Study",
+                isRequired: true,
+                text: fieldOfStudyBinding,
+                isError: shouldShowFieldOfStudyError,
+                errorMessage: "Field of study is required"
+            )
+            .focused($focusedField, equals: .fieldOfStudy)
 
             HStack(alignment: .top, spacing: COLUMN_SPACING) {
                 LabeledTextField(label: "Grade", text: gradeBinding)
                 LabeledDateRangeField(label: "Years", isRequired: true, startDate: startDateBinding, endDate: endDateBinding)
             }
         }
+        .onChange(of: focusedField) { oldFocus, newFocus in
+            if oldFocus == .school && newFocus != .school { schoolTouched = true }
+            if oldFocus == .degree && newFocus != .degree { degreeTouched = true }
+            if oldFocus == .fieldOfStudy && newFocus != .fieldOfStudy { fieldOfStudyTouched = true }
+        }
+        .animation(.default, value: schoolTouched)
+        .animation(.default, value: degreeTouched)
+        .animation(.default, value: fieldOfStudyTouched)
     }
 
     private var schoolBinding: Binding<String> {
