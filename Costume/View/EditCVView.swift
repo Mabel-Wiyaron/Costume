@@ -37,7 +37,10 @@ struct EditCVView: View {
                 }
             }
         }
-        .onAppear(perform: setupViewModelIfNeeded)
+        .onAppear {
+            setupViewModelIfNeeded()
+            viewModel?.startLiveMatching()
+        }
     }
 
     private func attemptBack() {

@@ -207,7 +207,10 @@ final class EditCVViewModel {
         KeywordMatcher.updateStatus(for: keywords, using: document.profile)
     }
 
+    private var liveMatchingTask: Task<Void, Never>?
+
     func startLiveMatching() {
+        updateKeywordStatus()
         observeProfile(document.profile)
     }
 
@@ -260,7 +263,12 @@ final class EditCVViewModel {
         } onChange: { [weak self] in
             guard let self else { return }
             Task { @MainActor in
+                self.liveMatchingTask?.cancel()
+                self.liveMatchingTask = Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 300_000_000)
+                    guard !Task.isCancelled else { return }
                 self.updateKeywordStatus()
+                }
                 self.observeProfile(profile)
             }
         }
