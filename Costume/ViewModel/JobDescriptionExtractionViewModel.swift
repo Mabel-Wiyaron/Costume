@@ -7,9 +7,15 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 
 @Observable
 final class JobDescriptionExtractionViewModel {
+    @ObservationIgnored @AppStorage("useExternalAPI") private var persistedUseExternalAPI = false
+    @ObservationIgnored @AppStorage("externalAPIBaseURL") private var persistedBaseURL = ""
+    @ObservationIgnored @AppStorage("externalAPIKey") private var persistedApiKey = ""
+    @ObservationIgnored @AppStorage("externalAPIModel") private var persistedModel = ""
+
     var isLoading: Bool = false
     var isFinished: Bool = false
     var createdProfile: Profile? = nil
@@ -21,7 +27,7 @@ final class JobDescriptionExtractionViewModel {
     var modelContext: ModelContext?
 
     func extract(from text: String) async throws -> JobDescriptionGenerable {
-        return try await agentService.invoke(for: text)
+        return try await runJobDescriptionAgent(for: text)
     }
     
     @MainActor
@@ -164,6 +170,18 @@ final class JobDescriptionExtractionViewModel {
         
         context.insert(newProfile)
         
+        var skillCopies: [ObjectIdentifier: Skill] = [:]
+        func copiedSkills(_ originals: [Skill]) -> [Skill] {
+            originals.map { original in
+                let key = ObjectIdentifier(original)
+                if let existing = skillCopies[key] { return existing }
+                let copy = Skill(name: original.name)
+                context.insert(copy)
+                skillCopies[key] = copy
+                return copy
+            }
+        }
+        
         newProfile.links = profile.links.map { link in
             let newLink = ProfileLink(platform: link.platform, url: link.url)
             context.insert(newLink)
@@ -179,7 +197,7 @@ final class JobDescriptionExtractionViewModel {
                 startDate: exp.startDate,
                 endDate: exp.endDate,
                 descriptionText: exp.descriptionText,
-                skills: exp.skills
+                skills: copiedSkills(exp.skills)
             )
             context.insert(newExp)
             return newExp
@@ -193,7 +211,7 @@ final class JobDescriptionExtractionViewModel {
                 startDate: edu.startDate,
                 endDate: edu.endDate,
                 grade: edu.grade,
-                skills: edu.skills
+                skills: copiedSkills(edu.skills)
             )
             context.insert(newEdu)
             return newEdu
@@ -207,7 +225,7 @@ final class JobDescriptionExtractionViewModel {
                 expirationDate: cert.expirationDate,
                 credentialID: cert.credentialID,
                 credentialURL: cert.credentialURL,
-                skills: cert.skills
+                skills: copiedSkills(cert.skills)
             )
             context.insert(newCert)
             return newCert
@@ -221,7 +239,7 @@ final class JobDescriptionExtractionViewModel {
                 endDate: proj.endDate,
                 website: proj.website,
                 descriptionText: proj.descriptionText,
-                skills: proj.skills
+                skills: copiedSkills(proj.skills)
             )
             context.insert(newProj)
             return newProj
@@ -246,7 +264,7 @@ final class JobDescriptionExtractionViewModel {
             return newLang
         }
         
-        newProfile.skills = profile.skills
+        newProfile.skills = copiedSkills(profile.skills)
         
         return newProfile
     }
@@ -254,4 +272,27 @@ final class JobDescriptionExtractionViewModel {
     func isSubmitDisabled(for text: String) -> Bool {
         isLoading || text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
+    
+    func getLanguageModel() async -> LanguageModelProtocol {
+        if persistedUseExternalAPI {
+            return OpenAIService(
+                endpoint: URL(string: persistedBaseURL)!,
+                apiKey: persistedApiKey,
+                model: persistedModel
+            )
+        }
+
+        return AppleIntelligenceService()
+    }
+
+    func runJobDescriptionAgent(for message: String) async throws -> JobDescriptionGenerable
+    {
+        let jobDescriptionAgent: JobDescriptionAgentService = .init(
+            languageModel: await getLanguageModel()
+        )
+
+        return try await jobDescriptionAgent.invoke(for: message)
+    }
+
 }
+

@@ -104,6 +104,7 @@ struct ATSCVTemplateView: View {
                 VStack(alignment: .center, spacing: 4) {
                     Text(profile.name.isEmpty ? "YOUR NAME" : profile.name.uppercased())
                         .font(.system(size: 20, weight: .black))
+                        .multilineTextAlignment(.center)
                     
                     contactInfoView()
                     
@@ -150,6 +151,7 @@ struct ATSCVTemplateView: View {
                                 ForEach(experience.descriptionText, id: \.self) { bullet in
                                     if !bullet.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                         Text("• \(bullet)")
+                                            .fixedSize(horizontal: false, vertical: true)
                                     }
                                 }
                             }
@@ -362,8 +364,8 @@ struct ATSCVTemplateView: View {
         var currentHeight: CGFloat = 0
         
         // Batas tinggi konten per halaman (A4 height 842 - padding 80 = 762pt)
-        let page1MaxHeight: CGFloat = 660 // Mengurangi tinggi untuk header (~100pt)
-        let nextPageMaxHeight: CGFloat = 720
+        let page1MaxHeight: CGFloat = 740
+        let nextPageMaxHeight: CGFloat = 740
         
         // Fungsi pembantu untuk mendeteksi sisa ruang dan mengalokasikan halaman baru jika meluap
         func checkHeightAndAllocate(_ height: CGFloat) {
@@ -382,8 +384,8 @@ struct ATSCVTemplateView: View {
         
         // 2. Summary
         if let summary = profile.summary, !summary.isEmpty {
-            let lines = CGFloat(max(1, summary.count / 85))
-            let summaryHeight = 25 + (lines * 14) // Judul + baris teks
+            let lines = CGFloat(max(1, (summary.count + 84) / 85))
+            let summaryHeight = 25 + (lines * 13) // Judul + baris teks
             pages[currentPageIndex].hasSummary = true
             currentHeight += summaryHeight
         }
@@ -393,10 +395,68 @@ struct ATSCVTemplateView: View {
         if !profExp.isEmpty {
             checkHeightAndAllocate(25) // Section Title
             for exp in profExp.sorted(by: { $0.startDate > $1.startDate }) {
-                // Estimasi tinggi per item (meta row + company row + deskripsi bullet)
-                let itemHeight = 35 + CGFloat(exp.descriptionText.count * 13)
-                checkHeightAndAllocate(itemHeight)
-                pages[currentPageIndex].experiences.append(exp)
+                let bulletHeights = exp.descriptionText.map { bullet in
+                    CGFloat(max(1, (bullet.count + 74) / 75) * 12 + 2)
+                }
+                let headerHeight: CGFloat = 30
+                let totalItemHeight = headerHeight + bulletHeights.reduce(0, +)
+                let maxHeight = (currentPageIndex == 0) ? page1MaxHeight : nextPageMaxHeight
+
+                if currentHeight + totalItemHeight <= maxHeight {
+                    pages[currentPageIndex].experiences.append(exp)
+                    currentHeight += totalItemHeight
+                } else {
+                    let availableHeight = maxHeight - currentHeight - headerHeight
+                    var accumulatedHeight: CGFloat = 0
+                    var splitIndex = 0
+
+                    for (index, bHeight) in bulletHeights.enumerated() {
+                        if accumulatedHeight + bHeight <= availableHeight {
+                            accumulatedHeight += bHeight
+                            splitIndex = index + 1
+                        } else {
+                            break
+                        }
+                    }
+
+                    if splitIndex >= 1 && splitIndex < exp.descriptionText.count {
+                        let firstBullets = Array(exp.descriptionText.prefix(splitIndex))
+                        let remainingBullets = Array(exp.descriptionText.dropFirst(splitIndex))
+
+                        let part1 = Experience(
+                            role: exp.role,
+                            employmentType: exp.employmentType,
+                            company: exp.company,
+                            location: exp.location,
+                            startDate: exp.startDate,
+                            endDate: exp.endDate,
+                            descriptionText: firstBullets
+                        )
+                        pages[currentPageIndex].experiences.append(part1)
+
+                        pages.append(PageContent())
+                        currentPageIndex += 1
+
+                        let part2 = Experience(
+                            role: "\(exp.role) (cont.)",
+                            employmentType: exp.employmentType,
+                            company: exp.company,
+                            location: exp.location,
+                            startDate: exp.startDate,
+                            endDate: exp.endDate,
+                            descriptionText: remainingBullets
+                        )
+                        pages[currentPageIndex].experiences.append(part2)
+
+                        let remainingBulletHeights = bulletHeights.dropFirst(splitIndex).reduce(0, +)
+                        currentHeight = headerHeight + remainingBulletHeights
+                    } else {
+                        pages.append(PageContent())
+                        currentPageIndex += 1
+                        pages[currentPageIndex].experiences.append(exp)
+                        currentHeight = totalItemHeight
+                    }
+                }
             }
         }
         
@@ -404,7 +464,7 @@ struct ATSCVTemplateView: View {
         if !profile.educations.isEmpty {
             checkHeightAndAllocate(25) // Section Title
             for edu in profile.educations.sorted(by: { $0.startDate > $1.startDate }) {
-                let itemHeight: CGFloat = 45
+                let itemHeight: CGFloat = 40
                 checkHeightAndAllocate(itemHeight)
                 pages[currentPageIndex].educations.append(edu)
             }
@@ -414,9 +474,66 @@ struct ATSCVTemplateView: View {
         if !profile.projects.isEmpty {
             checkHeightAndAllocate(25) // Section Title
             for proj in profile.projects.sorted(by: { $0.startDate > $1.startDate }) {
-                let itemHeight = 35 + CGFloat(proj.descriptionText.count * 13)
-                checkHeightAndAllocate(itemHeight)
-                pages[currentPageIndex].projects.append(proj)
+                let bulletHeights = proj.descriptionText.map { bullet in
+                    CGFloat(max(1, (bullet.count + 74) / 75) * 12 + 2)
+                }
+                let headerHeight: CGFloat = 30
+                let totalItemHeight = headerHeight + bulletHeights.reduce(0, +)
+                let maxHeight = (currentPageIndex == 0) ? page1MaxHeight : nextPageMaxHeight
+
+                if currentHeight + totalItemHeight <= maxHeight {
+                    pages[currentPageIndex].projects.append(proj)
+                    currentHeight += totalItemHeight
+                } else {
+                    let availableHeight = maxHeight - currentHeight - headerHeight
+                    var accumulatedHeight: CGFloat = 0
+                    var splitIndex = 0
+
+                    for (index, bHeight) in bulletHeights.enumerated() {
+                        if accumulatedHeight + bHeight <= availableHeight {
+                            accumulatedHeight += bHeight
+                            splitIndex = index + 1
+                        } else {
+                            break
+                        }
+                    }
+
+                    if splitIndex >= 1 && splitIndex < proj.descriptionText.count {
+                        let firstBullets = Array(proj.descriptionText.prefix(splitIndex))
+                        let remainingBullets = Array(proj.descriptionText.dropFirst(splitIndex))
+
+                        let part1 = Project(
+                            role: proj.role,
+                            name: proj.name,
+                            startDate: proj.startDate,
+                            endDate: proj.endDate,
+                            website: proj.website,
+                            descriptionText: firstBullets
+                        )
+                        pages[currentPageIndex].projects.append(part1)
+
+                        pages.append(PageContent())
+                        currentPageIndex += 1
+
+                        let part2 = Project(
+                            role: "\(proj.role) (cont.)",
+                            name: proj.name,
+                            startDate: proj.startDate,
+                            endDate: proj.endDate,
+                            website: proj.website,
+                            descriptionText: remainingBullets
+                        )
+                        pages[currentPageIndex].projects.append(part2)
+
+                        let remainingBulletHeights = bulletHeights.dropFirst(splitIndex).reduce(0, +)
+                        currentHeight = headerHeight + remainingBulletHeights
+                    } else {
+                        pages.append(PageContent())
+                        currentPageIndex += 1
+                        pages[currentPageIndex].projects.append(proj)
+                        currentHeight = totalItemHeight
+                    }
+                }
             }
         }
         
@@ -431,7 +548,7 @@ struct ATSCVTemplateView: View {
             if hasLanguages { linesCount += 1 }
             if hasCertifications { linesCount += 1 }
             if hasAwards { linesCount += 1 }
-            let skillsHeight = 25 + CGFloat(linesCount * 15)
+            let skillsHeight = 25 + CGFloat(linesCount * 14)
             checkHeightAndAllocate(skillsHeight)
             pages[currentPageIndex].showSkills = true
         }
@@ -441,9 +558,68 @@ struct ATSCVTemplateView: View {
         if !volExp.isEmpty {
             checkHeightAndAllocate(25) // Section Title
             for exp in volExp.sorted(by: { $0.startDate > $1.startDate }) {
-                let itemHeight = 35 + CGFloat(exp.descriptionText.count * 13)
-                checkHeightAndAllocate(itemHeight)
-                pages[currentPageIndex].volunteerExperiences.append(exp)
+                let bulletHeights = exp.descriptionText.map { bullet in
+                    CGFloat(max(1, (bullet.count + 74) / 75) * 12 + 2)
+                }
+                let headerHeight: CGFloat = 30
+                let totalItemHeight = headerHeight + bulletHeights.reduce(0, +)
+                let maxHeight = (currentPageIndex == 0) ? page1MaxHeight : nextPageMaxHeight
+
+                if currentHeight + totalItemHeight <= maxHeight {
+                    pages[currentPageIndex].volunteerExperiences.append(exp)
+                    currentHeight += totalItemHeight
+                } else {
+                    let availableHeight = maxHeight - currentHeight - headerHeight
+                    var accumulatedHeight: CGFloat = 0
+                    var splitIndex = 0
+
+                    for (index, bHeight) in bulletHeights.enumerated() {
+                        if accumulatedHeight + bHeight <= availableHeight {
+                            accumulatedHeight += bHeight
+                            splitIndex = index + 1
+                        } else {
+                            break
+                        }
+                    }
+
+                    if splitIndex >= 1 && splitIndex < exp.descriptionText.count {
+                        let firstBullets = Array(exp.descriptionText.prefix(splitIndex))
+                        let remainingBullets = Array(exp.descriptionText.dropFirst(splitIndex))
+
+                        let part1 = Experience(
+                            role: exp.role,
+                            employmentType: exp.employmentType,
+                            company: exp.company,
+                            location: exp.location,
+                            startDate: exp.startDate,
+                            endDate: exp.endDate,
+                            descriptionText: firstBullets
+                        )
+                        pages[currentPageIndex].volunteerExperiences.append(part1)
+
+                        pages.append(PageContent())
+                        currentPageIndex += 1
+
+                        let part2 = Experience(
+                            role: "\(exp.role) (cont.)",
+                            employmentType: exp.employmentType,
+                            company: exp.company,
+                            location: exp.location,
+                            startDate: exp.startDate,
+                            endDate: exp.endDate,
+                            descriptionText: remainingBullets
+                        )
+                        pages[currentPageIndex].volunteerExperiences.append(part2)
+
+                        let remainingBulletHeights = bulletHeights.dropFirst(splitIndex).reduce(0, +)
+                        currentHeight = headerHeight + remainingBulletHeights
+                    } else {
+                        pages.append(PageContent())
+                        currentPageIndex += 1
+                        pages[currentPageIndex].volunteerExperiences.append(exp)
+                        currentHeight = totalItemHeight
+                    }
+                }
             }
         }
         

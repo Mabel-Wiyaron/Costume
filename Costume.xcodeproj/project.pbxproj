@@ -6,6 +6,15 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		5BC1982130185CA900C9ED70 /* MLXEmbedders in Frameworks */ = {isa = PBXBuildFile; productRef = 5BC1982030185CA900C9ED70 /* MLXEmbedders */; };
+		5BC1982330185CA900C9ED70 /* MLXHuggingFace in Frameworks */ = {isa = PBXBuildFile; productRef = 5BC1982230185CA900C9ED70 /* MLXHuggingFace */; };
+		5BC1982530185CA900C9ED70 /* MLXLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 5BC1982430185CA900C9ED70 /* MLXLLM */; };
+		5BC1982730185CA900C9ED70 /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 5BC1982630185CA900C9ED70 /* MLXLMCommon */; };
+		5BC1982A30185CDF00C9ED70 /* HuggingFace in Frameworks */ = {isa = PBXBuildFile; productRef = 5BC1982930185CDF00C9ED70 /* HuggingFace */; };
+		5BC1982D30185DC900C9ED70 /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = 5BC1982C30185DC900C9ED70 /* Tokenizers */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		989C9CE8300090750021C6D0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -39,6 +48,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5BC1982530185CA900C9ED70 /* MLXLLM in Frameworks */,
+				5BC1982130185CA900C9ED70 /* MLXEmbedders in Frameworks */,
+				5BC1982D30185DC900C9ED70 /* Tokenizers in Frameworks */,
+				5BC1982A30185CDF00C9ED70 /* HuggingFace in Frameworks */,
+				5BC1982730185CA900C9ED70 /* MLXLMCommon in Frameworks */,
+				5BC1982330185CA900C9ED70 /* MLXHuggingFace in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,6 +105,12 @@
 			);
 			name = Costume;
 			packageProductDependencies = (
+				5BC1982030185CA900C9ED70 /* MLXEmbedders */,
+				5BC1982230185CA900C9ED70 /* MLXHuggingFace */,
+				5BC1982430185CA900C9ED70 /* MLXLLM */,
+				5BC1982630185CA900C9ED70 /* MLXLMCommon */,
+				5BC1982930185CDF00C9ED70 /* HuggingFace */,
+				5BC1982C30185DC900C9ED70 /* Tokenizers */,
 			);
 			productName = Costume;
 			productReference = 5BA974952FFF49A20050EAF9 /* Costume.app */;
@@ -146,6 +167,11 @@
 			);
 			mainGroup = 5BA9748C2FFF49A20050EAF9;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				5BC1981F30185CA900C9ED70 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */,
+				5BC1982830185CDF00C9ED70 /* XCRemoteSwiftPackageReference "swift-huggingface" */,
+				5BC1982B30185DC900C9ED70 /* XCRemoteSwiftPackageReference "swift-transformers" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5BA974962FFF49A20050EAF9 /* Products */;
 			projectDirPath = "";
@@ -325,13 +351,25 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Costume - Tailor Resume";
@@ -359,13 +397,25 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readwrite;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Costume - Tailor Resume";
@@ -459,6 +509,70 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5BC1981F30185CA900C9ED70 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ml-explore/mlx-swift-lm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.31.4;
+			};
+		};
+		5BC1982830185CDF00C9ED70 /* XCRemoteSwiftPackageReference "swift-huggingface" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/huggingface/swift-huggingface";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.0;
+			};
+			traits = (
+			);
+		};
+		5BC1982B30185DC900C9ED70 /* XCRemoteSwiftPackageReference "swift-transformers" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/huggingface/swift-transformers";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.3;
+			};
+			traits = (
+			);
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5BC1982030185CA900C9ED70 /* MLXEmbedders */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5BC1981F30185CA900C9ED70 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXEmbedders;
+		};
+		5BC1982230185CA900C9ED70 /* MLXHuggingFace */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5BC1981F30185CA900C9ED70 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXHuggingFace;
+		};
+		5BC1982430185CA900C9ED70 /* MLXLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5BC1981F30185CA900C9ED70 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXLLM;
+		};
+		5BC1982630185CA900C9ED70 /* MLXLMCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5BC1981F30185CA900C9ED70 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXLMCommon;
+		};
+		5BC1982930185CDF00C9ED70 /* HuggingFace */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5BC1982830185CDF00C9ED70 /* XCRemoteSwiftPackageReference "swift-huggingface" */;
+			productName = HuggingFace;
+		};
+		5BC1982C30185DC900C9ED70 /* Tokenizers */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5BC1982B30185DC900C9ED70 /* XCRemoteSwiftPackageReference "swift-transformers" */;
+			productName = Tokenizers;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 5BA9748D2FFF49A20050EAF9 /* Project object */;
 }

@@ -1,13 +1,13 @@
-//  EditProfileView.swift
-
 import SwiftData
 import SwiftUI
 
 struct EditProfileView: View {
     @Environment(\.modelContext) private var mainContext
+    @Environment(\.dismiss) private var dismiss
     
     var profile: Profile? = nil
     @State private var viewModel: EditProfileViewModel? = nil
+    @State private var cvViewModel: CVParsingViewModel? = nil
 
     private let OUTER_PADDING: CGFloat = 40
     private let CARD_MAX_WIDTH: CGFloat = 800
@@ -16,56 +16,120 @@ struct EditProfileView: View {
         NavigationSplitView {
             if let vm = viewModel {
                 @Bindable var bindableVM = vm
-                ProfileSidebarView(selectedSection: $bindableVM.selectedSection)
+                ProfileSidebarView(
+                    selectedSection: $bindableVM.selectedSection,
+                    onSelect: { section in attemptNavigate(to: section) }
+                )
             } else {
                 ProgressView()
             }
         } detail: {
-            ZStack {
+            ZStack(alignment: .top) {
                 Color("BackgroundColor")
                     .ignoresSafeArea()
-
+                
                 if let vm = viewModel {
                     @Bindable var bindableVM = vm
                     
                     ScrollView {
                         VStack(alignment: .leading) {
                             switch bindableVM.selectedSection {
-                            case .personalInfo, .none:
+                            case .uploadCV, .none:
+                                if let cvViewModel = cvViewModel {
+                                    let mainProfile = (try? mainContext.model(for: vm.profile.persistentModelID) as? Profile) ?? vm.profile
+                                    
+                                    UploadCVView(
+                                        viewModel: cvViewModel,
+                                        sandboxedProfile: vm.profile,
+                                        masterProfile: mainProfile,
+                                        mainContext: mainContext
+                                    )
+                                } else {
+                                    ProgressView("Initializing parser...")
+                                }
+                            case .personalInfo:
                                 PersonalInfoFormView(viewModel: vm)
                             case .education:
                                 EducationSectionView(viewModel: vm)
                             case .experience:
                                 ExperienceSectionView(viewModel: vm)
                             case .skills:
-                                SkillsSectionView(skills: $bindableVM.profile.skills, isSaveEnabled: vm.isSkillsSaveEnabled, onSave: vm.save)
+                                SkillsSectionView(skills: $bindableVM.profile.skills, isSaveEnabled: vm.isSkillsSaveEnabled, onSave: vm.saveWithConfirmation)
                             case .project:
                                 ProjectSectionView(viewModel: vm)
                             case .certification:
                                 CertificationSectionView(viewModel: vm)
                             case .awards:
                                 AwardSectionView(viewModel: vm)
+                            case .llmSettings:
+                                LLMSettingsView()
                             }
                         }
                         .frame(maxWidth: CARD_MAX_WIDTH, alignment: .top)
                         .padding(OUTER_PADDING)
                         .frame(maxWidth: .infinity, alignment: .top)
                     }
+                    
+                    if vm.showSaveConfirmation {
+                        SaveConfirmationToast()
+                            .frame(maxWidth: CARD_MAX_WIDTH)
+                            .padding(.horizontal, OUTER_PADDING)
+                            .padding(.top, OUTER_PADDING)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                            .zIndex(1)
+                            .allowsHitTesting(false)
+                    }
                 } else {
                     ProgressView()
                 }
             }
+            .animation(.easeInOut(duration: 0.25), value: viewModel?.showSaveConfirmation)
         }
         .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 300)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigation) {
+                Button(action: attemptBack) {
+                    Image(systemName: "chevron.left")
+                }
+            }
+        }
         .onAppear {
             setupViewModel()
+        }
+    }
+
+    private func attemptNavigate(to section: ProfileSection) {
+        guard viewModel?.selectedSection != section else { return }
+        proceedIfConfirmed { viewModel?.selectedSection = section }
+    }
+
+    private func attemptBack() {
+        proceedIfConfirmed { dismiss() }
+    }
+
+    private func proceedIfConfirmed(action: () -> Void) {
+        guard let vm = viewModel, vm.hasUnsavedChanges else {
+            action()
+            return
+        }
+        switch UnsavedChangesAlert.present() {
+        case .save:
+            vm.save()
+            action()
+        case .discardChanges:
+            vm.discardChanges()
+            action()
+        case .cancel:
+            break
         }
     }
 
     private func setupViewModel() {
         guard viewModel == nil else { return }
         
-        // 1. Fetch/Find target profile from main context
+        self.cvViewModel = CVParsingViewModel()
+
         let targetProfile: Profile
         if let profile = profile {
             targetProfile = profile
@@ -82,23 +146,28 @@ struct EditProfileView: View {
             } else {
                 let newProfile = Profile(name: "", email: "", location: "", phone: "")
                 mainContext.insert(newProfile)
+                try? mainContext.save()
                 targetProfile = newProfile
             }
         }
-        
-        // 2. Create an isolated Child Context (Sandboxed Draft)
+
         let childContext = ModelContext(mainContext.container)
-        
-        // Disable autosave explicitly on the draft context
         childContext.autosaveEnabled = false
-        
-        // 3. Fetch the sandboxed instance of the profile
+
         let targetID = targetProfile.persistentModelID
+        let activeViewModel: EditProfileViewModel
+
         if let sandboxedProfile = childContext.model(for: targetID) as? Profile {
-            self.viewModel = EditProfileViewModel(profile: sandboxedProfile, modelContext: childContext)
+            activeViewModel = EditProfileViewModel(profile: sandboxedProfile, modelContext: childContext)
         } else {
-            // Fallback if sandboxing isn't available
-            self.viewModel = EditProfileViewModel(profile: targetProfile, modelContext: mainContext)
+            activeViewModel = EditProfileViewModel(profile: targetProfile, modelContext: mainContext)
         }
+
+        let hasMasterProfileData = !targetProfile.name.trimmingCharacters(in: .whitespaces).isEmpty ||
+                                   !targetProfile.email.trimmingCharacters(in: .whitespaces).isEmpty
+
+        activeViewModel.selectedSection = hasMasterProfileData ? .personalInfo : .uploadCV
+
+        self.viewModel = activeViewModel
     }
 }

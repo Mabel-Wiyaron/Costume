@@ -8,6 +8,7 @@
 import Foundation
 
 enum ProfileSection: String, CaseIterable, Identifiable {
+    case uploadCV
     case personalInfo
     case education
     case experience
@@ -15,11 +16,13 @@ enum ProfileSection: String, CaseIterable, Identifiable {
     case project
     case certification
     case awards
+    case llmSettings
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
+        case .uploadCV:return "Upload CV"
         case .personalInfo: return "Personal Info*"
         case .education: return "Education*"
         case .experience: return "Experience*"
@@ -27,11 +30,13 @@ enum ProfileSection: String, CaseIterable, Identifiable {
         case .project: return "Project"
         case .certification: return "Certification"
         case .awards: return "Awards"
+        case .llmSettings: return "LLM Settings"
         }
     }
 
     var iconName: String {
         switch self {
+        case .uploadCV: return "square.and.arrow.up"
         case .personalInfo: return "doc.text"
         case .education: return "graduationcap"
         case .experience: return "briefcase"
@@ -39,6 +44,16 @@ enum ProfileSection: String, CaseIterable, Identifiable {
         case .project: return "folder"
         case .certification: return "medal"
         case .awards: return "trophy"
+        case .llmSettings: return "gearshape"
         }
     }
+
+    static let profileSections: [ProfileSection] = [
+        .uploadCV, .personalInfo, .education, .experience,
+        .skills, .project, .certification, .awards
+    ]
+
+    static let settingsSections: [ProfileSection] = [
+        .llmSettings
+    ]
 }

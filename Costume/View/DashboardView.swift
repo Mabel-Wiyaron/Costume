@@ -74,16 +74,17 @@ struct DashboardView: View {
                     .ignoresSafeArea()
                     
                 CustomHeaderShape()
-                    .fill(Color(.primary))
+                    .fill(Color("AppPrimaryColor"))
                     .frame(height: 260)
                     .ignoresSafeArea(edges: .top)
                     
                 VStack(alignment: .leading, spacing: 35) {
                         
                     HStack {
-                        Text("costumé") //LOGO NANTI DISINI
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(.white)
+                        Image("AppLogo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(height: 40)
                             
                         Spacer()
                             
@@ -264,11 +265,11 @@ struct EmptyStateView: View {
             Text("No results found for \"\(searchText)\"")
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundColor(.primary)
+                .foregroundColor(Color("AppPrimaryColor"))
             
             Text("Try searching for a different role, company, or date.")
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(Color("AppSecondaryColor"))
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 150)

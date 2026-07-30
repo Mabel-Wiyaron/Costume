@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 //STRUKTUR DATA
 struct Resume: Identifiable {
@@ -27,7 +28,7 @@ struct ResumeCard: View {
                 Spacer()
                 Text(resume.date)
                     .font(.body)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.gray)
                 Color.clear.frame(width: 20, height: 16)
             }
             Spacer()
@@ -44,7 +45,7 @@ struct ResumeCard: View {
                 TextField("", text: $draftCompany)
                     .textFieldStyle(.plain)
                     .font(.body)
-                    .foregroundColor(.accent)
+                    .foregroundColor(Color("AppAccentColor"))
                     .focused(focusedField, equals: .company)
                     .onSubmit(onCommitRename)
             } else {
@@ -55,7 +56,7 @@ struct ResumeCard: View {
 
                 Text(resume.company)
                     .font(.body)
-                    .foregroundColor(.accent)
+                    .foregroundColor(Color("AppAccentColor"))
             }
         }
         .padding(25)
@@ -69,7 +70,7 @@ struct ResumeCard: View {
         .cornerRadius(12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color.accent)
+                .fill(Color("AppAccentColor"))
                 .offset(y: 8)
         )
         .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
@@ -83,10 +84,12 @@ struct ResumeCard: View {
 // Owns state and composes NavigationLink + ellipsis menu as siblings,
 // so the menu never lives inside the NavigationLink's press-state hierarchy.
 struct ResumeCardContainer: View {
+    @Environment(\.modelContext) private var modelContext
     let profile: Profile
     let resume: Resume
     var onRename: (String, String) -> Void
     var onDelete: () -> Void
+    var onExport: (() -> Void)? = nil
 
     @State private var isEditing = false
     @State private var draftRole: String = ""
@@ -97,7 +100,14 @@ struct ResumeCardContainer: View {
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            NavigationLink(destination: CVPreviewView(profile: profile)) {
+            NavigationLink(destination: EditCVView(
+                document: CVDocument(profile: profile),
+                jobDescription: profile.jobDescription,
+                modelContext: modelContext,
+                onBack: {
+                    NotificationCenter.default.post(name: .popToDashboard, object: nil)
+                }
+            )) {
                 ResumeCard(
                     resume: resume,
                     isEditing: $isEditing,
@@ -116,12 +126,13 @@ struct ResumeCardContainer: View {
 
                 Menu {
                     Button("􁚛 Rename", action: startEditing)
+                    Button("􀈂 Export", action: exportPDF) // Triggers PDF export dialog
                     Button("􀈑 Delete", role: .destructive) {
                         isDeleteAlertPresented = true
                     }
                 } label: {
                     Image(systemName: "ellipsis")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color("AppSecondaryColor"))
                         .frame(width: 20, height: 20)
                 }
                 .menuStyle(.borderlessButton)
@@ -157,6 +168,16 @@ struct ResumeCardContainer: View {
         onRename(draftRole, draftCompany)
         isEditing = false
         focusedField = nil
+    }
+
+    /// Triggers PDF Export dialog for the resume card profile
+    private func exportPDF() {
+        if let onExport = onExport {
+            onExport()
+        } else {
+            let filename = "\(resume.role) - \(resume.company)"
+            PDFExporter.export(profile: profile, defaultFilename: filename)
+        }
     }
 }
 

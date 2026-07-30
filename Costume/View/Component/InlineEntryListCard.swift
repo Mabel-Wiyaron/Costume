@@ -19,13 +19,16 @@ struct InlineEntryListCard<Item: Identifiable & AnyObject, EntryFields: View>: V
     private let CARD_PADDING: CGFloat = 32
     private let ENTRY_SPACING: CGFloat = 20
     private let DIVIDER_HEIGHT: CGFloat = 1
+    
+    @State private var isDeleteConfirmationPresented: Bool = false
+    @State private var itemToDelete: Item? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             SectionHeaderView(title: title) {
                 Button(addButtonLabel, action: onAdd)
                     .buttonStyle(.borderedProminent)
-                    .tint(Color("PrimaryColor"))
+                    .tint(Color("AppPrimaryColor"))
             }
 
             VStack(alignment: .leading, spacing: ENTRY_SPACING) {
@@ -37,7 +40,7 @@ struct InlineEntryListCard<Item: Identifiable & AnyObject, EntryFields: View>: V
 
                     if index < items.count - 1 {
                         Rectangle()
-                            .fill(Color("AccentColor"))
+                            .fill(Color("AppAccentColor"))
                             .frame(height: DIVIDER_HEIGHT)
                     }
                 }
@@ -45,6 +48,17 @@ struct InlineEntryListCard<Item: Identifiable & AnyObject, EntryFields: View>: V
         }
         .padding(CARD_PADDING)
         .cardBackground()
+        .alert("Delete this entry?", isPresented: $isDeleteConfirmationPresented) {
+            Button("Cancel", role: .cancel) {
+                itemToDelete = nil
+            }
+            Button("Delete", role: .destructive) {
+                if let itemToDelete {
+                    onDelete(itemToDelete)
+                    self.itemToDelete = nil
+                }
+            }
+        }
     }
 
     private func entryHeader(index: Int, item: Item) -> some View {
@@ -54,7 +68,8 @@ struct InlineEntryListCard<Item: Identifiable & AnyObject, EntryFields: View>: V
                 .fontWeight(.bold)
             Spacer()
             Button {
-                onDelete(item)
+                itemToDelete = item
+                isDeleteConfirmationPresented = true
             } label: {
                 Image(systemName: "trash")
                     .foregroundStyle(.red)

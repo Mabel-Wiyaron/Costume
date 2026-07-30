@@ -22,7 +22,7 @@ struct SectionHeaderView<Trailing: View>: View {
                     .fontWeight(.bold)
                 
                 Rectangle()
-                    .fill(Color("AccentColor"))
+                    .fill(Color("AppAccentColor"))
                     .frame(height: RULE_HEIGHT)
             }
             trailing()

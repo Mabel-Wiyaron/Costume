@@ -24,12 +24,12 @@ struct CustomSegmentedControl: View {
                         .font(.system(size: 13, weight: .medium))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
-                        .foregroundStyle(selection == tab ? Color.white : Color.primary)
+                        .foregroundStyle(selection == tab ? Color.white : Color("TextColor"))
                         .background(
                             ZStack {
                                 if selection == tab {
                                     Capsule()
-                                        .fill(Color("PrimaryColor"))
+                                        .fill(Color("AppPrimaryColor"))
                                         .matchedGeometryEffect(id: "TabIndicator", in: animationNamespace)
                                 }
                             }

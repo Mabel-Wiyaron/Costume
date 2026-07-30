@@ -29,7 +29,7 @@ struct ProfileEntrySectionView<Item: Identifiable & AnyObject, Modal: View>: Vie
             SectionHeaderView(title: title) {
                 Button(addButtonLabel, action: onAdd)
                     .buttonStyle(.borderedProminent)
-                    .tint(Color("PrimaryColor"))
+                    .tint(Color("AppPrimaryColor"))
             }
 
             if items.isEmpty {

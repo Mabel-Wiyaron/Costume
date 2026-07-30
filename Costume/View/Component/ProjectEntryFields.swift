@@ -12,18 +12,54 @@ struct ProjectEntryFields: View {
 
     private let COLUMN_SPACING: CGFloat = 32
 
+    private enum Field: Hashable {
+        case name, role
+    }
+    @FocusState private var focusedField: Field?
+
+    @State private var nameTouched = false
+    @State private var roleTouched = false
+
+    private var shouldShowNameError: Bool {
+        nameTouched && project.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    private var shouldShowRoleError: Bool {
+        roleTouched && project.role.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            LabeledTextField(label: "Project Name", isRequired: true, text: nameBinding)
+            LabeledTextField(
+                label: "Project Name",
+                isRequired: true,
+                text: nameBinding,
+                isError: shouldShowNameError,
+                errorMessage: "Project name is required"
+            )
+            .focused($focusedField, equals: .name)
 
             HStack(alignment: .top, spacing: COLUMN_SPACING) {
-                LabeledTextField(label: "Fields", isRequired: true, text: roleBinding)
+                LabeledTextField(
+                    label: "Fields",
+                    isRequired: true,
+                    text: roleBinding,
+                    isError: shouldShowRoleError,
+                    errorMessage: "Fields are required"
+                )
+                .focused($focusedField, equals: .role)
+
                 LabeledDateRangeField(label: "Years", isRequired: true, startDate: startDateBinding, endDate: endDateBinding)
             }
 
             LabeledTextField(label: "Website", text: websiteBinding)
             LabeledTextEditor(label: "Description", text: descriptionBinding)
         }
+        .onChange(of: focusedField) { oldFocus, newFocus in
+            if oldFocus == .name && newFocus != .name { nameTouched = true }
+            if oldFocus == .role && newFocus != .role { roleTouched = true }
+        }
+        .animation(.default, value: nameTouched)
+        .animation(.default, value: roleTouched)
     }
 
     private var nameBinding: Binding<String> {
