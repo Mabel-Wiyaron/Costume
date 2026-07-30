@@ -104,6 +104,7 @@ struct ATSCVTemplateView: View {
                 VStack(alignment: .center, spacing: 4) {
                     Text(profile.name.isEmpty ? "YOUR NAME" : profile.name.uppercased())
                         .font(.system(size: 20, weight: .black))
+                        .multilineTextAlignment(.center)
                     
                     contactInfoView()
                     
@@ -150,6 +151,7 @@ struct ATSCVTemplateView: View {
                                 ForEach(experience.descriptionText, id: \.self) { bullet in
                                     if !bullet.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                         Text("• \(bullet)")
+                                            .fixedSize(horizontal: false, vertical: true)
                                     }
                                 }
                             }
@@ -393,8 +395,8 @@ struct ATSCVTemplateView: View {
         if !profExp.isEmpty {
             checkHeightAndAllocate(25) // Section Title
             for exp in profExp.sorted(by: { $0.startDate > $1.startDate }) {
-                // Estimasi tinggi per item (meta row + company row + deskripsi bullet)
-                let itemHeight = 35 + CGFloat(exp.descriptionText.count * 13)
+                let totalBulletLines = exp.descriptionText.reduce(0) { $0 + max(1, ($1.count + 55) / 56) }
+                let itemHeight = 35 + CGFloat(totalBulletLines * 13)
                 checkHeightAndAllocate(itemHeight)
                 pages[currentPageIndex].experiences.append(exp)
             }

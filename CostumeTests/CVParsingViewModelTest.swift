@@ -90,6 +90,7 @@ final class CVParsingViewModelTests: XCTestCase {
         print("Name: \(masterProfile.name)")
         print("Email: \(masterProfile.email)")
         print("Summary: \(masterProfile.summary)")
+        print("Location: \(masterProfile.location)")
         print("LinkedIn: \(masterProfile.linkedin?.absoluteString ?? "None")")
         print("Experiences Count: \(masterProfile.experiences.count)")
         print("Skills: \(masterProfile.skills.map { $0.name })")
