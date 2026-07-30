@@ -9,9 +9,11 @@ import SwiftUI
 
 struct AnalysisPanelView: View {
     @Bindable var viewModel: EditCVViewModel
+    var onBack: (() -> Void)? = nil
     
     @State private var zoomScale: CGFloat = 0.8
     @GestureState private var gestureZoomScale: CGFloat = 1.0
+    @State private var isDeleteConfirmationPresented: Bool = false
 
     private let TAB_PADDING: CGFloat = 24
     private let CONTENT_PADDING: CGFloat = 32
@@ -106,6 +108,24 @@ struct AnalysisPanelView: View {
                     .help("Save & Export PDF")
                 }
             }
+
+            ToolbarItem(placement: .primaryAction) {
+                Button(role: .destructive, action: {
+                    isDeleteConfirmationPresented = true
+                }) {
+                    Image(systemName: "trash")
+                }
+                .help("Delete CV")
+            }
+        }
+        .alert("Delete this CV?", isPresented: $isDeleteConfirmationPresented) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                viewModel.deleteDocument()
+                onBack?()
+            }
+        } message: {
+            Text("Are you sure you want to delete this CV? This action cannot be undone.")
         }
     }
 
