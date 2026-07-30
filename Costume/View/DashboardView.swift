@@ -81,9 +81,10 @@ struct DashboardView: View {
                 VStack(alignment: .leading, spacing: 35) {
                         
                     HStack {
-                        Text("costumé") //LOGO NANTI DISINI
-                            .font(.system(size: 28, weight: .bold))
-                            .foregroundColor(.white)
+                        Image("AppLogo")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(height: 40)
                             
                         Spacer()
                             

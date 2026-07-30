@@ -1,0 +1,475 @@
+{
+  "fill" : {
+    "linear-gradient" : [
+      "srgb:1.00000,1.00000,1.00000,1.00000",
+      "srgb:0.75615,0.71376,0.65441,1.00000"
+    ],
+    "orientation" : {
+      "start" : {
+        "x" : 0.5,
+        "y" : 1
+      },
+      "stop" : {
+        "x" : 0.5,
+        "y" : 0.3
+      }
+    }
+  },
+  "groups" : [
+    {
+      "blur-material" : null,
+      "hidden" : false,
+      "layers" : [
+        {
+          "image-name" : "1fesw.png",
+          "name" : "1fesw",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              -392.6618759831109,
+              -123.14272128800343
+            ]
+          }
+        },
+        {
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "extended-gray:0.25000,1.00000"
+              }
+            }
+          ],
+          "image-name" : "2fswe.png",
+          "name" : "2fswe",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              -237.92653010897982,
+              38.22292035066721
+            ]
+          }
+        },
+        {
+          "image-name" : "3swefd.png",
+          "name" : "3swefd",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              0,
+              353.9
+            ]
+          }
+        },
+        {
+          "image-name" : "4fews.png",
+          "name" : "4fews",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              0,
+              -62.499999999999886
+            ]
+          }
+        }
+      ],
+      "lighting" : "individual",
+      "name" : "Group",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.25
+      }
+    },
+    {
+      "blur-material" : null,
+      "hidden" : true,
+      "layers" : [
+        {
+          "hidden" : false,
+          "image-name" : "1fesw.png",
+          "name" : "1fesw",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              -305.62877354378236,
+              -136.5999999999999
+            ]
+          }
+        },
+        {
+          "image-name" : "2fswe.png",
+          "name" : "2fswe",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              -152.76187598311094,
+              19.899999999999864
+            ]
+          }
+        },
+        {
+          "image-name" : "3swefd.png",
+          "name" : "3swefd",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              0,
+              353.9
+            ]
+          }
+        },
+        {
+          "image-name" : "4fews.png",
+          "name" : "4fews",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              120.63812401688904,
+              -69.09999999999985
+            ]
+          }
+        },
+        {
+          "image-name" : "wmjeb 2.png",
+          "name" : "wmjeb 2",
+          "opacity" : 1,
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              120.63812401688904,
+              -1.2999999999999545
+            ]
+          }
+        },
+        {
+          "image-name" : "wmjeb 2.png",
+          "name" : "wmjeb 2",
+          "opacity" : 0.22,
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              49.51275663927379,
+              0
+            ]
+          }
+        },
+        {
+          "image-name" : "wmjeb 2.png",
+          "name" : "wmjeb 2",
+          "opacity" : 0.19,
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              -11,
+              -1.2999999999999545
+            ]
+          }
+        }
+      ],
+      "lighting" : "individual",
+      "name" : "Group",
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.25
+      }
+    },
+    {
+      "hidden" : true,
+      "layers" : [
+        {
+          "blend-mode" : "lighten",
+          "image-name" : "smdc.png",
+          "name" : "smdc",
+          "position" : {
+            "scale" : 0.49,
+            "translation-in-points" : [
+              0,
+              159.5796146661237
+            ]
+          }
+        },
+        {
+          "hidden" : false,
+          "image-name" : "adc.png",
+          "name" : "adc",
+          "position" : {
+            "scale" : 0.46,
+            "translation-in-points" : [
+              18.674675236553185,
+              -18
+            ]
+          }
+        },
+        {
+          "image-name" : "jasnb djk 2.png",
+          "name" : "jasnb djk 2",
+          "position" : {
+            "scale" : 0.49,
+            "translation-in-points" : [
+              0,
+              98.0846146661238
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "hidden" : true,
+      "layers" : [
+        {
+          "image-name" : "amehbd.png",
+          "name" : "amehbd",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              -436.8265301089798,
+              -175.97707964933272
+            ]
+          }
+        },
+        {
+          "image-name" : "nadvse.png",
+          "name" : "nadvse",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              -305.295,
+              -26.100000000000023
+            ]
+          }
+        },
+        {
+          "image-name" : "csmdn.png",
+          "name" : "csmdn",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              1.2999999999999545,
+              371.5999999999999
+            ]
+          }
+        },
+        {
+          "glass" : true,
+          "image-name" : "skjbedwf.png",
+          "name" : "skjbedwf",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        },
+        {
+          "image-name" : "wmjeb.png",
+          "name" : "wmjeb",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "hidden" : true,
+      "layers" : [
+        {
+          "image-name" : "amehbd.png",
+          "name" : "amehbd",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              -358.5,
+              -112.3170796493327
+            ]
+          }
+        },
+        {
+          "image-name" : "nadvse.png",
+          "name" : "nadvse",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              -217,
+              50.82292035066723
+            ]
+          }
+        },
+        {
+          "image-name" : "csmdn.png",
+          "name" : "csmdn",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              -1.2999999999999545,
+              371.5999999999999
+            ]
+          }
+        },
+        {
+          "glass" : true,
+          "image-name" : "skjbedwf.png",
+          "name" : "skjbedwf",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              0,
+              52.399999999999864
+            ]
+          }
+        },
+        {
+          "image-name" : "wmjeb.png",
+          "name" : "wmjeb",
+          "position" : {
+            "scale" : 0.6,
+            "translation-in-points" : [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "hidden" : true,
+      "layers" : [
+        {
+          "blend-mode" : "normal",
+          "glass" : true,
+          "image-name" : "1.png",
+          "name" : "1",
+          "position" : {
+            "scale" : 0.24,
+            "translation-in-points" : [
+              -53.46724336072623,
+              297.9972787119965
+            ]
+          }
+        },
+        {
+          "image-name" : "Asset 9.png",
+          "name" : "Asset 9",
+          "position" : {
+            "scale" : 0.24,
+            "translation-in-points" : [
+              -188.14563758815643,
+              -310.3770796493327
+            ]
+          }
+        },
+        {
+          "image-name" : "Asset 7.png",
+          "name" : "Asset 7",
+          "position" : {
+            "scale" : 0.24,
+            "translation-in-points" : [
+              7.019358796718393,
+              -76.61707964933271
+            ]
+          }
+        },
+        {
+          "blend-mode" : "hard-light",
+          "image-name" : "Asset 8.png",
+          "name" : "Asset 8",
+          "position" : {
+            "scale" : 0.24,
+            "translation-in-points" : [
+              7.019358796718393,
+              22.742920350667305
+            ]
+          }
+        },
+        {
+          "glass" : true,
+          "hidden" : false,
+          "image-name" : "3.png",
+          "name" : "3",
+          "position" : {
+            "scale" : 0.24,
+            "translation-in-points" : [
+              58.28924271581354,
+              40.502920350667296
+            ]
+          }
+        },
+        {
+          "image-name" : "4.png",
+          "name" : "4",
+          "position" : {
+            "scale" : 0.24,
+            "translation-in-points" : [
+              95.60467523655325,
+              90.90305467836936
+            ]
+          }
+        },
+        {
+          "blend-mode" : "plus-lighter",
+          "image-name" : "5.png",
+          "name" : "5",
+          "position" : {
+            "scale" : 0.24,
+            "translation-in-points" : [
+              61.52467523655321,
+              331.3829203506673
+            ]
+          }
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.25
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
