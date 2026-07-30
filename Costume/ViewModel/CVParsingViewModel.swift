@@ -35,7 +35,7 @@ final class CVParsingViewModel {
             
             let contactInfo = ContactInfoExtractor.extract(from: rawText)
             let cleanedText = ContactInfoExtractor.strippingContactInfo(from: rawText, using: contactInfo)
-//            print(cleanedText)
+            print(cleanedText)
             // 2. Run Foundation Model Agent
             let dto = try await agent.invoke(for: cleanedText)
             
@@ -55,17 +55,17 @@ final class CVParsingViewModel {
     @MainActor
     private func overwrite(profile: Profile, with generable: CVImportGenerable, contactInfo: ExtractedContactInfo, in context: ModelContext) {
         profile.name = generable.name
-        profile.email = contactInfo.email ?? generable.email
-        profile.phone = contactInfo.phone ?? generable.phone
-        profile.location = combinedLocation(contactInfo: contactInfo, fallback: generable.location) ?? generable.location
+        profile.email = contactInfo.email ?? ""
+        profile.phone = contactInfo.phone ?? ""
+        profile.location = combinedLocation(contactInfo: contactInfo, fallback: "") ?? ""
         
-        if let linkedinString = contactInfo.linkedin ?? generable.linkedin, let url = URL(string: linkedinString) {
+        if let linkedinString = contactInfo.linkedin, let url = URL(string: linkedinString) {
             profile.linkedin = url
         } else {
             profile.linkedin = nil
         }
         
-        if let websiteString = contactInfo.website ?? generable.website, let url = URL(string: websiteString) {
+        if let websiteString = contactInfo.website, let url = URL(string: websiteString) {
             profile.website = url
         } else {
             profile.website = nil
