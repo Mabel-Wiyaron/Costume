@@ -37,7 +37,10 @@ struct EditCVView: View {
                 }
             }
         }
-        .onAppear(perform: setupViewModelIfNeeded)
+        .onAppear {
+            setupViewModelIfNeeded()
+            viewModel?.startLiveMatching()
+        }
     }
 
     private func attemptBack() {
@@ -76,8 +79,6 @@ struct EditCVView: View {
         var sandboxedJobDescription: JobDescription? = nil
         if let jobDescriptionID = initialJobDescription?.persistentModelID {
             sandboxedJobDescription = childContext.model(for: jobDescriptionID) as? JobDescription
-        .onAppear {
-            viewModel.startLiveMatching()
         }
 
         viewModel = EditCVViewModel(
