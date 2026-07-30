@@ -364,8 +364,8 @@ struct ATSCVTemplateView: View {
         var currentHeight: CGFloat = 0
         
         // Batas tinggi konten per halaman (A4 height 842 - padding 80 = 762pt)
-        let page1MaxHeight: CGFloat = 660 // Mengurangi tinggi untuk header (~100pt)
-        let nextPageMaxHeight: CGFloat = 720
+        let page1MaxHeight: CGFloat = 740
+        let nextPageMaxHeight: CGFloat = 740
         
         // Fungsi pembantu untuk mendeteksi sisa ruang dan mengalokasikan halaman baru jika meluap
         func checkHeightAndAllocate(_ height: CGFloat) {
@@ -384,8 +384,8 @@ struct ATSCVTemplateView: View {
         
         // 2. Summary
         if let summary = profile.summary, !summary.isEmpty {
-            let lines = CGFloat(max(1, summary.count / 85))
-            let summaryHeight = 25 + (lines * 14) // Judul + baris teks
+            let lines = CGFloat(max(1, (summary.count + 84) / 85))
+            let summaryHeight = 25 + (lines * 13) // Judul + baris teks
             pages[currentPageIndex].hasSummary = true
             currentHeight += summaryHeight
         }
@@ -395,8 +395,8 @@ struct ATSCVTemplateView: View {
         if !profExp.isEmpty {
             checkHeightAndAllocate(25) // Section Title
             for exp in profExp.sorted(by: { $0.startDate > $1.startDate }) {
-                let totalBulletLines = exp.descriptionText.reduce(0) { $0 + max(1, ($1.count + 55) / 56) }
-                let itemHeight = 35 + CGFloat(totalBulletLines * 13)
+                let totalBulletLines = exp.descriptionText.reduce(0) { $0 + max(1, ($1.count + 74) / 75) }
+                let itemHeight = 30 + CGFloat(totalBulletLines * 12)
                 checkHeightAndAllocate(itemHeight)
                 pages[currentPageIndex].experiences.append(exp)
             }
@@ -406,7 +406,7 @@ struct ATSCVTemplateView: View {
         if !profile.educations.isEmpty {
             checkHeightAndAllocate(25) // Section Title
             for edu in profile.educations.sorted(by: { $0.startDate > $1.startDate }) {
-                let itemHeight: CGFloat = 45
+                let itemHeight: CGFloat = 40
                 checkHeightAndAllocate(itemHeight)
                 pages[currentPageIndex].educations.append(edu)
             }
@@ -416,7 +416,8 @@ struct ATSCVTemplateView: View {
         if !profile.projects.isEmpty {
             checkHeightAndAllocate(25) // Section Title
             for proj in profile.projects.sorted(by: { $0.startDate > $1.startDate }) {
-                let itemHeight = 35 + CGFloat(proj.descriptionText.count * 13)
+                let totalBulletLines = proj.descriptionText.reduce(0) { $0 + max(1, ($1.count + 74) / 75) }
+                let itemHeight = 30 + CGFloat(totalBulletLines * 12)
                 checkHeightAndAllocate(itemHeight)
                 pages[currentPageIndex].projects.append(proj)
             }
@@ -433,7 +434,7 @@ struct ATSCVTemplateView: View {
             if hasLanguages { linesCount += 1 }
             if hasCertifications { linesCount += 1 }
             if hasAwards { linesCount += 1 }
-            let skillsHeight = 25 + CGFloat(linesCount * 15)
+            let skillsHeight = 25 + CGFloat(linesCount * 14)
             checkHeightAndAllocate(skillsHeight)
             pages[currentPageIndex].showSkills = true
         }
@@ -443,7 +444,8 @@ struct ATSCVTemplateView: View {
         if !volExp.isEmpty {
             checkHeightAndAllocate(25) // Section Title
             for exp in volExp.sorted(by: { $0.startDate > $1.startDate }) {
-                let itemHeight = 35 + CGFloat(exp.descriptionText.count * 13)
+                let totalBulletLines = exp.descriptionText.reduce(0) { $0 + max(1, ($1.count + 74) / 75) }
+                let itemHeight = 30 + CGFloat(totalBulletLines * 12)
                 checkHeightAndAllocate(itemHeight)
                 pages[currentPageIndex].volunteerExperiences.append(exp)
             }

@@ -148,6 +148,81 @@ struct SchemaBuilder {
         return try schemaProperty(for: instance)
     }
 
+    static func responseFormatInstruction<T: Decodable>(
+        for type: T.Type,
+        propertyDescriptions: [String: String]? = nil
+    ) throws -> String {
+        let instance = try T(from: PlaceholderDecoder())
+        let jsonObject = try reflectToJSONValue(instance)
+        let data = try JSONSerialization.data(
+            withJSONObject: jsonObject,
+            options: [.prettyPrinted, .sortedKeys]
+        )
+        var result = String(data: data, encoding: .utf8) ?? "{}"
+        if let descriptions = propertyDescriptions, !descriptions.isEmpty {
+            let fields = descriptions.map { key, value in
+                "  - \(key): \(value)"
+            }.sorted().joined(separator: "\n")
+            result += "\n\nField descriptions:\n\(fields)"
+        }
+        return result
+    }
+
+    private static func reflectToJSONValue(_ value: Any) throws -> Any {
+        let mirror = Mirror(reflecting: value)
+        if mirror.displayStyle == .optional {
+            if let child = mirror.children.first {
+                return try reflectToJSONValue(child.value)
+            }
+            return NSNull()
+        }
+        if let dict = value as? [String: Any] {
+            var result: [String: Any] = [:]
+            for (key, val) in dict {
+                result[key] = try reflectToJSONValue(val)
+            }
+            return result
+        }
+        if let array = value as? [Any] {
+            if array.isEmpty {
+                return ["string"]
+            }
+            return try array.map { try reflectToJSONValue($0) }
+        }
+        if value is Int || value is Int8 || value is Int16 || value is Int32 || value is Int64
+            || value is UInt || value is UInt8 || value is UInt16 || value is UInt32 || value is UInt64
+        {
+            return 0
+        }
+        if value is Float || value is Double || value is Float16 {
+            return 0
+        }
+        if value is Bool {
+            return false
+        }
+        if value is String {
+            return "string"
+        }
+        if value is NSNumber {
+            return 0
+        }
+        if value is NSString {
+            return "string"
+        }
+        if mirror.displayStyle == .struct || mirror.displayStyle == .class {
+            var result: [String: Any] = [:]
+            for child in mirror.children {
+                guard let label = child.label else { continue }
+                result[label] = try reflectToJSONValue(child.value)
+            }
+            return result
+        }
+        if mirror.displayStyle == .enum {
+            return String(describing: value)
+        }
+        return String(describing: value)
+    }
+
     static func enrichSchema(
         _ schema: inout JSONSchemaProperty,
         with descriptions: [String: String]
