@@ -36,7 +36,7 @@ struct SkillTagField: View {
             if !helperText.isEmpty {
                 Text(helperText)
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color("TextColor"))
             }
 
             VStack(alignment: .leading, spacing: 12) {

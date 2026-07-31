@@ -9,23 +9,15 @@ import SwiftUI
 
 struct ProfileSidebarView: View {
     @Binding var selectedSection: ProfileSection?
+    var onSelect: ((ProfileSection) -> Void)? = nil
     var onBack: (() -> Void)? = nil
 
     var body: some View {
         ZStack {
-            Color("PrimaryColor")
+            Color("AppPrimaryColor")
                 .ignoresSafeArea()
 
             VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Button(action: { onBack?() }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundStyle(Color.white)
-                    }
-                    .buttonStyle(.plain)
-                    Spacer()
-                }
-
                 Text("Edit Profile")
                     .font(.title3)
                     .fontWeight(.bold)
@@ -33,7 +25,28 @@ struct ProfileSidebarView: View {
                     .padding(.horizontal, 4)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    ForEach(ProfileSection.allCases) { section in
+                    ForEach(ProfileSection.profileSections) { section in
+                        SidebarRow(
+                            section: section,
+                            isSelected: section == selectedSection,
+                            action: {
+                                if let onSelect {
+                                    onSelect(section)
+                                } else {
+                                    selectedSection = section
+                                }
+                            }
+                        )
+                    }
+                }
+
+                Spacer()
+
+                Divider()
+                    .overlay(Color.white.opacity(0.3))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(ProfileSection.settingsSections) { section in
                         SidebarRow(
                             section: section,
                             isSelected: section == selectedSection,
@@ -41,11 +54,8 @@ struct ProfileSidebarView: View {
                         )
                     }
                 }
-
-                Spacer()
             }
-            .padding(.top, 16)
-            .padding(.horizontal, 16)
+            .padding(16)
         }
     }
 }

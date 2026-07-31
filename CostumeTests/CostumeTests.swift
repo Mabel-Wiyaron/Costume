@@ -11,6 +11,7 @@ import Foundation
 @testable import Costume
 
 @MainActor
+@Suite(.serialized)
 struct CostumeTests {
 
     // Helper function untuk merakit ModelContainer in-memory yang bersih untuk setiap test case
@@ -247,5 +248,27 @@ struct CostumeTests {
         #expect(profile.awards.isEmpty)
         let saved = try context.fetch(FetchDescriptor<Award>())
         #expect(saved.isEmpty)
+    }
+
+    // MARK: - COMPILER & TEMPLATE TESTS
+
+    @Test("Menyebarkan halaman ATSCVTemplateView dengan benar")
+    func testATSCVTemplateViewDistribution() async throws {
+        let (_, profile, _container) = try createTestContext()
+        
+        let pages = ATSCVTemplateView.distribute(profile: profile)
+        #expect(!pages.isEmpty)
+        #expect(pages.first?.hasHeader == true)
+    }
+
+    @Test("Mengompilasi CVDocument menjadi HTML menggunakan CVHTMLCompiler")
+    func testCVHTMLCompilerCompile() async throws {
+        let (_, profile, _container) = try createTestContext()
+        let document = CVDocument(profile: profile)
+        
+        let html = CVHTMLCompiler.compile(document: document)
+        #expect(html.contains("<!DOCTYPE html>"))
+        #expect(html.contains(profile.name))
+        #expect(html.contains(profile.email))
     }
 }

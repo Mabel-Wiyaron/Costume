@@ -10,7 +10,6 @@ import SwiftData
 
 @Model
 final class Skill {
-    @Attribute(.unique)
     var name: String
 
     init(name: String) {

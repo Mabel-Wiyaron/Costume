@@ -12,6 +12,7 @@ struct LabeledTextField: View {
     var isRequired: Bool = false
     var placeholder: String = ""
     @Binding var text: String
+    var maxCharacters: Int = 100
     
     var isError: Bool = false
     @FocusState var isFocused: Bool
@@ -41,11 +42,13 @@ struct LabeledTextField: View {
                 )
                 .animation(.easeInOut(duration: 0.2), value: isFocused)
                 .animation(.easeInOut(duration: 0.2), value: isError)
+                .onChange(of: text) { oldValue, newValue in
+                    guard newValue.count > maxCharacters else { return }
+                    text = String(newValue.prefix(maxCharacters))
+                }
             
-            // Menampilkan inline error text tepat di bawah kotak input
             if isError, let errorMessage = errorMessage {
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    // Ikon tanda seru dalam lingkaran dari SF Symbols
                     Image(systemName: "exclamationmark.circle.fill")
                         .font(.caption)
                         .foregroundColor(.red)

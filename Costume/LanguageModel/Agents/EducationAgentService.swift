@@ -40,12 +40,12 @@ struct EducationGenerable: Codable {
 }
 
 struct EducationAgentService: AgentProtocol {
-    let languageModel: LanguageModelProtocol
+    var languageModel: LanguageModelProtocol
 
-    init() {
-        languageModel = AppleIntelligenceService(
-            instructions: EXPERIENCE_INSTRUCTIONS_V1
-        )
+    init(languageModel: LanguageModelProtocol = AppleIntelligenceService()) {
+        self.languageModel = languageModel
+
+        self.languageModel.instructions = EDUCATION_INSTRUCTIONS_V1
     }
 
     func invoke(for message: String) async throws -> EducationGenerable {

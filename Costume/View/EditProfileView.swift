@@ -1,112 +1,173 @@
-//
-//  EditProfileView.swift
-//  Costume
-//
-//  Created by Matthew Regan Hadiwidjaja on 14/07/26.
-//
-
 import SwiftData
 import SwiftUI
 
 struct EditProfileView: View {
-    // Gunakan @Environment untuk mendapatkan ModelContext bawaan sistem
-    @Environment(\.modelContext) private var modelContext
+    @Environment(\.modelContext) private var mainContext
+    @Environment(\.dismiss) private var dismiss
     
-    // Profil spesifik yang ingin di-edit (opsional)
     var profile: Profile? = nil
-    
-    // Inisialisasi ViewModel secara kosong dulu menggunakan @State
     @State private var viewModel: EditProfileViewModel? = nil
+    @State private var cvViewModel: CVParsingViewModel? = nil
 
     private let OUTER_PADDING: CGFloat = 40
     private let CARD_MAX_WIDTH: CGFloat = 800
 
     var body: some View {
         NavigationSplitView {
-            // Kita butuh viewModel siap dulu sebelum menampilkan sidebar
-            if let viewModel = Binding($viewModel) {
-                ProfileSidebarView(selectedSection: viewModel.selectedSection)
+            if let vm = viewModel {
+                @Bindable var bindableVM = vm
+                ProfileSidebarView(
+                    selectedSection: $bindableVM.selectedSection,
+                    onSelect: { section in attemptNavigate(to: section) }
+                )
             } else {
-                ProgressView() // Tampilan loading sementara data disiapkan
+                ProgressView()
             }
         } detail: {
-            ZStack {
+            ZStack(alignment: .top) {
                 Color("BackgroundColor")
                     .ignoresSafeArea()
-
-                ScrollView {
-                    if let viewModel = viewModel {
-                        Group {
-                            switch viewModel.selectedSection {
-                            case .personalInfo, .none:
-                                PersonalInfoFormView(viewModel: viewModel)
+                
+                if let vm = viewModel {
+                    @Bindable var bindableVM = vm
+                    
+                    ScrollView {
+                        VStack(alignment: .leading) {
+                            switch bindableVM.selectedSection {
+                            case .uploadCV, .none:
+                                if let cvViewModel = cvViewModel {
+                                    let mainProfile = (try? mainContext.model(for: vm.profile.persistentModelID) as? Profile) ?? vm.profile
+                                    
+                                    UploadCVView(
+                                        viewModel: cvViewModel,
+                                        sandboxedProfile: vm.profile,
+                                        masterProfile: mainProfile,
+                                        mainContext: mainContext
+                                    )
+                                } else {
+                                    ProgressView("Initializing parser...")
+                                }
+                            case .personalInfo:
+                                PersonalInfoFormView(viewModel: vm)
                             case .education:
-                                EducationSectionView(viewModel: viewModel)
-                            case .skills:
-                                SkillsSectionView(viewModel: viewModel)
+                                EducationSectionView(viewModel: vm)
                             case .experience:
-                                ExperienceSectionView(viewModel: viewModel)
+                                ExperienceSectionView(viewModel: vm)
+                            case .skills:
+                                SkillsSectionView(skills: $bindableVM.profile.skills, isSaveEnabled: vm.isSkillsSaveEnabled, onSave: vm.saveWithConfirmation)
                             case .project:
-                                ProjectSectionView(viewModel: viewModel)
+                                ProjectSectionView(viewModel: vm)
                             case .certification:
-                                CertificationSectionView(viewModel: viewModel)
+                                CertificationSectionView(viewModel: vm)
                             case .awards:
-                                AwardSectionView(viewModel: viewModel)
+                                AwardSectionView(viewModel: vm)
+                            case .llmSettings:
+                                LLMSettingsView()
                             }
                         }
                         .frame(maxWidth: CARD_MAX_WIDTH, alignment: .top)
                         .padding(OUTER_PADDING)
                         .frame(maxWidth: .infinity, alignment: .top)
                     }
+                    
+                    if vm.showSaveConfirmation {
+                        SaveConfirmationToast()
+                            .frame(maxWidth: CARD_MAX_WIDTH)
+                            .padding(.horizontal, OUTER_PADDING)
+                            .padding(.top, OUTER_PADDING)
+                            .transition(.move(edge: .top).combined(with: .opacity))
+                            .zIndex(1)
+                            .allowsHitTesting(false)
+                    }
+                } else {
+                    ProgressView()
+                }
+            }
+            .animation(.easeInOut(duration: 0.25), value: viewModel?.showSaveConfirmation)
+        }
+        .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 300)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigation) {
+                Button(action: attemptBack) {
+                    Image(systemName: "chevron.left")
                 }
             }
         }
-        .navigationSplitViewColumnWidth(min: 220, ideal: 260, max: 300)
-        // Pindahkan logika database ke .onAppear di bawah ini!
         .onAppear {
             setupViewModel()
+        }
+    }
+
+    private func attemptNavigate(to section: ProfileSection) {
+        guard viewModel?.selectedSection != section else { return }
+        proceedIfConfirmed { viewModel?.selectedSection = section }
+    }
+
+    private func attemptBack() {
+        proceedIfConfirmed { dismiss() }
+    }
+
+    private func proceedIfConfirmed(action: () -> Void) {
+        guard let vm = viewModel, vm.hasUnsavedChanges else {
+            action()
+            return
+        }
+        switch UnsavedChangesAlert.present() {
+        case .save:
+            vm.save()
+            action()
+        case .discardChanges:
+            vm.discardChanges()
+            action()
+        case .cancel:
+            break
         }
     }
 
     private func setupViewModel() {
         guard viewModel == nil else { return }
         
-        let finalProfile: Profile
+        self.cvViewModel = CVParsingViewModel()
+
+        let targetProfile: Profile
         if let profile = profile {
-            print("DEBUG: Menggunakan profile yang dilewatkan -> \(profile.name)")
-            finalProfile = profile
+            targetProfile = profile
         } else {
             let descriptor = FetchDescriptor<Profile>()
-            let fetchedProfiles = (try? modelContext.fetch(descriptor)) ?? []
+            let fetchedProfiles = (try? mainContext.fetch(descriptor)) ?? []
             
-            // DEBUG: Cetak jumlah profil yang sukses dibaca dari SQLite
-            print("DEBUG: Total profile ditemukan di DB = \(fetchedProfiles.count)")
-            for (index, p) in fetchedProfiles.enumerated() {
-                print("[\(index)] Nama: '\(p.name)', JobDesc: '\(String(describing: p.jobDescription))'")
-            }
-            
-            // Perbaikan logika: Cari profile utama.
-            // Jika jobDescription nil ATAU kosong, kita anggap itu profil utama pengguna.
-            let matchedProfile = fetchedProfiles.first(where: {
-                $0.jobDescription == nil
-            })
+            let matchedProfile = fetchedProfiles.first(where: { $0.jobDescription == nil })
             
             if let existing = matchedProfile {
-                print("DEBUG: Berhasil memakai data lama -> \(existing.name)")
-                finalProfile = existing
+                targetProfile = existing
             } else if let fallbackFirst = fetchedProfiles.first {
-                // Fallback darurat: jika filter di atas meleset tapi DB punya data, pakai data pertama yang ada
-                print("DEBUG: Fallback memakai profile pertama yang ada -> \(fallbackFirst.name)")
-                finalProfile = fallbackFirst
+                targetProfile = fallbackFirst
             } else {
-                // Jika database benar-benar kosong melompong, baru buat baru
-                print("DEBUG: Database kosong. Membuat profile baru.")
                 let newProfile = Profile(name: "", email: "", location: "", phone: "")
-                modelContext.insert(newProfile)
-                finalProfile = newProfile
+                mainContext.insert(newProfile)
+                try? mainContext.save()
+                targetProfile = newProfile
             }
         }
-        
-        self.viewModel = EditProfileViewModel(profile: finalProfile, modelContext: modelContext)
+
+        let childContext = ModelContext(mainContext.container)
+        childContext.autosaveEnabled = false
+
+        let targetID = targetProfile.persistentModelID
+        let activeViewModel: EditProfileViewModel
+
+        if let sandboxedProfile = childContext.model(for: targetID) as? Profile {
+            activeViewModel = EditProfileViewModel(profile: sandboxedProfile, modelContext: childContext)
+        } else {
+            activeViewModel = EditProfileViewModel(profile: targetProfile, modelContext: mainContext)
+        }
+
+        let hasMasterProfileData = !targetProfile.name.trimmingCharacters(in: .whitespaces).isEmpty ||
+                                   !targetProfile.email.trimmingCharacters(in: .whitespaces).isEmpty
+
+        activeViewModel.selectedSection = hasMasterProfileData ? .personalInfo : .uploadCV
+
+        self.viewModel = activeViewModel
     }
 }
